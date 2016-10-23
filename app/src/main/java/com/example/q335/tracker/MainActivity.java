@@ -1,10 +1,9 @@
 package com.example.q335.tracker;
 
-import android.app.usage.UsageEvents;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -23,36 +22,17 @@ import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity {
 
-    //Settings
-    private Button settingsButton;
-    private Button exportButton;
-    SharedPreferences EventPrefs;
-    public static final String SavedPrefs = "settings.log";
-
-
     // List of Events associated with buttons
     private SharedPreferences Events;
-    private Button but_A;
-    private Button but_B;
-    private Button but_C;
-    private Button but_D;
-    private Button but_E;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //InitializeEvents
-        EventPrefs = getSharedPreferences(SavedPrefs, Context.MODE_PRIVATE);
-        //TODO: Read settings
+        Events = PreferenceManager.getDefaultSharedPreferences(this);
 
-        //UI initialization
-        but_A = (Button) findViewById(R.id.buttonA);
-        but_B = (Button) findViewById(R.id.buttonB);
-        but_C = (Button) findViewById(R.id.buttonC);
-        but_D = (Button) findViewById(R.id.buttonD);
-        but_E = (Button) findViewById(R.id.buttonE);
+        Button but_A = (Button) findViewById(R.id.buttonA);
         but_A.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,13 +40,14 @@ public class MainActivity extends AppCompatActivity {
                     //Long tsLong = System.currentTimeMillis()/1000;
                     //Log(but_A.getText().toString() + " " + tsLong.toString(),"log.txt");
                     Log(Events.getString("A",""),"log.txt");
+                    Toast.makeText(MainActivity.this, "Logged:" + Events.getString("A",""), Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        settingsButton = (Button) findViewById(R.id.settings_button);
+        Button settingsButton = (Button) findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        exportButton = (Button) findViewById(R.id.buttonExport);
+        Button exportButton = (Button) findViewById(R.id.buttonExport);
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,9 +69,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Button visualizeButton = (Button) findViewById(R.id.buttonVisualilze);
+        visualizeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               //TODO: Visualize
+            }
+        });
     }
 
     public boolean Log(String data, String fname) {
+        //TODO: Logging Syntax
         File internalFile = new File(getFilesDir(), fname);
 
         try {
@@ -108,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
 
     private File exportFile(File src, File dst) throws IOException {
         //TODO: Request Permissions
+        //TODO: #1 Export shared Preferences
+        //TODO: #2 Import shared preferences
+
         //if folder does not exist
         if (!dst.exists()) {
             if (!dst.mkdir()) {

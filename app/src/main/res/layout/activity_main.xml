@@ -53,15 +53,6 @@
         android:id="@+id/buttonD" />
 
     <Button
-        android:text="Settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="13dp"
-        android:id="@+id/settings_button" />
-
-    <Button
         android:text="E"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,11 +63,33 @@
         android:layout_alignStart="@+id/buttonD" />
 
     <Button
+        android:text="Settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/settings_button"
+        android:layout_below="@+id/buttonE"
+        android:layout_alignLeft="@+id/buttonE"
+        android:layout_alignStart="@+id/buttonE"
+        android:layout_marginTop="25dp" />
+
+    <Button
         android:text="export"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/settings_button"
+        android:id="@+id/buttonExport"
+        android:layout_alignBaseline="@+id/settings_button"
+        android:layout_alignBottom="@+id/settings_button"
+        android:layout_toRightOf="@+id/settings_button"
+        android:layout_toEndOf="@+id/settings_button"
+        android:layout_marginLeft="28dp"
+        android:layout_marginStart="28dp" />
+
+    <Button
+        android:text="GRAPH"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/buttonExport"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/buttonExport" />
+        android:id="@+id/buttonVisualilze" />
 </RelativeLayout>

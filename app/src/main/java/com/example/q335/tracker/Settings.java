@@ -12,11 +12,12 @@ import org.w3c.dom.Text;
 
 public class Settings extends AppCompatActivity {
 
-    private Button cancel_Button;
+    private Button but_OK;
     private EditText TextA;
     private EditText TextB;
     private EditText TextC;
     private EditText TextD;
+
     SharedPreferences Events;
 
     @Override
@@ -31,8 +32,13 @@ public class Settings extends AppCompatActivity {
         TextC = (EditText) findViewById(R.id.editTextC);
         TextD = (EditText) findViewById(R.id.editTextD);
 
-        cancel_Button= (Button) findViewById(R.id.button_cancel);
-        cancel_Button.setOnClickListener(new View.OnClickListener() {
+        TextA.setText(Events.getString("A", "A: Place Event Text here"));
+        TextB.setText(Events.getString("B", "B: Place Event Text here"));
+        TextC.setText(Events.getString("C", "C: Place Event Text here"));
+        TextD.setText(Events.getString("D", "D: Place Event Text here"));
+
+        but_OK = (Button) findViewById(R.id.buttonOK);
+        but_OK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SharedPreferences.Editor editor = Events.edit();
@@ -40,12 +46,9 @@ public class Settings extends AppCompatActivity {
                 editor.putString("B",TextB.getText().toString());
                 editor.putString("C",TextC.getText().toString());
                 editor.putString("D",TextD.getText().toString());
-
+                editor.apply();
                 finish();
             }
         });
-
-
     }
-
 }
