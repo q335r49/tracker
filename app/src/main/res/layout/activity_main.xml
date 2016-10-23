@@ -30,27 +30,27 @@
         android:layout_alignLeft="@+id/buttonA"
         android:layout_alignStart="@+id/buttonA"
         android:layout_marginTop="19dp"
-        android:id="@+id/button4" />
+        android:id="@+id/buttonB" />
 
     <Button
         android:text="C"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button4"
-        android:layout_alignRight="@+id/button4"
-        android:layout_alignEnd="@+id/button4"
+        android:layout_below="@+id/buttonB"
+        android:layout_alignRight="@+id/buttonB"
+        android:layout_alignEnd="@+id/buttonB"
         android:layout_marginTop="23dp"
-        android:id="@+id/button5" />
+        android:id="@+id/buttonC" />
 
     <Button
         android:text="D"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button5"
-        android:layout_alignLeft="@+id/button5"
-        android:layout_alignStart="@+id/button5"
+        android:layout_below="@+id/buttonC"
+        android:layout_alignLeft="@+id/buttonC"
+        android:layout_alignStart="@+id/buttonC"
         android:layout_marginTop="24dp"
-        android:id="@+id/button6" />
+        android:id="@+id/buttonD" />
 
     <Button
         android:text="Settings"
@@ -66,8 +66,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:id="@+id/button7"
-        android:layout_below="@+id/button6"
-        android:layout_alignLeft="@+id/button6"
-        android:layout_alignStart="@+id/button6" />
+        android:id="@+id/buttonE"
+        android:layout_below="@+id/buttonD"
+        android:layout_alignLeft="@+id/buttonD"
+        android:layout_alignStart="@+id/buttonD" />
+
+    <Button
+        android:text="export"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/settings_button"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/buttonExport" />
 </RelativeLayout>
