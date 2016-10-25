@@ -27,13 +27,37 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <Button
+            android:text="@android:string/ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="21dp"
+            android:id="@+id/buttonOK"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/editTextD"
+            android:layout_toEndOf="@+id/editTextD" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="A text"
+            android:ems="10"
+            android:layout_marginTop="75dp"
+            android:id="@+id/editTextA"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
             android:text="B Text"
             android:ems="10"
-            android:layout_marginTop="52dp"
+            android:layout_marginTop="18dp"
             android:id="@+id/editTextB"
             android:layout_below="@+id/editTextA"
             android:layout_alignLeft="@+id/editTextA"
@@ -46,10 +70,10 @@
             android:text="C Text"
             android:ems="10"
             android:id="@+id/editTextC"
+            android:layout_marginTop="17dp"
             android:layout_below="@+id/editTextB"
             android:layout_alignLeft="@+id/editTextB"
-            android:layout_alignStart="@+id/editTextB"
-            android:layout_marginTop="41dp" />
+            android:layout_alignStart="@+id/editTextB" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -58,33 +82,40 @@
             android:text="D Text"
             android:ems="10"
             android:id="@+id/editTextD"
+            android:layout_marginTop="13dp"
             android:layout_below="@+id/editTextC"
             android:layout_alignLeft="@+id/editTextC"
-            android:layout_alignStart="@+id/editTextC"
-            android:layout_marginTop="27dp" />
-
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:text="A text"
-            android:ems="10"
-            android:layout_marginTop="116dp"
-            android:id="@+id/editTextA"
-            android:layout_marginLeft="37dp"
-            android:layout_marginStart="37dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignStart="@+id/editTextC" />
 
         <Button
-            android:text="@android:string/ok"
+            android:text="Export"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="23dp"
-            android:id="@+id/buttonOK"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_below="@+id/editTextD"
+            android:layout_alignLeft="@+id/editTextD"
+            android:layout_alignStart="@+id/editTextD"
+            android:layout_marginTop="17dp"
+            android:id="@+id/buttonExport" />
+
+        <Button
+            android:text="Import"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/buttonExport"
+            android:layout_toRightOf="@+id/buttonExport"
+            android:layout_toEndOf="@+id/buttonExport"
+            android:layout_marginLeft="12dp"
+            android:layout_marginStart="12dp"
+            android:id="@+id/buttonImport" />
+
+        <Button
+            android:text="Graph"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/buttonImport"
+            android:layout_alignRight="@+id/buttonOK"
+            android:layout_alignEnd="@+id/buttonOK"
+            android:id="@+id/buttonVisualize" />
 
     </RelativeLayout>
 

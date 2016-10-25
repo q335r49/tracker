@@ -67,29 +67,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/settings_button"
+        android:layout_marginTop="24dp"
         android:layout_below="@+id/buttonE"
-        android:layout_alignLeft="@+id/buttonE"
-        android:layout_alignStart="@+id/buttonE"
-        android:layout_marginTop="25dp" />
-
-    <Button
-        android:text="export"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/buttonExport"
-        android:layout_alignBaseline="@+id/settings_button"
-        android:layout_alignBottom="@+id/settings_button"
-        android:layout_toRightOf="@+id/settings_button"
-        android:layout_toEndOf="@+id/settings_button"
-        android:layout_marginLeft="28dp"
-        android:layout_marginStart="28dp" />
-
-    <Button
-        android:text="GRAPH"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/buttonExport"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/buttonVisualilze" />
+        android:layout_marginRight="51dp"
+        android:layout_marginEnd="51dp" />
+
 </RelativeLayout>
