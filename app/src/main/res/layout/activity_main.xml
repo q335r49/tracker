@@ -74,4 +74,16 @@
         android:layout_marginRight="51dp"
         android:layout_marginEnd="51dp" />
 
+    <Button
+        android:text="Graph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonGraph"
+        android:layout_alignBaseline="@+id/settings_button"
+        android:layout_alignBottom="@+id/settings_button"
+        android:layout_toLeftOf="@+id/settings_button"
+        android:layout_toStartOf="@+id/settings_button"
+        android:layout_marginRight="36dp"
+        android:layout_marginEnd="36dp" />
+
 </RelativeLayout>

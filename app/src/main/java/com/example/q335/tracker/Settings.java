@@ -26,7 +26,6 @@ import java.util.Map;
 
 public class Settings extends AppCompatActivity {
 
-    private Button but_OK;
     private EditText TextA;
     private EditText TextB;
     private EditText TextC;
@@ -51,7 +50,7 @@ public class Settings extends AppCompatActivity {
         TextC.setText(Events.getString("C", "C: Place Event Text here"));
         TextD.setText(Events.getString("D", "D: Place Event Text here"));
 
-        but_OK = (Button) findViewById(R.id.buttonOK);
+        Button but_OK = (Button) findViewById(R.id.buttonOK);
         but_OK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,22 +82,13 @@ public class Settings extends AppCompatActivity {
                     Toast.makeText(Settings.this, "Export preferences failed!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        Button visualizeButton = (Button) findViewById(R.id.buttonVisualize);
-        visualizeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: Visualize
-            }
-        });
+        //TODO: import
     }
 
     private File exportFile(File src, File dst) throws IOException {
         //TODO: Request Permissions
-        //TODO: #2 Import shared preferences
 
         //if folder does not exist
-
         FileChannel inChannel = null;
         FileChannel outChannel = null;
 

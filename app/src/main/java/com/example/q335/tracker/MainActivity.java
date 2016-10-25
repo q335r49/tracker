@@ -29,10 +29,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (Events.contains("A")) {
-                    //Long tsLong = System.currentTimeMillis()/1000;
-                    //Log(but_A.getText().toString() + " " + tsLong.toString(),"log.txt");
                     Log(Events.getString("A", ""), "log.txt");
-                    Toast.makeText(MainActivity.this, "Logged:" + Events.getString("A", ""), Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
                 }
@@ -46,6 +43,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(new Intent(getApplicationContext(), Settings.class), 1);
             }
         });
+
+        Button graphButton = (Button) findViewById(R.id.buttonGraph);
+        graphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: Visualize
+            }
+        });
+
     }
 
     public boolean Log(String data, String fname) {
@@ -58,12 +64,16 @@ public class MainActivity extends AppCompatActivity {
             switch (commands[i]) {
                 case "time":
                     commands[i] = Long.toString(System.currentTimeMillis() / 1000);
+                    //TODO: human readable dates
                     break;
                 //TODO: more advanced functions
             }
         }
 
         switch (comlen) {
+            case 1:
+                entry = commands[0];
+                break;
             case 2:
                 entry = String.format(commands[0],commands[1]);
                 break;
@@ -77,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 entry = String.format(commands[0],commands[1],commands[2],commands[3],commands[4]);
                 break;
             default:
-                entry = "";
+                entry = commands[0];
                 break;
         }
 
@@ -87,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             out.write(entry.getBytes());
             out.write(System.getProperty("line.separator").getBytes());
             out.close();
+            Toast.makeText(this, "Logged: " + entry, Toast.LENGTH_SHORT).show();
             return true;
         } catch (Exception e) {
             //e.printStackTrace();
