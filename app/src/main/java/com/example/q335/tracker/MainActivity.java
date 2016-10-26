@@ -3,9 +3,7 @@ package com.example.q335.tracker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,8 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String[]> Events = new ArrayList<String[]>();
     final Context context = this;
+    private List<Map<String,String>> LVCommands;
+    private SimpleAdapter LVadapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         Events.add(new String[] {"F", "Fanother thing"});
         Events.add(new String[] {"G", "Ganother thing"});
 
-        List<Map<String,String>> LVCommands = new ArrayList<Map<String,String>>();
+        LVCommands = new ArrayList<Map<String,String>>();
         for (String[] s: Events) {
             final Map<String,String> listItem = new HashMap<String,String>();
             listItem.put("label", s[0]);
@@ -63,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         LVCommands.add(listItem);
 
         ListView LV = (ListView) findViewById(R.id.LV);
-        SimpleAdapter LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
+        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVadapter);
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -75,9 +73,10 @@ public class MainActivity extends AppCompatActivity {
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                final String label = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
-                final String syntax = ((TextView)(view.findViewById(android.R.id.text2))).getText().toString();
-                final View listEntryView = view;
+                final TextView listLabel = ((TextView)(view.findViewById(android.R.id.text1)));
+                final TextView listCommand = ((TextView)(view.findViewById(android.R.id.text2)));
+                final String label = listLabel.getText().toString();
+                final String command = listCommand.getText().toString();
                 final int listIndex = pos;
 
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -86,15 +85,19 @@ public class MainActivity extends AppCompatActivity {
                 alertDialogBuilder.setView(promptView);
 
                 final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-                final EditText input = (EditText) promptView.findViewById(R.id.userInput);
+                final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
                 labelInput.setText(label);
-                input.setText(syntax);
+                commandInput.setText(command);
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Events.get(listIndex)[1]=input.getText().toString();
-                                ((TextView) listEntryView.findViewById(android.R.id.text2)).setText(input.getText().toString());
+                                Events.set(listIndex,new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                final Map<String,String> listItem = new HashMap<String,String>();
+                                    listItem.put("label", Events.get(listIndex)[0]);
+                                    listItem.put("syntax", Events.get(listIndex)[1]);
+                                LVCommands.set(listIndex,listItem);
+                                LVadapter.notifyDataSetChanged();
                             }
                         })
                         .setNegativeButton("Cancel",
@@ -103,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                                         dialog.cancel();
                                     }
                                 });
-                // create an alert dialog
                 AlertDialog alertD = alertDialogBuilder.create();
                 alertD.show();
                 return true;
@@ -115,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
         //TODO: handle initialization
         //TODO: Delete item in prompt
         //TODO: JSON: Export and edit log and import
-        //TODO: Figure why sometimes menu doesn't update
     }
 
     @Override
