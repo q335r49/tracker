@@ -99,45 +99,67 @@ public class MainActivity extends AppCompatActivity {
                 alertDialogBuilder.setView(promptView);
 
                 final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
                 final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
-                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
                 final int listIndex = pos;
 
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if (listIndex >= Events.size()) {
-                                    Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                                    final Map<String, String> listItem = new HashMap<String, String>();
-                                        listItem.put("label", Events.get(listIndex)[0]);
-                                        listItem.put("syntax", Events.get(listIndex)[1]);
-                                    LVCommands.add(listIndex, listItem);
-                                } else {
-                                    Events.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                                    final Map<String, String> listItem = new HashMap<String, String>();
-                                    listItem.put("label", Events.get(listIndex)[0]);
-                                    listItem.put("syntax", Events.get(listIndex)[1]);
-                                    LVCommands.set(listIndex, listItem);
-                                }
-                                writeCommandsToPrefs();
-                                LVadapter.notifyDataSetChanged();
+                if (listIndex >= Events.size()) {
+                    alertDialogBuilder
+                    .setCancelable(true)
+                    .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+                            final Map<String, String> listItem = new HashMap<String, String>();
+                            listItem.put("label", Events.get(listIndex)[0]);
+                            listItem.put("syntax", Events.get(listIndex)[1]);
+                            LVCommands.add(listIndex, listItem);
+                            writeCommandsToPrefs();
+                            LVadapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,	int id) {
+                            dialog.cancel();
+                        }
+                    });
+                } else {
+                    labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
+                    commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+
+                    alertDialogBuilder
+                    .setCancelable(true)
+                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (listIndex >= Events.size()) {
+                                Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+                                final Map<String, String> listItem = new HashMap<String, String>();
+                                listItem.put("label", Events.get(listIndex)[0]);
+                                listItem.put("syntax", Events.get(listIndex)[1]);
+                                LVCommands.add(listIndex, listItem);
+                            } else {
+                                Events.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                final Map<String, String> listItem = new HashMap<String, String>();
+                                listItem.put("label", Events.get(listIndex)[0]);
+                                listItem.put("syntax", Events.get(listIndex)[1]);
+                                LVCommands.set(listIndex, listItem);
                             }
-                        })
-                        .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Events.remove(listIndex);
-                                LVCommands.remove(listIndex);
-                                writeCommandsToPrefs();
-                                LVadapter.notifyDataSetChanged();
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,	int id) {
-                                dialog.cancel();
-                            }
-                        });
+                            writeCommandsToPrefs();
+                            LVadapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Events.remove(listIndex);
+                            LVCommands.remove(listIndex);
+                            writeCommandsToPrefs();
+                            LVadapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,	int id) {
+                            dialog.cancel();
+                        }
+                    });
+                }
                 AlertDialog alertD = alertDialogBuilder.create();
                 alertD.show();
                 return true;
