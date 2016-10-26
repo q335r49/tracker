@@ -26,6 +26,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -54,13 +56,13 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            Events.add(new String[]{"A", "Another thing"});
-            Events.add(new String[]{"B", "Banother thing"});
-            Events.add(new String[]{"C", "Canother thing"});
-            Events.add(new String[]{"D", "Danother thing"});
-            Events.add(new String[]{"E", "Enother thing"});
-            Events.add(new String[]{"F", "Fanother thing"});
-            Events.add(new String[]{"G", "Ganother thing"});
+            Events.add(new String[]{"A", "Sample A"});
+            Events.add(new String[]{"B", "Sample B"});
+            Events.add(new String[]{"C", "Sample C"});
+            Events.add(new String[]{"D", "Sample D"});
+            Events.add(new String[]{"E", "Sample E"});
+            Events.add(new String[]{"F", "Sample F"});
+            Events.add(new String[]{"G", "Sample G"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             Events = gson.fromJson(jsonText, listType);
@@ -124,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
                     commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
-
                     alertDialogBuilder
                     .setCancelable(true)
                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
@@ -165,8 +166,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //TODO: Delete entry
-        //TODO: JSON: Export and edit log and import
     }
 
     private boolean writeCommandsToPrefs() {
@@ -184,32 +183,86 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String dstPath = "";
-        File src;
-        File dst;
-        boolean success;
-
         switch (item.getItemId()) {
-            case R.id.menuItemExport:
-                dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                dst = new File(dstPath,"log.txt");
-                src = new File(getFilesDir(),"log.txt");
+            case R.id.menuItemExport: {
+                String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                File logDest = new File(extStorPath, "log.txt");
+                File logSrc = new File(getFilesDir(), "log.txt");
                 try {
-                    exportFile(src, dst);
+                    //if folder does not exist
+                    FileChannel inChannel = null;
+                    FileChannel outChannel = null;
+                    try {
+                        inChannel = new FileInputStream(logSrc).getChannel();
+                        outChannel = new FileOutputStream(logDest).getChannel();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "File not found exception: " + e.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                    try {
+                        inChannel.transferTo(0, inChannel.size(), outChannel);
+                    } finally {
+                        if (inChannel != null)
+                            inChannel.close();
+                        if (outChannel != null)
+                            outChannel.close();
+                    }
                 } catch (Exception e) {
-                    Toast.makeText(this, "Log Export Failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Log Export Failed! Exception:" + e.toString(), Toast.LENGTH_SHORT).show();
                 }
-                success = saveSharedPreferencesToFile(new File(dstPath,"prefs.txt"));
-                if (!success)
-                    Toast.makeText(this, "Export preferences failed!", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.menuItemImport:
-                dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                src = new File(dstPath,"prefs.txt");
-                success = loadSharedPreferencesFromFile(src);
-                if (!success)
-                    Toast.makeText(this, "Import failed!", Toast.LENGTH_SHORT).show();
-                break;
+
+                File commandsDest = new File(extStorPath, "commands.json");
+                ObjectOutputStream output = null;
+                try {
+                    output = new ObjectOutputStream(new FileOutputStream(commandsDest));
+                    output.writeObject(pref.getString("commands", null));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (output != null) {
+                            output.flush();
+                            output.close();
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                break;}
+            case R.id.menuItemImport: {
+                String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                File commandsSrc = new File(extStorPath,"commands.json");
+                String jsonText=null;
+                try {
+                    ObjectInputStream input = new ObjectInputStream(new FileInputStream(commandsSrc));
+                    int size = input.available();
+                    byte[] buffer = new byte[size];
+                    input.read(buffer);
+                    input.close();
+                    jsonText = new String(buffer,"UTF-8");
+                    
+                } catch (Exception e) {
+                    Toast.makeText(context, "Import failed!", Toast.LENGTH_SHORT).show();
+                }
+                Gson gson = new Gson();
+                if (jsonText == null) {
+                    Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                } else {
+                    Type listType = new TypeToken<List<String[]>>() {}.getType();
+                    Events = gson.fromJson(jsonText, listType);
+                    LVCommands = new ArrayList<Map<String,String>>();
+                    for (String[] s: Events) {
+                        final Map<String,String> listItem = new HashMap<String,String>();
+                        listItem.put("label", s[0]);
+                        listItem.put("syntax", s[1]);
+                        LVCommands.add(listItem);
+                    }
+                    writeCommandsToPrefs();
+                    LVadapter.notifyDataSetChanged();
+                }
+                break;}
             case R.id.menuItemGraph:
                 //TODO: Graph
                 break;
@@ -218,104 +271,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-    private File exportFile(File src, File dst) throws IOException {
-        //TODO: Request Permissions
-
-        //if folder does not exist
-        FileChannel inChannel = null;
-        FileChannel outChannel = null;
-
-        try {
-            inChannel = new FileInputStream(src).getChannel();
-            outChannel = new FileOutputStream(dst).getChannel();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-        } finally {
-            if (inChannel != null)
-                inChannel.close();
-            if (outChannel != null)
-                outChannel.close();
-        }
-
-        return dst;
-    }
-
-    private boolean saveSharedPreferencesToFile(File dst) {
-//        boolean res = false;
-//        ObjectOutputStream output = null;
-//        try {
-//            output = new ObjectOutputStream(new FileOutputStream(dst));
-//            output.writeObject(pref.getAll());
-//            res = true;
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (output != null) {
-//                    output.flush();
-//                    output.close();
-//                }
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-//        return res;
-        return true;
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    private boolean loadSharedPreferencesFromFile(File src) {
-//        boolean res = false;
-//        ObjectInputStream input = null;
-//        try {
-//            input = new ObjectInputStream(new FileInputStream(src));
-//            SharedPreferences.Editor prefEdit = Events.edit();
-//            prefEdit.clear();
-//            Map<String, ?> entries = (Map<String, ?>) input.readObject();
-//            for (Map.Entry<String, ?> entry : entries.entrySet()) {
-//                Object v = entry.getValue();
-//                String key = entry.getKey();
-//
-//                if (v instanceof Boolean)
-//                    prefEdit.putBoolean(key, ((Boolean) v).booleanValue());
-//                else if (v instanceof Float)
-//                    prefEdit.putFloat(key, ((Float) v).floatValue());
-//                else if (v instanceof Integer)
-//                    prefEdit.putInt(key, ((Integer) v).intValue());
-//                else if (v instanceof Long)
-//                    prefEdit.putLong(key, ((Long) v).longValue());
-//                else if (v instanceof String)
-//                    prefEdit.putString(key, ((String) v));
-//            }
-//            prefEdit.commit();
-//            res = true;
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }finally {
-//            try {
-//                if (input != null) {
-//                    input.close();
-//                }
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
-//        return res;
-        return true;
-    }
 
     public boolean Log(String data, String fname) {
-
         String[] commands = data.split("\\|");
         int comlen = commands.length;
         String entry;
