@@ -60,7 +60,7 @@ public class Settings extends AppCompatActivity {
             }
         });
 
-        //TODO: Convert inport / export to JSON
+        //TODO: Convert import / export to JSON
         Button exportButton = (Button) findViewById(R.id.buttonExport);
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -55,12 +56,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //LV = (ListView) findViewById(R.id.LV);
-       // ArrayList<String> entryList =
-        //ArrayAdapter adapter = new ArrayAdapter(this,);
-
         LVentries = new ArrayList<Map<String,String>>();
-        initList();
+
+        Map<String,?> keys = Events.getAll();
+        for (Map.Entry<String,?> entry : keys.entrySet()) {
+            LVentries.add(createEntry("button",entry.getKey()));
+        }
+
         LV = (ListView) findViewById(R.id.LV);
         LVad = new SimpleAdapter(this,LVentries,android.R.layout.simple_list_item_1,new String[] {"button"},new int[] {android.R.id.text1});
         LV.setAdapter(LVad);
@@ -74,31 +76,24 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
                 }
-
-                //Toast.makeText(MainActivity.this, "Item with id ["+id+"] - Position ["+position+"] - Planet ["+clickedView.getText()+"]", Toast.LENGTH_SHORT).show();
             }
         });
+
+        LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+                TextView clickedView = (TextView) arg1;
+                String text = clickedView.getText().toString();
+                Toast.makeText(MainActivity.this, "Long Click:" + text, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+        });
+
+        //TODO: Floating menus
+        //TODO: Export and edit log and import
     }
 
-    private void initList() {
-        LVentries.add(createEntry("button","A"));
-        LVentries.add(createEntry("button","B"));
-        LVentries.add(createEntry("button","C"));
-        LVentries.add(createEntry("button","D"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","Button1"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","Button2"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","Button3"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-        LVentries.add(createEntry("button","ButtonE"));
-    }
     private HashMap<String,String> createEntry(String key, String name) {
         HashMap<String,String> entry = new HashMap<String,String>();
         entry.put(key,name);
