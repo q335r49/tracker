@@ -3,16 +3,16 @@ package com.example.q335.tracker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -20,12 +20,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,26 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
         Events = PreferenceManager.getDefaultSharedPreferences(this);
 
-        Button settingsButton = (Button) findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(new Intent(getApplicationContext(), Settings.class), 1);
-            }
-        });
-
-        Button graphButton = (Button) findViewById(R.id.buttonGraph);
-        graphButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: Visualize
-            }
-        });
-
         List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
         Map<String,?> keys = Events.getAll();
         for (Map.Entry<String,?> entry : keys.entrySet()) {
-            //LVentries.add(createEntry("button",entry.getKey()));
             final Map<String,String> listItem = new HashMap<String,String>();
             listItem.put("label", entry.getKey());
             listItem.put("syntax", entry.getValue().toString());
@@ -116,14 +104,149 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //TODO: Floating menus
+        //TODO: Convert Event to array
+        //TODO: handle initialization
+        //TODO: NEW ITEM entry
+        //TODO: Delete item in prompt
         //TODO: JSON: Export and edit log and import
+        //TODO: Figure why sometimes menu doesn't update
     }
 
-    private HashMap<String,String> createEntry(String key, String name) {
-        HashMap<String,String> entry = new HashMap<String,String>();
-        entry.put(key,name);
-        return entry;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_settings,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        String dstPath = "";
+        File src;
+        File dst;
+        boolean success;
+
+        switch (item.getItemId()) {
+            case R.id.menuItemExport:
+                dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                dst = new File(dstPath,"log.txt");
+                src = new File(getFilesDir(),"log.txt");
+                try {
+                    exportFile(src, dst);
+                } catch (Exception e) {
+                    Toast.makeText(this, "Log Export Failed!", Toast.LENGTH_SHORT).show();
+                }
+                success = saveSharedPreferencesToFile(new File(dstPath,"prefs.txt"));
+                if (!success)
+                    Toast.makeText(this, "Export preferences failed!", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menuItemImport:
+                dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                src = new File(dstPath,"prefs.txt");
+                success = loadSharedPreferencesFromFile(src);
+                if (!success)
+                    Toast.makeText(this, "Import failed!", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menuItemGraph:
+                //TODO: Graph
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+    private File exportFile(File src, File dst) throws IOException {
+        //TODO: Request Permissions
+
+        //if folder does not exist
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+
+        try {
+            inChannel = new FileInputStream(src).getChannel();
+            outChannel = new FileOutputStream(dst).getChannel();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } finally {
+            if (inChannel != null)
+                inChannel.close();
+            if (outChannel != null)
+                outChannel.close();
+        }
+
+        return dst;
+    }
+
+    private boolean saveSharedPreferencesToFile(File dst) {
+        boolean res = false;
+        ObjectOutputStream output = null;
+        try {
+            output = new ObjectOutputStream(new FileOutputStream(dst));
+            SharedPreferences pref = Events;
+            output.writeObject(pref.getAll());
+            res = true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (output != null) {
+                    output.flush();
+                    output.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private boolean loadSharedPreferencesFromFile(File src) {
+        boolean res = false;
+        ObjectInputStream input = null;
+        try {
+            input = new ObjectInputStream(new FileInputStream(src));
+            SharedPreferences.Editor prefEdit = Events.edit();
+            prefEdit.clear();
+            Map<String, ?> entries = (Map<String, ?>) input.readObject();
+            for (Map.Entry<String, ?> entry : entries.entrySet()) {
+                Object v = entry.getValue();
+                String key = entry.getKey();
+
+                if (v instanceof Boolean)
+                    prefEdit.putBoolean(key, ((Boolean) v).booleanValue());
+                else if (v instanceof Float)
+                    prefEdit.putFloat(key, ((Float) v).floatValue());
+                else if (v instanceof Integer)
+                    prefEdit.putInt(key, ((Integer) v).intValue());
+                else if (v instanceof Long)
+                    prefEdit.putLong(key, ((Long) v).longValue());
+                else if (v instanceof String)
+                    prefEdit.putString(key, ((String) v));
+            }
+            prefEdit.commit();
+            res = true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (input != null) {
+                    input.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return res;
     }
 
     public boolean Log(String data, String fname) {
@@ -178,4 +301,3 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
-
