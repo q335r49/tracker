@@ -60,11 +60,11 @@ public class Settings extends AppCompatActivity {
             }
         });
 
+        //TODO: Convert inport / export to JSON
         Button exportButton = (Button) findViewById(R.id.buttonExport);
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: text file export
                 String dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
                 File dst = new File(dstPath,"log.txt");
                 File src = new File(getFilesDir(),"log.txt");
@@ -89,7 +89,7 @@ public class Settings extends AppCompatActivity {
                 boolean success = loadSharedPreferencesFromFile(src);
                 if (!success)
                     Toast.makeText(Settings.this, "Import failed!", Toast.LENGTH_SHORT).show();
-                //TODO: textual export / import of prefs
+
             }
         });
 

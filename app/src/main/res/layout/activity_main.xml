@@ -10,80 +10,36 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.q335.tracker.MainActivity">
 
-    <Button
-        android:text="A"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/LV"
+        android:layout_above="@+id/settings_button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="26dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="33dp"
-        android:id="@+id/buttonA" />
-
-    <Button
-        android:text="B"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonA"
-        android:layout_alignLeft="@+id/buttonA"
-        android:layout_alignStart="@+id/buttonA"
-        android:layout_marginTop="19dp"
-        android:id="@+id/buttonB" />
-
-    <Button
-        android:text="C"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonB"
-        android:layout_alignRight="@+id/buttonB"
-        android:layout_alignEnd="@+id/buttonB"
-        android:layout_marginTop="23dp"
-        android:id="@+id/buttonC" />
-
-    <Button
-        android:text="D"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonC"
-        android:layout_alignLeft="@+id/buttonC"
-        android:layout_alignStart="@+id/buttonC"
-        android:layout_marginTop="24dp"
-        android:id="@+id/buttonD" />
-
-    <Button
-        android:text="E"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:id="@+id/buttonE"
-        android:layout_below="@+id/buttonD"
-        android:layout_alignLeft="@+id/buttonD"
-        android:layout_alignStart="@+id/buttonD" />
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="38dp" />
 
     <Button
         android:text="Settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/settings_button"
-        android:layout_marginTop="24dp"
-        android:layout_below="@+id/buttonE"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="51dp"
-        android:layout_marginEnd="51dp" />
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:text="Graph"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/buttonGraph"
-        android:layout_alignBaseline="@+id/settings_button"
-        android:layout_alignBottom="@+id/settings_button"
+        android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/settings_button"
         android:layout_toStartOf="@+id/settings_button"
-        android:layout_marginRight="36dp"
-        android:layout_marginEnd="36dp" />
+        android:layout_marginRight="24dp"
+        android:layout_marginEnd="24dp" />
+
 
 </RelativeLayout>

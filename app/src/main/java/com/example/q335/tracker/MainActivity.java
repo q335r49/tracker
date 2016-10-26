@@ -6,16 +6,31 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences Events;
+
+    private ListView LV;
+    List<Map<String,String>> LVentries;
+    SimpleAdapter LVad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,18 +38,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Events = PreferenceManager.getDefaultSharedPreferences(this);
-
-        Button but_A = (Button) findViewById(R.id.buttonA);
-        but_A.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Events.contains("A")) {
-                    Log(Events.getString("A", ""), "log.txt");
-                } else {
-                    Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
         Button settingsButton = (Button) findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -51,6 +54,55 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Visualize
             }
         });
+
+        //LV = (ListView) findViewById(R.id.LV);
+       // ArrayList<String> entryList =
+        //ArrayAdapter adapter = new ArrayAdapter(this,);
+
+        LVentries = new ArrayList<Map<String,String>>();
+        initList();
+        LV = (ListView) findViewById(R.id.LV);
+        LVad = new SimpleAdapter(this,LVentries,android.R.layout.simple_list_item_1,new String[] {"button"},new int[] {android.R.id.text1});
+        LV.setAdapter(LVad);
+        LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            //TODO: Implement long-press settings!
+            public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
+                TextView clickedView = (TextView) view;
+                String text = clickedView.getText().toString();
+                if (Events.contains(text)) {
+                    Log(Events.getString(text, ""), "log.txt");
+                } else {
+                    Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
+                }
+
+                //Toast.makeText(MainActivity.this, "Item with id ["+id+"] - Position ["+position+"] - Planet ["+clickedView.getText()+"]", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void initList() {
+        LVentries.add(createEntry("button","A"));
+        LVentries.add(createEntry("button","B"));
+        LVentries.add(createEntry("button","C"));
+        LVentries.add(createEntry("button","D"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","Button1"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","Button2"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","Button3"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+        LVentries.add(createEntry("button","ButtonE"));
+    }
+    private HashMap<String,String> createEntry(String key, String name) {
+        HashMap<String,String> entry = new HashMap<String,String>();
+        entry.put(key,name);
+        return entry;
     }
 
     public boolean Log(String data, String fname) {
