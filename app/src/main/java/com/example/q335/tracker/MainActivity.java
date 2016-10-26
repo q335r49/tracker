@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
                 alertDialogBuilder
                         .setCancelable(false)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 if (listIndex >= Events.size()) {
                                     Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
@@ -125,12 +125,19 @@ public class MainActivity extends AppCompatActivity {
                                 LVadapter.notifyDataSetChanged();
                             }
                         })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,	int id) {
-                                        dialog.cancel();
-                                    }
-                                });
+                        .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Events.remove(listIndex);
+                                LVCommands.remove(listIndex);
+                                writeCommandsToPrefs();
+                                LVadapter.notifyDataSetChanged();
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,	int id) {
+                                dialog.cancel();
+                            }
+                        });
                 AlertDialog alertD = alertDialogBuilder.create();
                 alertD.show();
                 return true;
