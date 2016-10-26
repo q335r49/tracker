@@ -3,6 +3,7 @@ package com.example.q335.tracker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,11 +18,15 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,18 +40,31 @@ public class MainActivity extends AppCompatActivity {
     private List<Map<String,String>> LVCommands;
     private SimpleAdapter LVadapter;
 
+    public static final String MY_PREFS = "MyPrefsFile";
+    SharedPreferences pref;
+    SharedPreferences.Editor prefEdit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pref = getApplicationContext().getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+        prefEdit = pref.edit();
 
-        Events.add(new String[] {"A", "Another thing"});
-        Events.add(new String[] {"B", "Banother thing"});
-        Events.add(new String[] {"C", "Canother thing"});
-        Events.add(new String[] {"D", "Danother thing"});
-        Events.add(new String[] {"E", "Enother thing"});
-        Events.add(new String[] {"F", "Fanother thing"});
-        Events.add(new String[] {"G", "Ganother thing"});
+        Gson gson = new Gson();
+        String jsonText = pref.getString("commands", null);
+        if (jsonText == null) {
+            Events.add(new String[]{"A", "Another thing"});
+            Events.add(new String[]{"B", "Banother thing"});
+            Events.add(new String[]{"C", "Canother thing"});
+            Events.add(new String[]{"D", "Danother thing"});
+            Events.add(new String[]{"E", "Enother thing"});
+            Events.add(new String[]{"F", "Fanother thing"});
+            Events.add(new String[]{"G", "Ganother thing"});
+        } else {
+            Type listType = new TypeToken<List<String[]>>() {}.getType();
+            Events = gson.fromJson(jsonText, listType);
+        }
 
         LVCommands = new ArrayList<Map<String,String>>();
         for (String[] s: Events) {
@@ -103,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                                     listItem.put("syntax", Events.get(listIndex)[1]);
                                     LVCommands.set(listIndex, listItem);
                                 }
+                                writeCommandsToPrefs();
                                 LVadapter.notifyDataSetChanged();
                             }
                         })
@@ -117,11 +136,15 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //TODO: JSON
         //TODO: Delete entry
-        //TODO: handle initialization
-        //TODO: Delete item in prompt
         //TODO: JSON: Export and edit log and import
+    }
+
+    private boolean writeCommandsToPrefs() {
+        Gson gson = new Gson();
+        prefEdit.putString("commands",gson.toJson(Events));
+        prefEdit.apply();
+        return true;
     }
 
     @Override
