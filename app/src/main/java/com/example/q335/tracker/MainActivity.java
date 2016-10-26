@@ -75,21 +75,17 @@ public class MainActivity extends AppCompatActivity {
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                final TextView listLabel = ((TextView)(view.findViewById(android.R.id.text1)));
-                final TextView listCommand = ((TextView)(view.findViewById(android.R.id.text2)));
-                final String label = listLabel.getText().toString();
-                final String command = listCommand.getText().toString();
-                final int listIndex = pos;
-
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptView);
 
                 final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
+                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
                 final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
-                labelInput.setText(label);
-                commandInput.setText(command);
+                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+                final int listIndex = pos;
+
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -121,9 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //TODO: NEW ITEM entry
+        //TODO: JSON
         //TODO: Delete entry
-        //TODO: Convert Event to array
         //TODO: handle initialization
         //TODO: Delete item in prompt
         //TODO: JSON: Export and edit log and import
