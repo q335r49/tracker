@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             Commands.add(new String[]{"D", "Sample D"});
             Commands.add(new String[]{"E", "Sample E"});
             Commands.add(new String[]{"F", "Sample F"});
-            Commands.add(new String[]{"G", "Sample G"});
+            Commands.add(new String[]{"G", "Smample G"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             Commands = new Gson().fromJson(jsonText, listType);
