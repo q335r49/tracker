@@ -1,21 +1,23 @@
 package com.example.q335.tracker;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,10 +30,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences Events;
-
-    private ListView LV;
-    List<Map<String,String>> LVentries;
-    SimpleAdapter LVad;
+    final Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,42 +55,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        LVentries = new ArrayList<Map<String,String>>();
-
+        List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
         Map<String,?> keys = Events.getAll();
         for (Map.Entry<String,?> entry : keys.entrySet()) {
-            LVentries.add(createEntry("button",entry.getKey()));
+            //LVentries.add(createEntry("button",entry.getKey()));
+            final Map<String,String> listItem = new HashMap<String,String>();
+            listItem.put("label", entry.getKey());
+            listItem.put("syntax", entry.getValue().toString());
+            LVentries.add(listItem);
         }
 
-        LV = (ListView) findViewById(R.id.LV);
-        LVad = new SimpleAdapter(this,LVentries,android.R.layout.simple_list_item_1,new String[] {"button"},new int[] {android.R.id.text1});
+        ListView LV = (ListView) findViewById(R.id.LV);
+        SimpleAdapter LVad = new SimpleAdapter(this,LVentries,android.R.layout.simple_list_item_2,
+                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVad);
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            //TODO: Implement long-press settings!
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                TextView clickedView = (TextView) view;
-                String text = clickedView.getText().toString();
+                String text = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
                 if (Events.contains(text)) {
                     Log(Events.getString(text, ""), "log.txt");
                 } else {
-                    Toast.makeText(MainActivity.this, "No Event Associated with Button A", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "No Event Associated with Button " + text, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
-                TextView clickedView = (TextView) arg1;
-                String text = clickedView.getText().toString();
-                Toast.makeText(MainActivity.this, "Long Click:" + text, Toast.LENGTH_SHORT).show();
+            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
+                final String label = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
+                final String syntax = ((TextView)(view.findViewById(android.R.id.text2))).getText().toString();
+                final View currentview = view;
+
+                LayoutInflater layoutInflater = LayoutInflater.from(context);
+                View promptView = layoutInflater.inflate(R.layout.prompts, null);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder.setView(promptView);
+
+                final EditText input = (EditText) promptView.findViewById(R.id.userInput);
+                ((TextView)promptView.findViewById(R.id.promptTextView)).setText(label);
+                input.setText(syntax);
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                SharedPreferences.Editor editor = Events.edit();
+                                editor.putString(label,input.getText().toString());
+                                editor.apply();
+                                ((TextView) currentview.findViewById(android.R.id.text2)).setText(input.getText().toString());
+                            }
+                        })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,	int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                // create an alert dialog
+                AlertDialog alertD = alertDialogBuilder.create();
+                alertD.show();
                 return true;
             }
-
         });
-
         //TODO: Floating menus
-        //TODO: Export and edit log and import
+        //TODO: JSON: Export and edit log and import
     }
 
     private HashMap<String,String> createEntry(String key, String name) {
