@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -212,10 +213,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 File commandsDest = new File(extStorPath, "commands.json");
-                ObjectOutputStream output = null;
+                FileWriter output = null;
                 try {
-                    output = new ObjectOutputStream(new FileOutputStream(commandsDest));
-                    output.writeObject(pref.getString("commands", null));
+                    output = new FileWriter(commandsDest);
+                    output.write(pref.getString("commands", null));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
