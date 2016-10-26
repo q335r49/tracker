@@ -66,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
         LV.setAdapter(LVadapter);
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                String text = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
-                Log(Events.get(position)[1], "log.txt");
+                if (position<Events.size()) {
+                    String text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
+                    Log(Events.get(position)[1], "log.txt");
+                }
             }
         });
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -92,11 +94,19 @@ public class MainActivity extends AppCompatActivity {
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Events.set(listIndex,new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                                final Map<String,String> listItem = new HashMap<String,String>();
+                                if (listIndex >= Events.size()) {
+                                    Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+                                    final Map<String, String> listItem = new HashMap<String, String>();
+                                        listItem.put("label", Events.get(listIndex)[0]);
+                                        listItem.put("syntax", Events.get(listIndex)[1]);
+                                    LVCommands.add(listIndex, listItem);
+                                } else {
+                                    Events.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                    final Map<String, String> listItem = new HashMap<String, String>();
                                     listItem.put("label", Events.get(listIndex)[0]);
                                     listItem.put("syntax", Events.get(listIndex)[1]);
-                                LVCommands.set(listIndex,listItem);
+                                    LVCommands.set(listIndex, listItem);
+                                }
                                 LVadapter.notifyDataSetChanged();
                             }
                         })
