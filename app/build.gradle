@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'trackerKeys'
+            keyPassword 'Traqwear'
+            storeFile file('C:/Users/q335r/AndroidProjects/Tracker/keystore/tracker.jks')
+            storePassword 'tracqwer'
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
     defaultConfig {
