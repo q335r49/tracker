@@ -32,12 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-
-    private List<String[]> Events = new ArrayList<String[]>();
     final Context context = this;
-    private List<Map<String,String>> LVCommands;
-    private SimpleAdapter LVadapter;
+
+    private List<String[]> Commands = new ArrayList<String[]>();
+
     private ListView LV;
+    private List<Map<String,String>> LVentries;
+    private SimpleAdapter LVadapter;
 
     public static final String MY_PREFS = "MyPrefsFile";
     SharedPreferences pref;
@@ -47,127 +48,127 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         pref = getApplicationContext().getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         prefEdit = pref.edit();
 
-        Gson gson = new Gson();
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            Events.add(new String[]{"A", "Sample A"});
-            Events.add(new String[]{"B", "Sample B"});
-            Events.add(new String[]{"C", "Sample C"});
-            Events.add(new String[]{"D", "Sample D"});
-            Events.add(new String[]{"E", "Sample E"});
-            Events.add(new String[]{"F", "Sample F"});
-            Events.add(new String[]{"G", "Sample G"});
+            Commands.add(new String[]{"A", "Sample A"});
+            Commands.add(new String[]{"B", "Sample B"});
+            Commands.add(new String[]{"C", "Sample C"});
+            Commands.add(new String[]{"D", "Sample D"});
+            Commands.add(new String[]{"E", "Sample E"});
+            Commands.add(new String[]{"F", "Sample F"});
+            Commands.add(new String[]{"G", "Sample G"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
-            Events = gson.fromJson(jsonText, listType);
+            Commands = new Gson().fromJson(jsonText, listType);
         }
 
         LV = (ListView) findViewById(R.id.LV);
         initializeLVAdapter();
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                if (position<Events.size()) {
+                if (position< Commands.size()) {
                     String text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
-                    Log(Events.get(position)[1], "log.txt");
+                    Log(Commands.get(position)[1], "log.txt");
                 }
             }
         });
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                LayoutInflater layoutInflater = LayoutInflater.from(context);
-                View promptView = layoutInflater.inflate(R.layout.prompts, null);
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-                alertDialogBuilder.setView(promptView);
+            LayoutInflater layoutInflater = LayoutInflater.from(context);
+            View promptView = layoutInflater.inflate(R.layout.prompts, null);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+            alertDialogBuilder.setView(promptView);
 
-                final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-                final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
-                final int listIndex = pos;
+            final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
+            final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
+            final int listIndex = pos;
 
-                if (listIndex >= Events.size()) {
-                    alertDialogBuilder
-                    .setCancelable(true)
-                    .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+            if (listIndex >= Commands.size()) {
+                alertDialogBuilder
+                .setCancelable(true)
+                .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+                        final Map<String, String> listItem = new HashMap<String, String>();
+                        listItem.put("label", Commands.get(listIndex)[0]);
+                        listItem.put("syntax", Commands.get(listIndex)[1]);
+                        LVentries.add(listIndex, listItem);
+                        writeCommandsToPrefs();
+                        LVadapter.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,	int id) {
+                        dialog.cancel();
+                    }
+                });
+            } else {
+                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
+                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+                alertDialogBuilder
+                .setCancelable(true)
+                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (listIndex >= Commands.size()) {
+                            Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
                             final Map<String, String> listItem = new HashMap<String, String>();
-                            listItem.put("label", Events.get(listIndex)[0]);
-                            listItem.put("syntax", Events.get(listIndex)[1]);
-                            LVCommands.add(listIndex, listItem);
-                            writeCommandsToPrefs();
-                            LVadapter.notifyDataSetChanged();
+                            listItem.put("label", Commands.get(listIndex)[0]);
+                            listItem.put("syntax", Commands.get(listIndex)[1]);
+                            LVentries.add(listIndex, listItem);
+                        } else {
+                            Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                            final Map<String, String> listItem = new HashMap<String, String>();
+                            listItem.put("label", Commands.get(listIndex)[0]);
+                            listItem.put("syntax", Commands.get(listIndex)[1]);
+                            LVentries.set(listIndex, listItem);
                         }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,	int id) {
-                            dialog.cancel();
-                        }
-                    });
-                } else {
-                    labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
-                    commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
-                    alertDialogBuilder
-                    .setCancelable(true)
-                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            if (listIndex >= Events.size()) {
-                                Events.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                                final Map<String, String> listItem = new HashMap<String, String>();
-                                listItem.put("label", Events.get(listIndex)[0]);
-                                listItem.put("syntax", Events.get(listIndex)[1]);
-                                LVCommands.add(listIndex, listItem);
-                            } else {
-                                Events.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                                final Map<String, String> listItem = new HashMap<String, String>();
-                                listItem.put("label", Events.get(listIndex)[0]);
-                                listItem.put("syntax", Events.get(listIndex)[1]);
-                                LVCommands.set(listIndex, listItem);
-                            }
-                            writeCommandsToPrefs();
-                            LVadapter.notifyDataSetChanged();
-                        }
-                    })
-                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Events.remove(listIndex);
-                            LVCommands.remove(listIndex);
-                            writeCommandsToPrefs();
-                            LVadapter.notifyDataSetChanged();
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,	int id) {
-                            dialog.cancel();
-                        }
-                    });
-                }
-                AlertDialog alertD = alertDialogBuilder.create();
-                alertD.show();
-                return true;
+                        writeCommandsToPrefs();
+                        LVadapter.notifyDataSetChanged();
+                    }
+                })
+                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Commands.remove(listIndex);
+                        LVentries.remove(listIndex);
+                        writeCommandsToPrefs();
+                        LVadapter.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,	int id) {
+                        dialog.cancel();
+                    }
+                });
+            }
+            AlertDialog alertD = alertDialogBuilder.create();
+            alertD.show();
+            return true;
             }
         });
+        //TODO: Reorder commands
     }
     private void writeCommandsToPrefs() {
-        Gson gson = new Gson();
-        prefEdit.putString("commands",gson.toJson(Events));
+        prefEdit.putString("commands",new Gson().toJson(Commands));
         prefEdit.apply();
     }
     private void initializeLVAdapter() {
-        LVCommands = new ArrayList<Map<String,String>>();
-        for (String[] s: Events) {
+        LVentries = new ArrayList<Map<String,String>>();
+        for (String[] s: Commands) {
             final Map<String,String> listItem = new HashMap<String,String>();
             listItem.put("label", s[0]);
             listItem.put("syntax", s[1]);
-            LVCommands.add(listItem);
+            LVentries.add(listItem);
         }
             final Map<String,String> listItem = new HashMap<String,String>();
             listItem.put("label", "New Command");
             listItem.put("syntax", "Long press to add a new command");
-            LVCommands.add(listItem);
-        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
+            LVentries.add(listItem);
+        LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVadapter);
         LVadapter.notifyDataSetChanged();
@@ -232,12 +233,11 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: File browser intent
                 try {
                     String jsonText = readString(inputCmd);
-                    Gson gson = new Gson();
                     if (jsonText == null) {
                         Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                     } else {
                         Type listType = new TypeToken<List<String[]>>() {}.getType();
-                        Events = gson.fromJson(jsonText, listType);
+                        Commands = new Gson().fromJson(jsonText, listType);
                         initializeLVAdapter();
                         writeCommandsToPrefs();
                     }
