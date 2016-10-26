@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private SharedPreferences Events;
+    private List<String[]> Events = new ArrayList<String[]>();
     final Context context = this;
 
     @Override
@@ -42,29 +42,34 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Events = PreferenceManager.getDefaultSharedPreferences(this);
+        Events.add(new String[] {"A", "Another thing"});
+        Events.add(new String[] {"B", "Banother thing"});
+        Events.add(new String[] {"C", "Canother thing"});
+        Events.add(new String[] {"D", "Danother thing"});
+        Events.add(new String[] {"E", "Enother thing"});
+        Events.add(new String[] {"F", "Fanother thing"});
+        Events.add(new String[] {"G", "Ganother thing"});
 
-        List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
-        Map<String,?> keys = Events.getAll();
-        for (Map.Entry<String,?> entry : keys.entrySet()) {
+        List<Map<String,String>> LVCommands = new ArrayList<Map<String,String>>();
+        for (String[] s: Events) {
             final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", entry.getKey());
-            listItem.put("syntax", entry.getValue().toString());
-            LVentries.add(listItem);
+            listItem.put("label", s[0]);
+            listItem.put("syntax", s[1]);
+            LVCommands.add(listItem);
         }
+        final Map<String,String> listItem = new HashMap<String,String>();
+        listItem.put("label", "New Command");
+        listItem.put("syntax", "Long press to add a new command");
+        LVCommands.add(listItem);
 
         ListView LV = (ListView) findViewById(R.id.LV);
-        SimpleAdapter LVad = new SimpleAdapter(this,LVentries,android.R.layout.simple_list_item_2,
+        SimpleAdapter LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
-        LV.setAdapter(LVad);
+        LV.setAdapter(LVadapter);
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 String text = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
-                if (Events.contains(text)) {
-                    Log(Events.getString(text, ""), "log.txt");
-                } else {
-                    Toast.makeText(MainActivity.this, "No Event Associated with Button " + text, Toast.LENGTH_SHORT).show();
-                }
+                Log(Events.get(position)[1], "log.txt");
             }
         });
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -72,24 +77,24 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
                 final String label = ((TextView)(view.findViewById(android.R.id.text1))).getText().toString();
                 final String syntax = ((TextView)(view.findViewById(android.R.id.text2))).getText().toString();
-                final View currentview = view;
+                final View listEntryView = view;
+                final int listIndex = pos;
 
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptView);
 
+                final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
                 final EditText input = (EditText) promptView.findViewById(R.id.userInput);
-                ((TextView)promptView.findViewById(R.id.promptTextView)).setText(label);
+                labelInput.setText(label);
                 input.setText(syntax);
                 alertDialogBuilder
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                SharedPreferences.Editor editor = Events.edit();
-                                editor.putString(label,input.getText().toString());
-                                editor.apply();
-                                ((TextView) currentview.findViewById(android.R.id.text2)).setText(input.getText().toString());
+                                Events.get(listIndex)[1]=input.getText().toString();
+                                ((TextView) listEntryView.findViewById(android.R.id.text2)).setText(input.getText().toString());
                             }
                         })
                         .setNegativeButton("Cancel",
@@ -104,9 +109,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        //TODO: NEW ITEM entry
+        //TODO: Delete entry
         //TODO: Convert Event to array
         //TODO: handle initialization
-        //TODO: NEW ITEM entry
         //TODO: Delete item in prompt
         //TODO: JSON: Export and edit log and import
         //TODO: Figure why sometimes menu doesn't update
@@ -181,72 +187,73 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean saveSharedPreferencesToFile(File dst) {
-        boolean res = false;
-        ObjectOutputStream output = null;
-        try {
-            output = new ObjectOutputStream(new FileOutputStream(dst));
-            SharedPreferences pref = Events;
-            output.writeObject(pref.getAll());
-            res = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (output != null) {
-                    output.flush();
-                    output.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return res;
+//        boolean res = false;
+//        ObjectOutputStream output = null;
+//        try {
+//            output = new ObjectOutputStream(new FileOutputStream(dst));
+//            output.writeObject(pref.getAll());
+//            res = true;
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if (output != null) {
+//                    output.flush();
+//                    output.close();
+//                }
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//        return res;
+        return true;
     }
 
     @SuppressWarnings({ "unchecked" })
     private boolean loadSharedPreferencesFromFile(File src) {
-        boolean res = false;
-        ObjectInputStream input = null;
-        try {
-            input = new ObjectInputStream(new FileInputStream(src));
-            SharedPreferences.Editor prefEdit = Events.edit();
-            prefEdit.clear();
-            Map<String, ?> entries = (Map<String, ?>) input.readObject();
-            for (Map.Entry<String, ?> entry : entries.entrySet()) {
-                Object v = entry.getValue();
-                String key = entry.getKey();
-
-                if (v instanceof Boolean)
-                    prefEdit.putBoolean(key, ((Boolean) v).booleanValue());
-                else if (v instanceof Float)
-                    prefEdit.putFloat(key, ((Float) v).floatValue());
-                else if (v instanceof Integer)
-                    prefEdit.putInt(key, ((Integer) v).intValue());
-                else if (v instanceof Long)
-                    prefEdit.putLong(key, ((Long) v).longValue());
-                else if (v instanceof String)
-                    prefEdit.putString(key, ((String) v));
-            }
-            prefEdit.commit();
-            res = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                if (input != null) {
-                    input.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return res;
+//        boolean res = false;
+//        ObjectInputStream input = null;
+//        try {
+//            input = new ObjectInputStream(new FileInputStream(src));
+//            SharedPreferences.Editor prefEdit = Events.edit();
+//            prefEdit.clear();
+//            Map<String, ?> entries = (Map<String, ?>) input.readObject();
+//            for (Map.Entry<String, ?> entry : entries.entrySet()) {
+//                Object v = entry.getValue();
+//                String key = entry.getKey();
+//
+//                if (v instanceof Boolean)
+//                    prefEdit.putBoolean(key, ((Boolean) v).booleanValue());
+//                else if (v instanceof Float)
+//                    prefEdit.putFloat(key, ((Float) v).floatValue());
+//                else if (v instanceof Integer)
+//                    prefEdit.putInt(key, ((Integer) v).intValue());
+//                else if (v instanceof Long)
+//                    prefEdit.putLong(key, ((Long) v).longValue());
+//                else if (v instanceof String)
+//                    prefEdit.putString(key, ((String) v));
+//            }
+//            prefEdit.commit();
+//            res = true;
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }finally {
+//            try {
+//                if (input != null) {
+//                    input.close();
+//                }
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//        return res;
+        return true;
     }
 
     public boolean Log(String data, String fname) {
