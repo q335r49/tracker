@@ -150,8 +150,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
             }
         });
-        //TODO: Reorder commands
+        //TODO: Listview drag commands
     }
+
     private void writeCommandsToPrefs() {
         prefEdit.putString("commands",new Gson().toJson(Commands));
         prefEdit.apply();
@@ -266,7 +267,6 @@ public class MainActivity extends AppCompatActivity {
                     commands[i] = Long.toString(System.currentTimeMillis() / 1000);
                     //TODO: human readable dates
                     break;
-                //TODO: Expense Tracker
             }
         }
         switch (comlen) {
