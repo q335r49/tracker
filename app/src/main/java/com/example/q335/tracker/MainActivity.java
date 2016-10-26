@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             Commands.add(new String[]{"C", "Sample C"});
             Commands.add(new String[]{"D", "Sample D"});
             Commands.add(new String[]{"E", "Sample E"});
-            Commands.add(new String[]{"F", "Sample F"});
+            Commands.add(new String[]{"F", "Sampkle F"});
             Commands.add(new String[]{"G", "Smample G"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
