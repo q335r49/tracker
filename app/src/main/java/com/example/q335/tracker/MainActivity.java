@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,19 +21,9 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -77,22 +65,8 @@ public class MainActivity extends AppCompatActivity {
             Events = gson.fromJson(jsonText, listType);
         }
 
-        LVCommands = new ArrayList<Map<String,String>>();
-        for (String[] s: Events) {
-            final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", s[0]);
-            listItem.put("syntax", s[1]);
-            LVCommands.add(listItem);
-        }
-        final Map<String,String> listItem = new HashMap<String,String>();
-        listItem.put("label", "New Command");
-        listItem.put("syntax", "Long press to add a new command");
-        LVCommands.add(listItem);
-
         LV = (ListView) findViewById(R.id.LV);
-        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
-                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
-        LV.setAdapter(LVadapter);
+        initializeLVAdapter();
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 if (position<Events.size()) {
@@ -176,15 +150,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    private boolean writeCommandsToPrefs() {
+    private void writeCommandsToPrefs() {
         Gson gson = new Gson();
         prefEdit.putString("commands",gson.toJson(Events));
         prefEdit.apply();
-        return true;
+    }
+    private void initializeLVAdapter() {
+        LVCommands = new ArrayList<Map<String,String>>();
+        for (String[] s: Events) {
+            final Map<String,String> listItem = new HashMap<String,String>();
+            listItem.put("label", s[0]);
+            listItem.put("syntax", s[1]);
+            LVCommands.add(listItem);
+        }
+            final Map<String,String> listItem = new HashMap<String,String>();
+            listItem.put("label", "New Command");
+            listItem.put("syntax", "Long press to add a new command");
+            LVCommands.add(listItem);
+        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
+                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
+        LV.setAdapter(LVadapter);
+        LVadapter.notifyDataSetChanged();
     }
 
-    public static void writeString (File file,String data) throws Exception{
+    public static void writeString (File file, String data) throws Exception{
         FileOutputStream stream = new FileOutputStream(file);
         try {
             stream.write(data.getBytes());
@@ -224,12 +213,12 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_settings,menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                //TODO: File browser intent
                 File outputLog = new File(extStorPath,"log.txt");
                 File outputCmd = new File(extStorPath,"commands.json");
                 try { copyFile(new File(getFilesDir(), "log.txt"),outputLog); }
@@ -240,31 +229,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menuItemImport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
                 File inputCmd = new File(extStorPath,"commands.json");
-                String jsonText=null;
+                //TODO: File browser intent
                 try {
-                    jsonText = readString(inputCmd);
+                    String jsonText = readString(inputCmd);
                     Gson gson = new Gson();
                     if (jsonText == null) {
                         Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                     } else {
                         Type listType = new TypeToken<List<String[]>>() {}.getType();
                         Events = gson.fromJson(jsonText, listType);
-                        LVCommands = new ArrayList<Map<String,String>>();
-                        for (String[] s: Events) {
-                            final Map<String,String> listItem = new HashMap<String,String>();
-                            listItem.put("label", s[0]);
-                            listItem.put("syntax", s[1]);
-                            LVCommands.add(listItem);
-                        }
-                        final Map<String,String> listItem = new HashMap<String,String>();
-                        listItem.put("label", "New Command");
-                        listItem.put("syntax", "Long press to add a new command");
-                        LVCommands.add(listItem);
-                        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
-                                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
-                        LV.setAdapter(LVadapter);
+                        initializeLVAdapter();
                         writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -294,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Expense Tracker
             }
         }
-
         switch (comlen) {
             case 1:
                 entry = commands[0];
@@ -315,7 +289,6 @@ public class MainActivity extends AppCompatActivity {
                 entry = commands[0];
                 break;
         }
-
         File internalFile = new File(getFilesDir(), fname);
         try {
             FileOutputStream out = new FileOutputStream(internalFile, true);
