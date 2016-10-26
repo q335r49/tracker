@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,14 +23,19 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -42,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     final Context context = this;
     private List<Map<String,String>> LVCommands;
     private SimpleAdapter LVadapter;
+    private ListView LV;
 
     public static final String MY_PREFS = "MyPrefsFile";
     SharedPreferences pref;
@@ -81,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         listItem.put("syntax", "Long press to add a new command");
         LVCommands.add(listItem);
 
-        ListView LV = (ListView) findViewById(R.id.LV);
+        LV = (ListView) findViewById(R.id.LV);
         LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVadapter);
@@ -176,6 +184,41 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public static void writeString (File file,String data) throws Exception{
+        FileOutputStream stream = new FileOutputStream(file);
+        try {
+            stream.write(data.getBytes());
+        } finally {
+            stream.close();
+        }
+    }
+    public static String readString (File file) throws Exception{
+        int length = (int) file.length();
+        byte[] bytes = new byte[length];
+
+        FileInputStream in = new FileInputStream(file);
+        try {
+            in.read(bytes);
+        } finally {
+            in.close();
+        }
+        return new String(bytes);
+    }
+    public static void copyFile(File src, File dst) throws Exception {
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            inChannel = new FileInputStream(src).getChannel();
+            outChannel = new FileOutputStream(dst).getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } finally {
+            if (inChannel != null)
+                inChannel.close();
+            if (outChannel != null)
+                outChannel.close();
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings,menu);
@@ -187,81 +230,45 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                File logDest = new File(extStorPath, "log.txt");
-                File logSrc = new File(getFilesDir(), "log.txt");
-                try {
-                    //if folder does not exist
-                    FileChannel inChannel = null;
-                    FileChannel outChannel = null;
-                    try {
-                        inChannel = new FileInputStream(logSrc).getChannel();
-                        outChannel = new FileOutputStream(logDest).getChannel();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        Toast.makeText(context, "File not found exception: " + e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                    try {
-                        inChannel.transferTo(0, inChannel.size(), outChannel);
-                    } finally {
-                        if (inChannel != null)
-                            inChannel.close();
-                        if (outChannel != null)
-                            outChannel.close();
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(this, "Log Export Failed! Exception:" + e.toString(), Toast.LENGTH_SHORT).show();
-                }
-
-                File commandsDest = new File(extStorPath, "commands.json");
-                FileWriter output = null;
-                try {
-                    output = new FileWriter(commandsDest);
-                    output.write(pref.getString("commands", null));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (output != null) {
-                            output.flush();
-                            output.close();
-                        }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
+                File outputLog = new File(extStorPath,"log.txt");
+                File outputCmd = new File(extStorPath,"commands.json");
+                try { copyFile(new File(getFilesDir(), "log.txt"),outputLog); }
+                    catch (Exception e) { Toast.makeText(context, "Log export failed: " + e.toString(), Toast.LENGTH_SHORT).show(); }
+                try { writeString(outputCmd, pref.getString("commands","")); }
+                    catch (Exception e) { Toast.makeText(context, "Command export failed: " + e.toString(), Toast.LENGTH_SHORT).show(); }
                 break;}
             case R.id.menuItemImport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                File commandsSrc = new File(extStorPath,"commands.json");
+                File inputCmd = new File(extStorPath,"commands.json");
                 String jsonText=null;
                 try {
-                    ObjectInputStream input = new ObjectInputStream(new FileInputStream(commandsSrc));
-                    int size = input.available();
-                    byte[] buffer = new byte[size];
-                    input.read(buffer);
-                    input.close();
-                    jsonText = new String(buffer,"UTF-8");
-                    
-                } catch (Exception e) {
-                    Toast.makeText(context, "Import failed!", Toast.LENGTH_SHORT).show();
-                }
-                Gson gson = new Gson();
-                if (jsonText == null) {
-                    Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
-                } else {
-                    Type listType = new TypeToken<List<String[]>>() {}.getType();
-                    Events = gson.fromJson(jsonText, listType);
-                    LVCommands = new ArrayList<Map<String,String>>();
-                    for (String[] s: Events) {
+                    jsonText = readString(inputCmd);
+                    Gson gson = new Gson();
+                    if (jsonText == null) {
+                        Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Type listType = new TypeToken<List<String[]>>() {}.getType();
+                        Events = gson.fromJson(jsonText, listType);
+                        LVCommands = new ArrayList<Map<String,String>>();
+                        for (String[] s: Events) {
+                            final Map<String,String> listItem = new HashMap<String,String>();
+                            listItem.put("label", s[0]);
+                            listItem.put("syntax", s[1]);
+                            LVCommands.add(listItem);
+                        }
                         final Map<String,String> listItem = new HashMap<String,String>();
-                        listItem.put("label", s[0]);
-                        listItem.put("syntax", s[1]);
+                        listItem.put("label", "New Command");
+                        listItem.put("syntax", "Long press to add a new command");
                         LVCommands.add(listItem);
+                        LVadapter = new SimpleAdapter(this, LVCommands,android.R.layout.simple_list_item_2,
+                                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
+                        LV.setAdapter(LVadapter);
+                        writeCommandsToPrefs();
+                        LVadapter.notifyDataSetChanged();
                     }
-                    writeCommandsToPrefs();
-                    LVadapter.notifyDataSetChanged();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(context, "Import failed!" + e.toString(), Toast.LENGTH_SHORT).show();
                 }
                 break;}
             case R.id.menuItemGraph:
