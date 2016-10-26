@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Visualize
             }
         });
-
     }
 
     public boolean Log(String data, String fname) {
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                     commands[i] = Long.toString(System.currentTimeMillis() / 1000);
                     //TODO: human readable dates
                     break;
-                //TODO: more advanced functions
+                //TODO: Expense Tracker
             }
         }
 

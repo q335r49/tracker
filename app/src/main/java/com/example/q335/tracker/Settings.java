@@ -1,8 +1,6 @@
 package com.example.q335.tracker;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -11,8 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,6 +64,7 @@ public class Settings extends AppCompatActivity {
         exportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: text file export
                 String dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
                 File dst = new File(dstPath,"log.txt");
                 File src = new File(getFilesDir(),"log.txt");
@@ -79,10 +76,24 @@ public class Settings extends AppCompatActivity {
 
                 boolean success = saveSharedPreferencesToFile(new File(dstPath,"prefs.txt"));
                 if (!success)
-                    Toast.makeText(Settings.this, "Export preferences failed!", Toast.LENGTH_SHORT).show();
+                     Toast.makeText(Settings.this, "Export preferences failed!", Toast.LENGTH_SHORT).show();
             }
         });
-        //TODO: import
+
+        Button importButton = (Button) findViewById(R.id.buttonImport);
+        exportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String dstPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                File src = new File(dstPath,"prefs.txt");
+                boolean success = loadSharedPreferencesFromFile(src);
+                if (!success)
+                    Toast.makeText(Settings.this, "Import failed!", Toast.LENGTH_SHORT).show();
+                //TODO: textual export / import of prefs
+            }
+        });
+
+
     }
 
     private File exportFile(File src, File dst) throws IOException {
