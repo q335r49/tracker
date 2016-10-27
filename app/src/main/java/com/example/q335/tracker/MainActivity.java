@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,14 +46,10 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
     SharedPreferences.Editor prefEdit;
 
-    static Context myMainContext;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        myMainContext = this;
 
         pref = getApplicationContext().getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         prefEdit = pref.edit();
@@ -376,59 +373,93 @@ public class MainActivity extends AppCompatActivity {
         //TODO: Request access
     }
 
+    private int waitsForModal = 0;
+    private String[] logCommands;
+    private int comlen;
+    private String logfile;
     public boolean Log(String data, String fname) {
-        String[] commands = data.split("!");
-        int comlen = commands.length;
-        String entry = null;
+        logCommands = data.split("!");
+        comlen = logCommands.length;
+        waitsForModal = 0;
+        logfile = fname;
 
         Calendar now = Calendar.getInstance();
         for (int i = 1; i < comlen; i++) {
-            switch (commands[i]) {
+            switch (logCommands[i]) {
                 case "dhm":
-                    commands[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE) + ",";
+                    logCommands[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE) + ",";
                     break;
                 case "ts":
-                    commands[i] = Long.toString(System.currentTimeMillis()/1000);
+                    logCommands[i] = Long.toString(System.currentTimeMillis() / 1000);
                     break;
                 case "doy":
-                    commands[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
+                    logCommands[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
                     break;
                 case "year":
-                    commands[i] = Integer.toString(now.get(Calendar.YEAR));
+                    logCommands[i] = Integer.toString(now.get(Calendar.YEAR));
                     break;
                 case "hour":
-                    commands[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
+                    logCommands[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
                     break;
                 case "min":
-                    commands[i] = Integer.toString(now.get(Calendar.MINUTE));
+                    logCommands[i] = Integer.toString(now.get(Calendar.MINUTE));
                     break;
                 case "sec":
-                    commands[i] = Integer.toString(now.get(Calendar.SECOND));
+                    logCommands[i] = Integer.toString(now.get(Calendar.SECOND));
                     break;
                 case "dow":
-                    commands[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
+                    logCommands[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
                     break;
+                case "mod":
+                    logCommands[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE));
+                    break;
+                case "text": {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("Enter text log");
+                    final EditText input = new EditText(this);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                    builder.setView(input);
+                    waitsForModal++;
+                    final int j = i;
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logCommands[j] = input.getText().toString();
+                            waitsForModal--;
+                            if (waitsForModal == 0) {
+                                writeLog(logfile);
+                            }
+                        }
+                    });
+                    builder.show();
+                    break;
+                }
             }
         }
+        return true;
+    }
+
+    private void writeLog(String fname) {
+        String entry = null;
         try {
             switch (comlen) {
                 case 1:
-                    entry = commands[0];
+                    entry = logCommands[0];
                     break;
                 case 2:
-                    entry = String.format(commands[0], commands[1]);
+                    entry = String.format(logCommands[0], logCommands[1]);
                     break;
                 case 3:
-                    entry = String.format(commands[0], commands[1], commands[2]);
+                    entry = String.format(logCommands[0], logCommands[1], logCommands[2]);
                     break;
                 case 4:
-                    entry = String.format(commands[0], commands[1], commands[2], commands[3]);
+                    entry = String.format(logCommands[0], logCommands[1], logCommands[2], logCommands[3]);
                     break;
                 case 5:
-                    entry = String.format(commands[0], commands[1], commands[2], commands[3], commands[4]);
+                    entry = String.format(logCommands[0], logCommands[1], logCommands[2], logCommands[3], logCommands[4]);
                     break;
                 default:
-                    entry = commands[0];
+                    entry = logCommands[0];
                     break;
             }
         } catch (Exception e) {
@@ -442,14 +473,10 @@ public class MainActivity extends AppCompatActivity {
                 out.write(System.getProperty("line.separator").getBytes());
                 out.close();
                 Toast.makeText(this, "Logged: " + entry, Toast.LENGTH_SHORT).show();
-                return true;
             } catch (Exception e) {
                 //e.printStackTrace();
                 Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_SHORT).show();
-                return false;
             }
-        } else {
-            return false;
         }
     }
 }
