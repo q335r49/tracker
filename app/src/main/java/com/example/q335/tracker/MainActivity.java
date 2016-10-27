@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean Log(String data, String fname) {
         String[] commands = data.split("!");
         int comlen = commands.length;
-        String entry;
+        String entry = null;
 
         Calendar now = Calendar.getInstance();
         for (int i = 1; i < comlen; i++) {
@@ -431,17 +431,21 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
-        File internalFile = new File(getFilesDir(), fname);
-        try {
-            FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(entry.getBytes());
-            out.write(System.getProperty("line.separator").getBytes());
-            out.close();
-            Toast.makeText(this, "Logged: " + entry, Toast.LENGTH_SHORT).show();
-            return true;
-        } catch (Exception e) {
-            //e.printStackTrace();
-            Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_SHORT).show();
+        if (entry != null) {
+            File internalFile = new File(getFilesDir(), fname);
+            try {
+                FileOutputStream out = new FileOutputStream(internalFile, true);
+                out.write(entry.getBytes());
+                out.write(System.getProperty("line.separator").getBytes());
+                out.close();
+                Toast.makeText(this, "Logged: " + entry, Toast.LENGTH_SHORT).show();
+                return true;
+            } catch (Exception e) {
+                //e.printStackTrace();
+                Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } else {
             return false;
         }
     }
