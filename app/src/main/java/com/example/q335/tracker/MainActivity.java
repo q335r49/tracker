@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 1; i < comlen; i++) {
             switch (logCommands[i]) {
                 case "dhm":
-                    logCommands[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE) + ",";
+                    logCommands[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE);
                     break;
                 case "ts":
                     logCommands[i] = Long.toString(System.currentTimeMillis() / 1000);
