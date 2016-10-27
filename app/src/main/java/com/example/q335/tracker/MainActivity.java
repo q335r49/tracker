@@ -45,10 +45,14 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences pref;
     SharedPreferences.Editor prefEdit;
 
+    static Context myMainContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        myMainContext = this;
 
         pref = getApplicationContext().getSharedPreferences(MY_PREFS, MODE_PRIVATE);
         prefEdit = pref.edit();
@@ -217,48 +221,149 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean choiceLog = false;
+        boolean choiceCmd = false;
+
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
-                String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                File directory = new File(extStorPath);
+                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                final File directory = new File(extStorPath);
                 directory.mkdirs();
-                File outputLog = new File(extStorPath,"log.txt");
-                File outputCmd = new File(extStorPath,"commands.json");
-                try {
-                    copyFile(new File(getFilesDir(), "log.txt"),outputLog);
-                    writeString(outputCmd, pref.getString("commands",""));
-                    Toast.makeText(context, "log.txt and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "Writing log.txt, commands.json to " + extStorPath
-                            + "failed: Make sure this App has write permission! (Settings > Apps)", Toast.LENGTH_SHORT).show();
-                }
+                final File outputLog = new File(extStorPath,"log.txt");
+                final File outputCmd = new File(extStorPath,"commands.json");
+
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+                alertBuilder
+                        .setCancelable(true)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Choose files to import")
+                        .setMessage("Exporting to "+extStorPath)
+                        .setNeutralButton("command.json", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    writeCommandsToPrefs();
+                                    writeString(outputCmd, pref.getString("commands",""));
+                                    Toast.makeText(context, "commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("log.txt", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    copyFile(new File(getFilesDir(), "log.txt"),outputLog);
+                                    Toast.makeText(context, "log.txt exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .setPositiveButton("Both", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    copyFile(new File(getFilesDir(), "log.txt"),outputLog);
+                                    writeCommandsToPrefs();
+                                    writeString(outputCmd, pref.getString("commands",""));
+                                    Toast.makeText(context, "log.txt and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .show();
                 break;}
             case R.id.menuItemImport: {
-                String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                File directory = new File(extStorPath);
+                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                final File directory = new File(extStorPath);
+                final File inputCmd = new File(extStorPath, "commands.json");
+                final File inputLog = new File(extStorPath, "log.txt");
+
                 if (!directory.isDirectory()) {
                     Toast.makeText(context, "Import error: " + extStorPath + "not found!", Toast.LENGTH_SHORT).show();
                 } else {
-                    File inputCmd = new File(extStorPath, "commands.json");
-                    //TODO: Log import if exists
-                    try {
-                        String jsonText = readString(inputCmd);
-                        if (jsonText == null) {
-                            Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Type listType = new TypeToken<List<String[]>>() {
-                            }.getType();
-                            Commands = new Gson().fromJson(jsonText, listType);
-                            initializeLVAdapter();
-                            writeCommandsToPrefs();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                    Toast.makeText(context, "Imported " + extStorPath + "commands.json", Toast.LENGTH_SHORT).show();
-                    break;
+                    AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+                    alertBuilder
+                        .setCancelable(true)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Choose files to import")
+                        .setMessage("Importing from " + extStorPath)
+                        .setNeutralButton("commands.json", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    String jsonText = readString(inputCmd);
+                                    if (jsonText == null) {
+                                        Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Type listType = new TypeToken<List<String[]>>() {
+                                        }.getType();
+                                        Commands = new Gson().fromJson(jsonText, listType);
+                                        initializeLVAdapter();
+                                        writeCommandsToPrefs();
+                                        Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("log.txt", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (!inputLog.exists()) {
+                                    Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    try {
+                                        copyFile(inputLog, new File(getFilesDir(), "log.txt"));
+                                        Toast.makeText(context, "log.txt import successful", Toast.LENGTH_SHORT).show();
+                                    } catch (Exception e) {
+                                        Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+                        })
+                        .setPositiveButton("Both", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    String jsonText = readString(inputCmd);
+                                    if (jsonText == null) {
+                                        Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Type listType = new TypeToken<List<String[]>>() {
+                                        }.getType();
+                                        Commands = new Gson().fromJson(jsonText, listType);
+                                        initializeLVAdapter();
+                                        writeCommandsToPrefs();
+                                        Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                                if (!inputLog.exists()) {
+                                    Toast.makeText(context, "log.txt failed: no file", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    try {
+                                        copyFile(inputLog, new File(getFilesDir(), "log.txt"));
+                                        Toast.makeText(context, "log.txt import successful", Toast.LENGTH_SHORT).show();
+                                    } catch (Exception e) {
+                                        Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+                        })
+                        .show();
                 }
             }
             case R.id.menuItemGraph:
