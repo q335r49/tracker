@@ -407,25 +407,29 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
-        switch (comlen) {
-            case 1:
-                entry = commands[0];
-                break;
-            case 2:
-                entry = String.format(commands[0],commands[1]);
-                break;
-            case 3:
-                entry = String.format(commands[0],commands[1],commands[2]);
-                break;
-            case 4:
-                entry = String.format(commands[0],commands[1],commands[2],commands[3]);
-                break;
-            case 5:
-                entry = String.format(commands[0],commands[1],commands[2],commands[3],commands[4]);
-                break;
-            default:
-                entry = commands[0];
-                break;
+        try {
+            switch (comlen) {
+                case 1:
+                    entry = commands[0];
+                    break;
+                case 2:
+                    entry = String.format(commands[0], commands[1]);
+                    break;
+                case 3:
+                    entry = String.format(commands[0], commands[1], commands[2]);
+                    break;
+                case 4:
+                    entry = String.format(commands[0], commands[1], commands[2], commands[3]);
+                    break;
+                case 5:
+                    entry = String.format(commands[0], commands[1], commands[2], commands[3], commands[4]);
+                    break;
+                default:
+                    entry = commands[0];
+                    break;
+            }
+        } catch (Exception e) {
+            Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
         File internalFile = new File(getFilesDir(), fname);
         try {
