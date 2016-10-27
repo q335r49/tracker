@@ -227,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     copyFile(new File(getFilesDir(), "log.txt"),outputLog);
                     writeString(outputCmd, pref.getString("commands",""));
+                    Toast.makeText(context, "log.txt and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(context, "Writing log.txt, commands.json to " + extStorPath
@@ -267,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
         return true;
+        //TODO: Request access
     }
 
     public boolean Log(String data, String fname) {
