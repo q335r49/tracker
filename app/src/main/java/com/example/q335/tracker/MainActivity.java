@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            Commands.add(new String[]{"A", "Sample A"});
+            Commands.add(new String[]{"Log time", "The day of the year is %s!doy"});
             Commands.add(new String[]{"B", "Sample B"});
             Commands.add(new String[]{"C", "Sample C"});
             Commands.add(new String[]{"D", "Sample D"});
@@ -150,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
             }
         });
-        //TODO: Listview drag commands
     }
 
     private void writeCommandsToPrefs() {
@@ -220,33 +220,46 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                //TODO: File browser intent
+                File directory = new File(extStorPath);
+                directory.mkdirs();
                 File outputLog = new File(extStorPath,"log.txt");
                 File outputCmd = new File(extStorPath,"commands.json");
-                try { copyFile(new File(getFilesDir(), "log.txt"),outputLog); }
-                    catch (Exception e) { Toast.makeText(context, "Log export failed: " + e.toString(), Toast.LENGTH_SHORT).show(); }
-                try { writeString(outputCmd, pref.getString("commands","")); }
-                    catch (Exception e) { Toast.makeText(context, "Command export failed: " + e.toString(), Toast.LENGTH_SHORT).show(); }
+                try {
+                    copyFile(new File(getFilesDir(), "log.txt"),outputLog);
+                    writeString(outputCmd, pref.getString("commands",""));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(context, "Writing log.txt, commands.json to " + extStorPath
+                            + "failed: Make sure this App has write permission! (Settings > Apps)", Toast.LENGTH_SHORT).show();
+                }
                 break;}
             case R.id.menuItemImport: {
                 String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
-                File inputCmd = new File(extStorPath,"commands.json");
-                //TODO: File browser intent
-                try {
-                    String jsonText = readString(inputCmd);
-                    if (jsonText == null) {
-                        Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Type listType = new TypeToken<List<String[]>>() {}.getType();
-                        Commands = new Gson().fromJson(jsonText, listType);
-                        initializeLVAdapter();
-                        writeCommandsToPrefs();
+                File directory = new File(extStorPath);
+                if (!directory.isDirectory()) {
+                    Toast.makeText(context, "Import error: " + extStorPath + "not found!", Toast.LENGTH_SHORT).show();
+                } else {
+                    File inputCmd = new File(extStorPath, "commands.json");
+                    //TODO: Log import if exists
+                    try {
+                        String jsonText = readString(inputCmd);
+                        if (jsonText == null) {
+                            Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Type listType = new TypeToken<List<String[]>>() {
+                            }.getType();
+                            Commands = new Gson().fromJson(jsonText, listType);
+                            initializeLVAdapter();
+                            writeCommandsToPrefs();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "Import failed!" + e.toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Imported " + extStorPath + "commands.json", Toast.LENGTH_SHORT).show();
+                    break;
                 }
-                break;}
+            }
             case R.id.menuItemGraph:
                 //TODO: Graph
                 break;
@@ -257,15 +270,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean Log(String data, String fname) {
-        String[] commands = data.split("\\|");
+        String[] commands = data.split("!");
         int comlen = commands.length;
         String entry;
 
+        Calendar now = Calendar.getInstance();
         for (int i = 1; i < comlen; i++) {
             switch (commands[i]) {
-                case "time":
+                case "stp":
                     commands[i] = Long.toString(System.currentTimeMillis() / 1000);
-                    //TODO: human readable dates
+                    break;
+                case "doy":
+                    commands[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
+                    break;
+                case "year":
+                    commands[i] = Integer.toString(now.get(Calendar.YEAR));
+                    break;
+                case "hour":
+                    commands[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
+                    break;
+                case "min":
+                    commands[i] = Integer.toString(now.get(Calendar.MINUTE));
+                    break;
+                case "sec":
+                    commands[i] = Integer.toString(now.get(Calendar.SECOND));
+                    break;
+                case "dow":
+                    commands[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
                     break;
             }
         }

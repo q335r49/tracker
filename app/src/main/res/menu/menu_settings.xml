@@ -2,9 +2,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.q335.tracker.Settings">
-    <item android:title="Export"
+    <item android:title="Export commands and log"
         android:id="@+id/menuItemExport" />
-    <item android:title="Import"
+    <item android:title="Import commands"
         android:id="@+id/menuItemImport" />
     <item android:title="Graph"
         android:id="@+id/menuItemGraph" />
