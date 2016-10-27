@@ -384,8 +384,8 @@ public class MainActivity extends AppCompatActivity {
         Calendar now = Calendar.getInstance();
         for (int i = 1; i < comlen; i++) {
             switch (commands[i]) {
-                case "stp":
-                    commands[i] = Long.toString(System.currentTimeMillis() / 1000);
+                case "time":
+                    commands[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE);
                     break;
                 case "doy":
                     commands[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
