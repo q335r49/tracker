@@ -29,6 +29,8 @@ import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,26 +55,27 @@ public class MainActivity extends AppCompatActivity {
         pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         prefEdit = pref.edit();
 
+        LV = (ListView) findViewById(R.id.LV);
+
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            Commands.add(new String[]{"Day of year, Hour, Minute", "%s!dhm"});
-            Commands.add(new String[]{"Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
-            Commands.add(new String[]{"Timestamp", "timestamp: %s!ts"});
-            Commands.add(new String[]{"Day of Week, Minute of Day", "%s,%s!dow!mod"});
-            Commands.add(new String[]{"Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
-            Commands.add(new String[]{"Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
-            Commands.add(new String[]{"Just some text", "some text"});
+            Commands.add(new String[]{"02 Day of year, Hour, Minute", "%s!dhm"});
+            Commands.add(new String[]{"03 Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
+            Commands.add(new String[]{"04 Timestamp", "timestamp: %s!ts"});
+            Commands.add(new String[]{"05 Day of Week, Minute of Day", "%s,%s!dow!mod"});
+            Commands.add(new String[]{"06 Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
+            Commands.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
+            Commands.add(new String[]{"01 Just some text", "some text"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             Commands = new Gson().fromJson(jsonText, listType);
         }
+        sortCommands();
 
-        LV = (ListView) findViewById(R.id.LV);
-        initializeLVAdapter();
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 if (position< Commands.size()) {
-                    String text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
+                    String  text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
                     Log(Commands.get(position)[1], "log.txt");
                 }
             }
@@ -95,12 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                        final Map<String, String> listItem = new HashMap<String, String>();
-                        listItem.put("label", Commands.get(listIndex)[0]);
-                        listItem.put("syntax", Commands.get(listIndex)[1]);
-                        LVentries.add(listIndex, listItem);
-                        writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
+                        sortCommands();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -117,27 +115,18 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listIndex >= Commands.size()) {
                             Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                            final Map<String, String> listItem = new HashMap<String, String>();
-                            listItem.put("label", Commands.get(listIndex)[0]);
-                            listItem.put("syntax", Commands.get(listIndex)[1]);
-                            LVentries.add(listIndex, listItem);
+                            sortCommands();
                         } else {
                             Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                            final Map<String, String> listItem = new HashMap<String, String>();
-                            listItem.put("label", Commands.get(listIndex)[0]);
-                            listItem.put("syntax", Commands.get(listIndex)[1]);
-                            LVentries.set(listIndex, listItem);
+                            sortCommands();
                         }
-                        writeCommandsToPrefs();
                         LVadapter.notifyDataSetChanged();
                     }
                 })
                 .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Commands.remove(listIndex);
-                        LVentries.remove(listIndex);
-                        writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
+                        sortCommands();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -152,12 +141,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    private void writeCommandsToPrefs() {
-        prefEdit.putString("commands",new Gson().toJson(Commands));
-        prefEdit.apply();
-    }
-    private void initializeLVAdapter() {
+    private void sortCommands() {
+        Collections.sort(Commands, new Comparator<String[]>() {
+            public int compare(String[] s1, String[] s2) {
+                return s1[0].compareToIgnoreCase(s2[0]);
+            }
+        });
         LVentries = new ArrayList<Map<String,String>>();
         for (String[] s: Commands) {
             final Map<String,String> listItem = new HashMap<String,String>();
@@ -165,14 +154,16 @@ public class MainActivity extends AppCompatActivity {
             listItem.put("syntax", s[1]);
             LVentries.add(listItem);
         }
-            final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", "New Command");
-            listItem.put("syntax", "Long press to add a new command");
-            LVentries.add(listItem);
+        final Map<String,String> listItem = new HashMap<String,String>();
+        listItem.put("label", "New Command");
+        listItem.put("syntax", "Long press to add a new command");
+        LVentries.add(listItem);
         LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVadapter);
         LVadapter.notifyDataSetChanged();
+        prefEdit.putString("commands",new Gson().toJson(Commands));
+        prefEdit.apply();
     }
 
     public static void writeString (File file, String data) throws Exception{
@@ -238,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    writeCommandsToPrefs();
                                     writeString(outputCmd, pref.getString("commands",""));
                                     Toast.makeText(context, "commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
@@ -264,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     copyFile(new File(getFilesDir(), "log.txt"),outputLog);
-                                    writeCommandsToPrefs();
                                     writeString(outputCmd, pref.getString("commands",""));
                                     Toast.makeText(context, "log.txt and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
@@ -301,8 +290,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         Commands = new Gson().fromJson(jsonText, listType);
-                                        initializeLVAdapter();
-                                        writeCommandsToPrefs();
+                                        sortCommands();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
@@ -338,8 +326,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         Commands = new Gson().fromJson(jsonText, listType);
-                                        initializeLVAdapter();
-                                        writeCommandsToPrefs();
+                                        sortCommands();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
