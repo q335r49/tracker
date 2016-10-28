@@ -3,6 +3,7 @@ package com.example.q335.tracker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -333,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             case R.id.menuItemGraph:
-                //TODO: Graph
+                startActivity(new Intent(this, GrapherActivity.class));
                 break;
             default:
                 return super.onOptionsItemSelected(item);
