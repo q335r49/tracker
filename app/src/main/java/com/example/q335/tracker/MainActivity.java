@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             Commands = new Gson().fromJson(jsonText, listType);
         }
-        sortCommands();
+        makeLV();
 
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                        sortCommands();
+                        makeLV();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -115,10 +115,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listIndex >= Commands.size()) {
                             Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                            sortCommands();
+                            makeLV();
                         } else {
                             Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                            sortCommands();
+                            makeLV();
                         }
                         LVadapter.notifyDataSetChanged();
                     }
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Commands.remove(listIndex);
-                        sortCommands();
+                        makeLV();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private void sortCommands() {
+    private void makeLV() {
         Collections.sort(Commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
                 return s1[0].compareToIgnoreCase(s2[0]);
@@ -154,10 +154,10 @@ public class MainActivity extends AppCompatActivity {
             listItem.put("syntax", s[1]);
             LVentries.add(listItem);
         }
-        final Map<String,String> listItem = new HashMap<String,String>();
-        listItem.put("label", "New Command");
-        listItem.put("syntax", "Long press to add a new command");
-        LVentries.add(listItem);
+            final Map<String,String> listItem = new HashMap<String,String>();
+            listItem.put("label", "New Command");
+            listItem.put("syntax", "Long press to add a new command");
+            LVentries.add(listItem);
         LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
         LV.setAdapter(LVadapter);
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         Commands = new Gson().fromJson(jsonText, listType);
-                                        sortCommands();
+                                        makeLV();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         Commands = new Gson().fromJson(jsonText, listType);
-                                        sortCommands();
+                                        makeLV();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
