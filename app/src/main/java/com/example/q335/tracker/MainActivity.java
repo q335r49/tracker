@@ -74,70 +74,68 @@ public class MainActivity extends AppCompatActivity {
 
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                if (position< Commands.size()) {
-                    String  text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
+                if (position< Commands.size())
                     Log(Commands.get(position)[1], "log.txt");
-                }
             }
         });
         LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
-            View promptView = layoutInflater.inflate(R.layout.prompts, null);
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-            alertDialogBuilder.setView(promptView);
+                LayoutInflater layoutInflater = LayoutInflater.from(context);
+                View promptView = layoutInflater.inflate(R.layout.prompts, null);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder.setView(promptView);
 
-            final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-            final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
-            final int listIndex = pos;
+                final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
+                final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
+                final int listIndex = pos;
 
-            if (listIndex >= Commands.size()) {
-                alertDialogBuilder
-                .setCancelable(true)
-                .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                        makeLV();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,	int id) {
-                        dialog.cancel();
-                    }
-                });
-            } else {
-                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
-                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
-                alertDialogBuilder
-                .setCancelable(true)
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (listIndex >= Commands.size()) {
+                if (listIndex >= Commands.size()) {
+                    alertDialogBuilder
+                    .setCancelable(true)
+                    .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
                             Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
                             makeLV();
-                        } else {
-                            Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,	int id) {
+                            dialog.cancel();
+                        }
+                    });
+                } else {
+                    labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
+                    commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+                    alertDialogBuilder
+                    .setCancelable(true)
+                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if (listIndex >= Commands.size()) {
+                                Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+                                makeLV();
+                            } else {
+                                Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                makeLV();
+                            }
+                            LVadapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Commands.remove(listIndex);
                             makeLV();
                         }
-                        LVadapter.notifyDataSetChanged();
-                    }
-                })
-                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Commands.remove(listIndex);
-                        makeLV();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,	int id) {
-                        dialog.cancel();
-                    }
-                });
-            }
-            AlertDialog alertD = alertDialogBuilder.create();
-            alertD.show();
-            return true;
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,	int id) {
+                            dialog.cancel();
+                        }
+                    });
+                }
+                AlertDialog alertD = alertDialogBuilder.create();
+                alertD.show();
+                return true;
             }
         });
     }
@@ -208,9 +206,6 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        boolean choiceLog = false;
-        boolean choiceCmd = false;
-
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
@@ -359,62 +354,58 @@ public class MainActivity extends AppCompatActivity {
         //TODO: Request access
     }
 
-    private int logState_modal_dialogs_remaining = 0;
-    private String[] logCom;
-    private int logComLen;
-    private String LogFile;
+    private int logPromptsRemaining = 0;
+    private String[] logComList;
     public boolean Log(String data, String fname) {
-        logCom = data.split("!");
-        logComLen = logCom.length;
-        logState_modal_dialogs_remaining = 0;
-        LogFile = fname;
+        logComList = data.split("!");
+        logPromptsRemaining = 0;
 
         Calendar now = Calendar.getInstance();
-        for (int i = logComLen-1; i >=0; i--) {
-            String[] parsedLC = logCom[i].split(",",2);
-            switch (parsedLC[0]) {
+        for (int i = logComList.length-1; i >=0; i--) {
+            String[] f_arg = logComList[i].split(",",2);
+            switch (f_arg[0]) {
                 case "dhm":
-                    logCom[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE);
+                    logComList[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE);
                     break;
                 case "ts":
-                    logCom[i] = Long.toString(System.currentTimeMillis() / 1000);
+                    logComList[i] = Long.toString(System.currentTimeMillis() / 1000);
                     break;
                 case "doy":
-                    logCom[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
+                    logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
                     break;
                 case "year":
-                    logCom[i] = Integer.toString(now.get(Calendar.YEAR));
+                    logComList[i] = Integer.toString(now.get(Calendar.YEAR));
                     break;
                 case "hour":
-                    logCom[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
+                    logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
                     break;
                 case "min":
-                    logCom[i] = Integer.toString(now.get(Calendar.MINUTE));
+                    logComList[i] = Integer.toString(now.get(Calendar.MINUTE));
                     break;
                 case "sec":
-                    logCom[i] = Integer.toString(now.get(Calendar.SECOND));
+                    logComList[i] = Integer.toString(now.get(Calendar.SECOND));
                     break;
                 case "dow":
-                    logCom[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
+                    logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
                     break;
                 case "mod":
-                    logCom[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE));
+                    logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE));
                     break;
                 case "text":
                 case "number": {
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(parsedLC.length > 1 ? parsedLC[1] : "Enter text");
+                    b.setTitle(f_arg.length > 1 ? f_arg[1] : "Enter text");
                     final EditText input = new EditText(this);
-                    input.setInputType(parsedLC[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
+                    input.setInputType(f_arg[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
                     b.setView(input);
-                    logState_modal_dialogs_remaining++;
+                    logPromptsRemaining++;
                     final int j = i;
+                    final String LogFile = fname;
                     b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            logCom[j] = input.getText().toString();
-                            logState_modal_dialogs_remaining--;
-                            if (logState_modal_dialogs_remaining == 0)
+                            logComList[j] = input.getText().toString();
+                            if (--logPromptsRemaining == 0)
                                 writeLog(LogFile);
                         }
                     });
@@ -423,16 +414,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case "pickPrompt":
                 case "pick": {
-                    if (parsedLC.length <= 1)
+                    if (f_arg.length <= 1)
                         break;
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
-                    logState_modal_dialogs_remaining++;
+                    logPromptsRemaining++;
                     final int j = i;
                     final String[] types;
-                    if (parsedLC[0].equals("pick"))
-                        types = parsedLC[1].split(",");
+                    final String LogFile = fname;
+                    if (f_arg[0].equals("pick"))
+                        types = f_arg[1].split(",");
                     else {
-                        String[] titleAndChoices = parsedLC[1].split(",",2);
+                        String[] titleAndChoices = f_arg[1].split(",",2);
                         if (titleAndChoices.length <=1)
                             break;
                         b.setTitle(titleAndChoices[0]);
@@ -442,9 +434,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            logCom[j] = types[which];
-                            logState_modal_dialogs_remaining--;
-                            if (logState_modal_dialogs_remaining == 0)
+                            logComList[j] = types[which];
+                            if (--logPromptsRemaining == 0)
                                 writeLog(LogFile);
                         }
                     });
@@ -453,32 +444,32 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        if (logState_modal_dialogs_remaining == 0)
-            writeLog(LogFile);
+        if (logPromptsRemaining == 0)
+            writeLog(fname);
         return true;
     }
 
     private void writeLog(String fname) {
         String entry = null;
         try {
-            switch (logComLen) {
+            switch (logComList.length) {
                 case 1:
-                    entry = logCom[0];
+                    entry = logComList[0];
                     break;
                 case 2:
-                    entry = String.format(logCom[0], logCom[1]);
+                    entry = String.format(logComList[0], logComList[1]);
                     break;
                 case 3:
-                    entry = String.format(logCom[0], logCom[1], logCom[2]);
+                    entry = String.format(logComList[0], logComList[1], logComList[2]);
                     break;
                 case 4:
-                    entry = String.format(logCom[0], logCom[1], logCom[2], logCom[3]);
+                    entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3]);
                     break;
                 case 5:
-                    entry = String.format(logCom[0], logCom[1], logCom[2], logCom[3], logCom[4]);
+                    entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4]);
                     break;
                 default:
-                    entry = logCom[0];
+                    entry = logComList[0];
                     break;
             }
         } catch (Exception e) {
