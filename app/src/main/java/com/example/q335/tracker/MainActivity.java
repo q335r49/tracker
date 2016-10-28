@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     b.setTitle(parsedLC.length > 1 ? parsedLC[1] : "Enter text");
                     final EditText input = new EditText(this);
-                    input.setInputType(parsedLC[0]=="text"? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
+                    input.setInputType(parsedLC[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
                     b.setView(input);
                     logState_modal_dialogs_remaining++;
                     final int j = i;
@@ -442,7 +442,7 @@ public class MainActivity extends AppCompatActivity {
                     logState_modal_dialogs_remaining++;
                     final int j = i;
                     final String[] types;
-                    if (parsedLC[0]=="pick")
+                    if (parsedLC[0].equals("pick"))
                         types = parsedLC[1].split(",");
                     else {
                         String[] titleAndChoices = parsedLC[1].split(",",2);
