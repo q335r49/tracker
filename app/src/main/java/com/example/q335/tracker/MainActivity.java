@@ -376,12 +376,12 @@ public class MainActivity extends AppCompatActivity {
     private int logState_modal_dialogs_remaining = 0;
     private String[] logCom;
     private int logComLen;
-    private String FileLog;
+    private String LogFile;
     public boolean Log(String data, String fname) {
         logCom = data.split("!");
         logComLen = logCom.length;
         logState_modal_dialogs_remaining = 0;
-        FileLog = fname;
+        LogFile = fname;
 
         Calendar now = Calendar.getInstance();
         for (int i = 1; i < logComLen; i++) {
@@ -416,32 +416,42 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "text":
                 case "number": {
-                    AlertDialog.Builder ad = new AlertDialog.Builder(context);
-                    ad.setTitle(parsedLC.length > 1 ? parsedLC[1] : "Enter text");
+                    AlertDialog.Builder b = new AlertDialog.Builder(context);
+                    b.setTitle(parsedLC.length > 1 ? parsedLC[1] : "Enter text");
                     final EditText input = new EditText(this);
                     input.setInputType(parsedLC[0]=="text"? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
-                    ad.setView(input);
+                    b.setView(input);
                     logState_modal_dialogs_remaining++;
                     final int j = i;
-                    ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             logCom[j] = input.getText().toString();
                             logState_modal_dialogs_remaining--;
                             if (logState_modal_dialogs_remaining == 0)
-                                writeLog(FileLog);
+                                writeLog(LogFile);
                         }
                     });
-                    ad.show();
+                    b.show();
                     break;
                 }
+                case "pickPrompt":
                 case "pick": {
                     if (parsedLC.length <= 1)
                         break;
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
-                    final int j = i;
-                    final String[] types = parsedLC[1].split(",");
                     logState_modal_dialogs_remaining++;
+                    final int j = i;
+                    final String[] types;
+                    if (parsedLC[0]=="pick")
+                        types = parsedLC[1].split(",");
+                    else {
+                        String[] titleAndChoices = parsedLC[1].split(",",2);
+                        if (titleAndChoices.length <=1)
+                            break;
+                        b.setTitle(titleAndChoices[0]);
+                        types = titleAndChoices[1].split(",");
+                    }
                     b.setItems(types, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -449,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
                             logCom[j] = types[which];
                             logState_modal_dialogs_remaining--;
                             if (logState_modal_dialogs_remaining == 0)
-                                writeLog(FileLog);
+                                writeLog(LogFile);
                         }
                     });
                     b.show();
@@ -458,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (logState_modal_dialogs_remaining == 0)
-            writeLog(FileLog);
+            writeLog(LogFile);
         return true;
     }
 
