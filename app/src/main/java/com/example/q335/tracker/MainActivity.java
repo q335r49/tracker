@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private List<String[]> Commands = new ArrayList<String[]>();
 
     private com.example.q335.tracker.DynamicListView LV;
-    private List<Map<String,String>> LVentries;
-    private SimpleAdapter LVadapter;
+    private ArrayList<Map<String,String>> LVentries;
+    private com.example.q335.tracker.StableArrayAdapter LVadapter;
 
     public static final String MY_PREFS = "MyPrefsFile";
     SharedPreferences pref;
@@ -70,88 +70,88 @@ public class MainActivity extends AppCompatActivity {
 
         LV = (com.example.q335.tracker.DynamicListView) findViewById(R.id.LV);
         initializeLVAdapter();
-        LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                if (position< Commands.size()) {
-                    String text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
-                    Log(Commands.get(position)[1], "log.txt");
-                }
-            }
-        });
-        LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
-            View promptView = layoutInflater.inflate(R.layout.prompts, null);
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-            alertDialogBuilder.setView(promptView);
-
-            final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-            final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
-            final int listIndex = pos;
-
-            if (listIndex >= Commands.size()) {
-                alertDialogBuilder
-                .setCancelable(true)
-                .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                        final Map<String, String> listItem = new HashMap<String, String>();
-                        listItem.put("label", Commands.get(listIndex)[0]);
-                        listItem.put("syntax", Commands.get(listIndex)[1]);
-                        LVentries.add(listIndex, listItem);
-                        writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,	int id) {
-                        dialog.cancel();
-                    }
-                });
-            } else {
-                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
-                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
-                alertDialogBuilder
-                .setCancelable(true)
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (listIndex >= Commands.size()) {
-                            Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                            final Map<String, String> listItem = new HashMap<String, String>();
-                            listItem.put("label", Commands.get(listIndex)[0]);
-                            listItem.put("syntax", Commands.get(listIndex)[1]);
-                            LVentries.add(listIndex, listItem);
-                        } else {
-                            Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                            final Map<String, String> listItem = new HashMap<String, String>();
-                            listItem.put("label", Commands.get(listIndex)[0]);
-                            listItem.put("syntax", Commands.get(listIndex)[1]);
-                            LVentries.set(listIndex, listItem);
-                        }
-                        writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
-                    }
-                })
-                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Commands.remove(listIndex);
-                        LVentries.remove(listIndex);
-                        writeCommandsToPrefs();
-                        LVadapter.notifyDataSetChanged();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,	int id) {
-                        dialog.cancel();
-                    }
-                });
-            }
-            AlertDialog alertD = alertDialogBuilder.create();
-            alertD.show();
-            return true;
-            }
-        });
+//        LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
+//                if (position< Commands.size()) {
+//                    String text = ((TextView) (view.findViewById(android.R.id.text1))).getText().toString();
+//                    Log(Commands.get(position)[1], "log.txt");
+//                }
+//            }
+//        });
+//        LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
+//            LayoutInflater layoutInflater = LayoutInflater.from(context);
+//            View promptView = layoutInflater.inflate(R.layout.prompts, null);
+//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+//            alertDialogBuilder.setView(promptView);
+//
+//            final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
+//            final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
+//            final int listIndex = pos;
+//
+//            if (listIndex >= Commands.size()) {
+//                alertDialogBuilder
+//                .setCancelable(true)
+//                .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+//                        final Map<String, String> listItem = new HashMap<String, String>();
+//                        listItem.put("label", Commands.get(listIndex)[0]);
+//                        listItem.put("syntax", Commands.get(listIndex)[1]);
+//                        LVentries.add(listIndex, listItem);
+//                        writeCommandsToPrefs();
+//                        LVadapter.notifyDataSetChanged();
+//                    }
+//                })
+//                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog,	int id) {
+//                        dialog.cancel();
+//                    }
+//                });
+//            } else {
+//                labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
+//                commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+//                alertDialogBuilder
+//                .setCancelable(true)
+//                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        if (listIndex >= Commands.size()) {
+//                            Commands.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
+//                            final Map<String, String> listItem = new HashMap<String, String>();
+//                            listItem.put("label", Commands.get(listIndex)[0]);
+//                            listItem.put("syntax", Commands.get(listIndex)[1]);
+//                            LVentries.add(listIndex, listItem);
+//                        } else {
+//                            Commands.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+//                            final Map<String, String> listItem = new HashMap<String, String>();
+//                            listItem.put("label", Commands.get(listIndex)[0]);
+//                            listItem.put("syntax", Commands.get(listIndex)[1]);
+//                            LVentries.set(listIndex, listItem);
+//                        }
+//                        writeCommandsToPrefs();
+//                        LVadapter.notifyDataSetChanged();
+//                    }
+//                })
+//                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        Commands.remove(listIndex);
+//                        LVentries.remove(listIndex);
+//                        writeCommandsToPrefs();
+//                        LVadapter.notifyDataSetChanged();
+//                    }
+//                })
+//                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog,	int id) {
+//                        dialog.cancel();
+//                    }
+//                });
+//            }
+//            AlertDialog alertD = alertDialogBuilder.create();
+//            alertD.show();
+//            return true;
+//            }
+//        });
     }
 
     private void writeCommandsToPrefs() {
@@ -170,9 +170,12 @@ public class MainActivity extends AppCompatActivity {
             listItem.put("label", "New Command");
             listItem.put("syntax", "Long press to add a new command");
             LVentries.add(listItem);
-        LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
+        LVadapter = new com.example.q335.tracker.StableArrayAdapter(this, LVentries,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
+
+        LV.setCheeseList(LVentries);
         LV.setAdapter(LVadapter);
+        LV.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         LVadapter.notifyDataSetChanged();
     }
 

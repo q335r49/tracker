@@ -18,29 +18,32 @@ package com.example.q335.tracker;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
+import android.widget.SimpleAdapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class StableArrayAdapter extends ArrayAdapter<String> {
+public class StableArrayAdapter extends SimpleAdapter {
 
     final int INVALID_ID = -1;
 
-    HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+    HashMap<Map<String,String>, Integer> mIdMap = new HashMap<Map<String,String>, Integer>();
 
-    public StableArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
-        super(context, textViewResourceId, objects);
+    public StableArrayAdapter(Context context, ArrayList<Map<String,String>> objects, int textViewResourceId, String[] labels, int[] id) {
+        super(context, objects, textViewResourceId, labels, id);
         for (int i = 0; i < objects.size(); ++i) {
             mIdMap.put(objects.get(i), i);
-        }
     }
+}
 
     @Override
     public long getItemId(int position) {
         if (position < 0 || position >= mIdMap.size()) {
             return INVALID_ID;
         }
-        String item = getItem(position);
+        Object item = getItem(position);
         return mIdMap.get(item);
     }
 
