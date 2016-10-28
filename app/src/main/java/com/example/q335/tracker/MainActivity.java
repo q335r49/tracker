@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
+            //syntax examples
             commandList.add(new String[]{"02 Day of year, Hour, Minute", "%s!dhm"});
             commandList.add(new String[]{"03 Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
             commandList.add(new String[]{"04 Timestamp", "timestamp: %s!ts"});
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"06 Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
             commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
+            //chart examples
+            commandList.add(new String[]{"Food", "dhm:%s,ago:%s,event:start,cat:food,stamp:%s!dhm!pickPrompt,Started minutes ago:,0,5,10,15,20!ts"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             commandList = new Gson().fromJson(jsonText, listType);
@@ -461,6 +464,7 @@ public class MainActivity extends AppCompatActivity {
                     entry = logComList[0];
                     break;
             }
+            getSupportActionBar().setTitle(entry);
         } catch (Exception e) {
             Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
@@ -471,9 +475,7 @@ public class MainActivity extends AppCompatActivity {
                 out.write(entry.getBytes());
                 out.write(System.getProperty("line.separator").getBytes());
                 out.close();
-                Toast.makeText(this, "Logged: " + entry, Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                //e.printStackTrace();
                 Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_SHORT).show();
             }
         }
