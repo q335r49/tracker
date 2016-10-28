@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private List<Map<String,String>> LVentries;
     private SimpleAdapter LVadapter;
 
-    public static final String MY_PREFS = "MyPrefsFile";
     SharedPreferences pref;
     SharedPreferences.Editor prefEdit;
 
@@ -51,18 +50,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pref = getApplicationContext().getSharedPreferences(MY_PREFS, MODE_PRIVATE);
+        pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         prefEdit = pref.edit();
 
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            Commands.add(new String[]{"Log time", "The day of the year is %s!doy"});
-            Commands.add(new String[]{"B", "Sample B"});
-            Commands.add(new String[]{"C", "Sample C"});
-            Commands.add(new String[]{"D", "Sample D"});
-            Commands.add(new String[]{"E", "Sample E"});
-            Commands.add(new String[]{"F", "Sampkle F"});
-            Commands.add(new String[]{"G", "Smample G"});
+            Commands.add(new String[]{"Day of year, Hour, Minute", "%s!dhm"});
+            Commands.add(new String[]{"Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
+            Commands.add(new String[]{"Timestamp", "timestamp: %s!ts"});
+            Commands.add(new String[]{"Day of Week, Minute of Day", "%s,%s!dow!mod"});
+            Commands.add(new String[]{"Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
+            Commands.add(new String[]{"Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt:pick,Number 1-5:,1,2,3,4,5"});
+            Commands.add(new String[]{"Just some text", "some text"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             Commands = new Gson().fromJson(jsonText, listType);
