@@ -33,8 +33,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
@@ -346,14 +348,14 @@ public class MainActivity extends AppCompatActivity {
         //TODO: Request access
     }
 
-    private int logPromptsRemaining = 0;
     private String[] logComList;
+    Queue<AlertDialog.Builder> promptStack;
     public boolean Log(String data, String fname) {
         logComList = data.split("!");
-        logPromptsRemaining = 0;
+        promptStack = new LinkedList<>();
 
         Calendar now = Calendar.getInstance();
-        for (int i = logComList.length-1; i >=0; i--) {
+        for (int i = 0; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",",2);
             switch (f_arg[0]) {
                 case "dhm":
@@ -390,18 +392,19 @@ public class MainActivity extends AppCompatActivity {
                     final EditText input = new EditText(this);
                     input.setInputType(f_arg[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
                     b.setView(input);
-                    logPromptsRemaining++;
                     final int j = i;
                     final String LogFile = fname;
                     b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             logComList[j] = input.getText().toString();
-                            if (--logPromptsRemaining == 0)
+                            if (promptStack.isEmpty())
                                 writeLog(LogFile);
+                            else
+                                promptStack.remove().show();
                         }
                     });
-                    b.show();
+                    promptStack.add(b);
                     break;
                 }
                 case "pickPrompt":
@@ -409,7 +412,6 @@ public class MainActivity extends AppCompatActivity {
                     if (f_arg.length <= 1)
                         break;
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
-                    logPromptsRemaining++;
                     final int j = i;
                     final String[] types;
                     final String LogFile = fname;
@@ -427,17 +429,21 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             logComList[j] = types[which];
-                            if (--logPromptsRemaining == 0)
+                            if (promptStack.isEmpty())
                                 writeLog(LogFile);
+                            else
+                                promptStack.remove().show();
                         }
                     });
-                    b.show();
+                    promptStack.add(b);
                     break;
                 }
             }
         }
-        if (logPromptsRemaining == 0)
+        if (promptStack.isEmpty())
             writeLog(fname);
+        else
+            promptStack.remove().show();
         return true;
     }
 
@@ -465,6 +471,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
             getSupportActionBar().setTitle(entry);
+        } catch (NullPointerException npe) {
+            //cannot change actionbar font
         } catch (Exception e) {
             Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
