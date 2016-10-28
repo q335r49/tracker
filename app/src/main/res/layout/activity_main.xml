@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.q335.tracker.MainActivity">
 
-    <ListView
+    <com.example.q335.tracker.DynamicListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/LV" />

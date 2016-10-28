@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String[]> Commands = new ArrayList<String[]>();
 
-    private ListView LV;
+    private com.example.q335.tracker.DynamicListView LV;
     private List<Map<String,String>> LVentries;
     private SimpleAdapter LVadapter;
 
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             Commands = new Gson().fromJson(jsonText, listType);
         }
 
-        LV = (ListView) findViewById(R.id.LV);
+        LV = (com.example.q335.tracker.DynamicListView) findViewById(R.id.LV);
         initializeLVAdapter();
         LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
