@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
         LogFile = fname;
 
         Calendar now = Calendar.getInstance();
-        for (int i = 1; i < logComLen; i++) {
+        for (int i = logComLen-1; i >=0; i--) {
             String[] parsedLC = logCom[i].split(",",2);
             switch (parsedLC[0]) {
                 case "dhm":
