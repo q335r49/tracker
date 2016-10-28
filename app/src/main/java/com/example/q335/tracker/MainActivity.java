@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             Commands.add(new String[]{"Timestamp", "timestamp: %s!ts"});
             Commands.add(new String[]{"Day of Week, Minute of Day", "%s,%s!dow!mod"});
             Commands.add(new String[]{"Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
-            Commands.add(new String[]{"Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt:pick,Number 1-5:,1,2,3,4,5"});
+            Commands.add(new String[]{"Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
             Commands.add(new String[]{"Just some text", "some text"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
