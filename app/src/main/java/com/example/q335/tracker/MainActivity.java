@@ -426,9 +426,8 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             logCommands[j] = input.getText().toString();
                             waitsForModal--;
-                            if (waitsForModal == 0) {
+                            if (waitsForModal == 0)
                                 writeLog(logfile);
-                            }
                         }
                     });
                     builder.show();
@@ -436,6 +435,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        if (waitsForModal == 0)
+            writeLog(logfile);
         return true;
     }
 
