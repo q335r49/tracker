@@ -416,8 +416,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case "seek": {
-                    if (f_arg.length < 2)
+                    String[] prompt_MIN_MAX = f_arg[1].split(",");
+                    if (prompt_MIN_MAX.length < 3) {
                         break;
+                    }
+                    final String prompt = prompt_MIN_MAX[0];
+                    final int MIN = Integer.parseInt(prompt_MIN_MAX[1]);
+                    final int MAX = Integer.parseInt(prompt_MIN_MAX[2]);
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     b.setTitle(f_arg[1]);
                     final SeekBar input = new SeekBar(this);
@@ -427,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
                     b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            logComList[j] = Integer.toString(input.getProgress());
+                            logComList[j] = Integer.toString(MIN+input.getProgress()*(MAX-MIN)/100);
                             if (promptStack.isEmpty())
                                 writeLog(LogFile);
                             else
@@ -438,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
                     input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            handle.setTitle(Integer.toString(progress));
+                            handle.setTitle(prompt + Integer.toString(MIN+progress*(MAX-MIN)/100));
                         }
                         @Override
                         public void onStartTrackingTouch(SeekBar seekBar) {
