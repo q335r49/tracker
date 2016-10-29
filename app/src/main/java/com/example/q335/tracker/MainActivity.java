@@ -429,8 +429,8 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                     final String prompt = prompt_MIN_MAX[0];
-                    final int MIN = Integer.parseInt(prompt_MIN_MAX[1]);
-                    final int MAX = Integer.parseInt(prompt_MIN_MAX[2]);
+                    final float MIN = Float.parseFloat(prompt_MIN_MAX[1]);
+                    final float MAX = Float.parseFloat(prompt_MIN_MAX[2]);
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     b.setTitle(prompt+prompt_MIN_MAX[1]);
                     final SeekBar input = new SeekBar(this);
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
                     b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            logComList[j] = Integer.toString(MIN+input.getProgress()*(MAX-MIN)/100);
+                            logComList[j] = String.format("%.02f", MIN+(MAX-MIN)*input.getProgress()/100);
                             if (promptStack.isEmpty())
                                 writeLog(LogFile);
                             else
@@ -451,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
                     input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            handle.setTitle(prompt + Integer.toString(MIN+progress*(MAX-MIN)/100));
+                            handle.setTitle(prompt + String.format("%.02f",MIN+progress*(MAX-MIN)/100));
                         }
                         @Override
                         public void onStartTrackingTouch(SeekBar seekBar) {
