@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
-            //syntax examples
             commandList.add(new String[]{"02 Day of year, Hour, Minute", "%s!dhm"});
             commandList.add(new String[]{"03 Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
             commandList.add(new String[]{"04 Timestamp", "timestamp: %s!ts"});
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"06 Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
             commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,Numbers 1-4:,1,2,3,4!pick,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
-            //chart examples
+            //generic forms for chart data
             commandList.add(new String[]{"Event Data", "label:dev,cat:blue,dhm:%s,already:%s,pos:%s,ts:%s!dhm!seek,already:,0,60!pick,pos:,start,end,mark!ts"});
             commandList.add(new String[]{"Expense Data", "label:food,cat:res,amt:%s,pos:mark,ts:%s!seek,$:,0,50!ts"});
         } else {
