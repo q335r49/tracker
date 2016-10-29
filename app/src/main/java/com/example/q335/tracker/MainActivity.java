@@ -431,24 +431,12 @@ public class MainActivity extends AppCompatActivity {
         String entry = null;
         try {
             switch (logComList.length) {
-                case 1:
-                    entry = logComList[0];
-                    break;
-                case 2:
-                    entry = String.format(logComList[0], logComList[1]);
-                    break;
-                case 3:
-                    entry = String.format(logComList[0], logComList[1], logComList[2]);
-                    break;
-                case 4:
-                    entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3]);
-                    break;
-                case 5:
-                    entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4]);
-                    break;
-                default:
-                    entry = logComList[0];
-                    break;
+                case 1: entry = logComList[0]; break;
+                case 2: entry = String.format(logComList[0], logComList[1]); break;
+                case 3: entry = String.format(logComList[0], logComList[1], logComList[2]); break;
+                case 4: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3]); break;
+                case 5: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4]); break;
+                default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry);
         } catch (NullPointerException npe) {
