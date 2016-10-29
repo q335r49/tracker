@@ -64,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,Numbers 1-4:,1,2,3,4!pick,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
             //chart examples
-            commandList.add(new String[]{"Food", "dhm:%s,ago:%s,event:start,cat:food,stamp:%s!dhm!pick,Started minutes ago:,0,5,10,15,20!ts"});
+            commandList.add(new String[]{"Event Data", "label:dev,cat:blue,dhm:%s,already:%s,pos:%s,ts:%s!dhm!seek,already:,0,60!pick,pos:,start,end,mark!ts"});
+            commandList.add(new String[]{"Expense Data", "label:food,cat:res,amt:%s,pos:mark,ts:%s!seek,$:,0,50!ts"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             commandList = new Gson().fromJson(jsonText, listType);
