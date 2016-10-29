@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
             //chart examples
-            commandList.add(new String[]{"Food", "dhm:%s,ago:%s,event:start,cat:food,stamp:%s!dhm!pickPrompt,Started minutes ago:,0,5,10,15,20!ts"});
+            commandList.add(new String[]{"Food", "dhm:%s,ago:%s,event:start,cat:food,stamp:%s!dhm!pick,Started minutes ago:,0,5,10,15,20!ts"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             commandList = new Gson().fromJson(jsonText, listType);
@@ -353,7 +353,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean Log(String data, String fname) {
         logComList = data.split("!");
         promptStack = new LinkedList<>();
-
         Calendar now = Calendar.getInstance();
         for (int i = 0; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",",2);
@@ -388,27 +387,22 @@ public class MainActivity extends AppCompatActivity {
                     promptStack.add(b);
                     break;
                 }
-                case "pickPrompt": case "pick": {
-                    if (f_arg.length <= 1)
+                case "pick": {
+                    if (f_arg.length < 2)
+                        break;
+                    String[] prompt_choices = f_arg[1].split(",",2);
+                    if (prompt_choices.length < 2)
                         break;
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
+                    b.setTitle(prompt_choices[0]);
+                    final String[] choices = prompt_choices[1].split(",");
                     final int j = i;
-                    final String[] types;
                     final String LogFile = fname;
-                    if (f_arg[0].equals("pick"))
-                        types = f_arg[1].split(",");
-                    else {
-                        String[] titleAndChoices = f_arg[1].split(",",2);
-                        if (titleAndChoices.length <=1)
-                            break;
-                        b.setTitle(titleAndChoices[0]);
-                        types = titleAndChoices[1].split(",");
-                    }
-                    b.setItems(types, new DialogInterface.OnClickListener() {
+                    b.setItems(choices, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            logComList[j] = types[which];
+                            logComList[j] = choices[which];
                             if (promptStack.isEmpty())
                                 writeLog(LogFile);
                             else
