@@ -432,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
                     final int MIN = Integer.parseInt(prompt_MIN_MAX[1]);
                     final int MAX = Integer.parseInt(prompt_MIN_MAX[2]);
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(prompt);
+                    b.setTitle(prompt+prompt_MIN_MAX[1]);
                     final SeekBar input = new SeekBar(this);
                     b.setView(input);
                     final int j = i;
