@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"04 Timestamp", "timestamp: %s!ts"});
             commandList.add(new String[]{"05 Day of Week, Minute of Day", "%s,%s!dow!mod"});
             commandList.add(new String[]{"06 Text Input, Number Input", "Text:%s Numb%s!text,Enter text!number,Enter number"});
-            commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,1,2,3,4!pickPrompt,Number 1-5:,1,2,3,4,5"});
+            commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,Numbers 1-4:,1,2,3,4!pick,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
             //chart examples
             commandList.add(new String[]{"Food", "dhm:%s,ago:%s,event:start,cat:food,stamp:%s!dhm!pick,Started minutes ago:,0,5,10,15,20!ts"});
@@ -349,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String[] logComList;
-    Queue<AlertDialog.Builder> promptStack;
+    Queue<AlertDialog> promptStack;
     public boolean Log(String data, String fname) {
         logComList = data.split("!");
         promptStack = new LinkedList<>();
@@ -367,8 +368,10 @@ public class MainActivity extends AppCompatActivity {
                 case "dow": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK)); break;
                 case "mod": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)); break;
                 case "text": case "number": {
+                    if (f_arg.length < 2)
+                        break;
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(f_arg.length > 1 ? f_arg[1] : "Enter text");
+                    b.setTitle(f_arg[1]);
                     final EditText input = new EditText(this);
                     input.setInputType(f_arg[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
                     b.setView(input);
@@ -384,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
                                 promptStack.remove().show();
                         }
                     });
-                    promptStack.add(b);
+                    promptStack.add(b.create());
                     break;
                 }
                 case "pick": {
@@ -409,7 +412,42 @@ public class MainActivity extends AppCompatActivity {
                                 promptStack.remove().show();
                         }
                     });
-                    promptStack.add(b);
+                    promptStack.add(b.create());
+                    break;
+                }
+                case "seek": {
+                    if (f_arg.length < 2)
+                        break;
+                    AlertDialog.Builder b = new AlertDialog.Builder(context);
+                    b.setTitle(f_arg[1]);
+                    final SeekBar input = new SeekBar(this);
+                    b.setView(input);
+                    final int j = i;
+                    final String LogFile = fname;
+                    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logComList[j] = Integer.toString(input.getProgress());
+                            if (promptStack.isEmpty())
+                                writeLog(LogFile);
+                            else
+                                promptStack.remove().show();
+                        }
+                    });
+                    final AlertDialog handle = b.create();
+                    input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            handle.setTitle(Integer.toString(progress));
+                        }
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+                    promptStack.add(handle);
                     break;
                 }
             }
