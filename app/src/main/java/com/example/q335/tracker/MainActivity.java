@@ -352,6 +352,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] logComList;
     Queue<AlertDialog> promptStack;
     public boolean Log(String data, String fname) {
+        String ErrorCondition = "";
         logComList = data.split("!");
         promptStack = new LinkedList<>();
         Calendar now = Calendar.getInstance();
@@ -368,8 +369,10 @@ public class MainActivity extends AppCompatActivity {
                 case "dow": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK)); break;
                 case "mod": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)); break;
                 case "text": case "number": {
-                    if (f_arg.length < 2)
+                    if (f_arg.length < 2) {
+                        ErrorCondition += "| Error: Insufficient args for text/number ";
                         break;
+                    }
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     b.setTitle(f_arg[1]);
                     final EditText input = new EditText(this);
@@ -391,11 +394,15 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case "pick": {
-                    if (f_arg.length < 2)
+                    if (f_arg.length < 2) {
+                        ErrorCondition += "| Error: Insufficient args for pick ";
                         break;
+                    }
                     String[] prompt_choices = f_arg[1].split(",",2);
-                    if (prompt_choices.length < 2)
+                    if (prompt_choices.length < 2) {
+                        ErrorCondition += "| Error: Insufficient choices for pick ";
                         break;
+                    }
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
                     b.setTitle(prompt_choices[0]);
                     final String[] choices = prompt_choices[1].split(",");
@@ -418,13 +425,14 @@ public class MainActivity extends AppCompatActivity {
                 case "seek": {
                     String[] prompt_MIN_MAX = f_arg[1].split(",");
                     if (prompt_MIN_MAX.length < 3) {
+                        ErrorCondition += "| Error: Insufficient args for seek ";
                         break;
                     }
                     final String prompt = prompt_MIN_MAX[0];
                     final int MIN = Integer.parseInt(prompt_MIN_MAX[1]);
                     final int MAX = Integer.parseInt(prompt_MIN_MAX[2]);
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(f_arg[1]);
+                    b.setTitle(prompt);
                     final SeekBar input = new SeekBar(this);
                     b.setView(input);
                     final int j = i;
@@ -457,7 +465,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        if (promptStack.isEmpty())
+        if (!ErrorCondition.isEmpty())
+            Toast.makeText(context, ErrorCondition, Toast.LENGTH_SHORT).show();
+        else if (promptStack.isEmpty())
             writeLog(fname);
         else
             promptStack.remove().show();
