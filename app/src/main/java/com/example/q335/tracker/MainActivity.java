@@ -358,35 +358,16 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",",2);
             switch (f_arg[0]) {
-                case "dhm":
-                    logComList[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE);
-                    break;
-                case "ts":
-                    logComList[i] = Long.toString(System.currentTimeMillis() / 1000);
-                    break;
-                case "doy":
-                    logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR));
-                    break;
-                case "year":
-                    logComList[i] = Integer.toString(now.get(Calendar.YEAR));
-                    break;
-                case "hour":
-                    logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY));
-                    break;
-                case "min":
-                    logComList[i] = Integer.toString(now.get(Calendar.MINUTE));
-                    break;
-                case "sec":
-                    logComList[i] = Integer.toString(now.get(Calendar.SECOND));
-                    break;
-                case "dow":
-                    logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK));
-                    break;
-                case "mod":
-                    logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE));
-                    break;
-                case "text":
-                case "number": {
+                case "dhm": logComList[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE); break;
+                case "ts": logComList[i] = Long.toString(System.currentTimeMillis() / 1000); break;
+                case "doy": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR)); break;
+                case "year": logComList[i] = Integer.toString(now.get(Calendar.YEAR)); break;
+                case "hour": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY)); break;
+                case "min": logComList[i] = Integer.toString(now.get(Calendar.MINUTE)); break;
+                case "sec": logComList[i] = Integer.toString(now.get(Calendar.SECOND)); break;
+                case "dow": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK)); break;
+                case "mod": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)); break;
+                case "text": case "number": {
                     AlertDialog.Builder b = new AlertDialog.Builder(context);
                     b.setTitle(f_arg.length > 1 ? f_arg[1] : "Enter text");
                     final EditText input = new EditText(this);
@@ -407,8 +388,7 @@ public class MainActivity extends AppCompatActivity {
                     promptStack.add(b);
                     break;
                 }
-                case "pickPrompt":
-                case "pick": {
+                case "pickPrompt": case "pick": {
                     if (f_arg.length <= 1)
                         break;
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
