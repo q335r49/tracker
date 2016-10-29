@@ -483,6 +483,9 @@ public class MainActivity extends AppCompatActivity {
                 case 3: entry = String.format(logComList[0], logComList[1], logComList[2]); break;
                 case 4: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3]); break;
                 case 5: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4]); break;
+                case 6: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5]); break;
+                case 7: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6]); break;
+                case 8: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7]); break;
                 default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry);
