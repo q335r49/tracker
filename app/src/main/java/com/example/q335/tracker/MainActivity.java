@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             commandList.add(new String[]{"07 Pick, Pick prompt", "Just pick:%s Prompt pick:%s!pick,Numbers 1-4:,1,2,3,4!pick,Number 1-5:,1,2,3,4,5"});
             commandList.add(new String[]{"01 Just some text", "some text"});
             //generic forms for chart data
-            commandList.add(new String[]{"Event Data", "label:dev,cat:blue,dhm:%s,already:%s,pos:%s,ts:%s!dhm!seek,already:,0,60!pick,pos:,start,end,mark!ts"});
+            commandList.add(new String[]{"Event Data", "label:dev,cat:blue,dhm:%s,already:%s,ts:%s!dhm!seek,already:,0,60!pick!ts"});
             commandList.add(new String[]{"Expense Data", "label:food,cat:res,amt:%s,pos:mark,ts:%s!seek,$:,0,50!ts"});
         } else {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
@@ -486,6 +486,8 @@ public class MainActivity extends AppCompatActivity {
                 case 6: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5]); break;
                 case 7: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6]); break;
                 case 8: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7]); break;
+                case 9: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8]); break;
+                case 10: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8],logComList[9]); break;
                 default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry);
