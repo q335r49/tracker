@@ -426,41 +426,43 @@ public class MainActivity extends AppCompatActivity {
                     String[] prompt_MIN_MAX = f_arg[1].split(",");
                     if (prompt_MIN_MAX.length < 3) {
                         ErrorCondition += "| Error: Insufficient args for seek ";
-                        break;
+                    } else {
+                        final String prompt = prompt_MIN_MAX[0];
+                        final float MIN = Float.parseFloat(prompt_MIN_MAX[1]);
+                        final float MAX = Float.parseFloat(prompt_MIN_MAX[2]);
+                        AlertDialog.Builder b = new AlertDialog.Builder(context);
+                        b.setTitle(prompt + prompt_MIN_MAX[1]);
+                        final SeekBar input = new SeekBar(this);
+                        b.setView(input);
+                        final int j = i;
+                        final String LogFile = fname;
+                        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                logComList[j] = String.format("%.02f", MIN + (MAX - MIN) * input.getProgress() / 100);
+                                if (promptStack.isEmpty())
+                                    writeLog(LogFile);
+                                else
+                                    promptStack.remove().show();
+                            }
+                        });
+                        final AlertDialog handle = b.create();
+                        input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                            @Override
+                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                handle.setTitle(prompt + String.format("%.02f", MIN + progress * (MAX - MIN) / 100));
+                            }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+                            }
+                        });
+                        promptStack.add(handle);
                     }
-                    final String prompt = prompt_MIN_MAX[0];
-                    final float MIN = Float.parseFloat(prompt_MIN_MAX[1]);
-                    final float MAX = Float.parseFloat(prompt_MIN_MAX[2]);
-                    AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(prompt+prompt_MIN_MAX[1]);
-                    final SeekBar input = new SeekBar(this);
-                    b.setView(input);
-                    final int j = i;
-                    final String LogFile = fname;
-                    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logComList[j] = String.format("%.02f", MIN+(MAX-MIN)*input.getProgress()/100);
-                            if (promptStack.isEmpty())
-                                writeLog(LogFile);
-                            else
-                                promptStack.remove().show();
-                        }
-                    });
-                    final AlertDialog handle = b.create();
-                    input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            handle.setTitle(prompt + String.format("%.02f",MIN+progress*(MAX-MIN)/100));
-                        }
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-                        }
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-                        }
-                    });
-                    promptStack.add(handle);
                     break;
                 }
             }
