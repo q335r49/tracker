@@ -430,12 +430,12 @@ public class MainActivity extends AppCompatActivity {
                         final String prompt = prompt_MIN_MAX[0];
                         final float MIN = Float.parseFloat(prompt_MIN_MAX[1]);
                         final float MAX = Float.parseFloat(prompt_MIN_MAX[2]);
-                        AlertDialog.Builder b = new AlertDialog.Builder(context);
-                        b.setTitle(prompt + prompt_MIN_MAX[1]);
                         final SeekBar input = new SeekBar(this);
-                        b.setView(input);
                         final int j = i;
                         final String LogFile = fname;
+                        AlertDialog.Builder b = new AlertDialog.Builder(context);
+                        b.setTitle(prompt + prompt_MIN_MAX[1]);
+                        b.setView(input);
                         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
