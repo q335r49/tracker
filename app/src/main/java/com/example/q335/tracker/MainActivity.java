@@ -150,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
         List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
         for (String[] s: commandList) {
             final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", s[0]);
-            listItem.put("syntax", s[1]);
+            listItem.put("label", String.format("%2.30s", s[0]));
+            listItem.put("syntax",String.format("%2.30s", s[1]));
             LVentries.add(listItem);
         }
         final Map<String,String> listItem = new HashMap<String,String>();
@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         LVadapter.notifyDataSetChanged();
         pref.edit().putString("commands",new Gson().toJson(commandList)).apply();
     }
-
 
     public static void writeString (File file, String data) throws Exception{
         FileOutputStream stream = new FileOutputStream(file);
