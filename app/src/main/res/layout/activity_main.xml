@@ -10,10 +10,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.q335.tracker.MainActivity">
 
-    <ListView
+    <GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/LV" />
+        android:id="@+id/GV"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

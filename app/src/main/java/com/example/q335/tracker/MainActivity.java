@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 import android.widget.SeekBar;
@@ -46,12 +47,8 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
     private List<String[]> commandList = new ArrayList<String[]>();
-    private ListView LV;
     SharedPreferences pref;
-
-    private ListView ntfLV;
-    private final int NOTE_ID = 888;
-
+    private GridView GV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        LV = (ListView) findViewById(R.id.LV);
+        GV = (GridView) findViewById(R.id.GV);
 
         String jsonText = pref.getString("commands", null);
         if (jsonText == null) {
@@ -77,15 +74,15 @@ public class MainActivity extends AppCompatActivity {
             Type listType = new TypeToken<List<String[]>>() {}.getType();
             commandList = new Gson().fromJson(jsonText, listType);
         }
-        makeLV();
+        makeGV();
 
-        LV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        GV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 if (position< commandList.size())
                     Log(commandList.get(position)[1], "log.txt");
             }
         });
-        LV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        GV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -103,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             commandList.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
-                            makeLV();
+                            makeGV();
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -122,13 +119,13 @@ public class MainActivity extends AppCompatActivity {
                                 commandList.add(new String[] {labelInput.getText().toString(), commandInput.getText().toString()});
                             else
                                 commandList.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
-                            makeLV();
+                            makeGV();
                         }
                     })
                     .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             commandList.remove(listIndex);
-                            makeLV();
+                            makeGV();
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -144,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void makeLV() {
+    private void makeGV() {
         Collections.sort(commandList, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
                 return s1[0].compareToIgnoreCase(s2[0]);
@@ -157,32 +154,17 @@ public class MainActivity extends AppCompatActivity {
             listItem.put("syntax", s[1]);
             LVentries.add(listItem);
         }
-            final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", "New Command");
-            listItem.put("syntax", "Long press to add a new command");
-            LVentries.add(listItem);
-        SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
-                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
-        LV.setAdapter(LVadapter);
-        LVadapter.notifyDataSetChanged();
-        pref.edit().putString("commands",new Gson().toJson(commandList)).apply();
-    }
-    private void makentfLV() {
-        List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
-        for (String[] s: commandList) {
-            final Map<String,String> listItem = new HashMap<String,String>();
-            listItem.put("label", s[0]);
-            listItem.put("syntax", s[1]);
-            LVentries.add(listItem);
-        }
         final Map<String,String> listItem = new HashMap<String,String>();
         listItem.put("label", "New Command");
         listItem.put("syntax", "Long press to add a new command");
         LVentries.add(listItem);
-        SimpleAdapter ntfLVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
+        SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
                 new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
-        ntfLV.setAdapter(ntfLVadapter);
+        GV.setAdapter(LVadapter);
+        LVadapter.notifyDataSetChanged();
+        pref.edit().putString("commands",new Gson().toJson(commandList)).apply();
     }
+
 
     public static void writeString (File file, String data) throws Exception{
         FileOutputStream stream = new FileOutputStream(file);
@@ -305,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         commandList = new Gson().fromJson(jsonText, listType);
-                                        makeLV();
+                                        makeGV();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
@@ -341,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                                         Type listType = new TypeToken<List<String[]>>() {
                                         }.getType();
                                         commandList = new Gson().fromJson(jsonText, listType);
-                                        makeLV();
+                                        makeGV();
                                         Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
