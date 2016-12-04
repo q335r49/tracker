@@ -16,7 +16,6 @@
         android:horizontalSpacing="5dp"
         android:stretchMode="columnWidth"
 
-
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

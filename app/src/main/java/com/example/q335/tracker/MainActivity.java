@@ -1,8 +1,6 @@
 package com.example.q335.tracker;
 
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,17 +8,15 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ListView;
-import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -159,7 +155,25 @@ public class MainActivity extends AppCompatActivity {
         listItem.put("syntax", "Long press to add a new command");
         LVentries.add(listItem);
         SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
-                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
+                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2}) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position,convertView,parent);
+
+                if (position < commandList.size()) {
+                    String entry = commandList.get(position)[1];
+                    int ind = entry.lastIndexOf("!");
+                    if (ind < entry.length() - 1 && ind > 0) {
+                        try {
+                            view.setBackgroundColor(Integer.parseInt(entry.substring(ind + 1, entry.length())));
+                            //1278190335
+                        } catch (NumberFormatException e) {
+                        }
+                    }
+                }
+                return view;
+            }
+        };
         GV.setAdapter(LVadapter);
         LVadapter.notifyDataSetChanged();
         pref.edit().putString("commands",new Gson().toJson(commandList)).apply();
