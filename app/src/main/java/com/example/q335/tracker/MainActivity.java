@@ -155,8 +155,8 @@ public class MainActivity extends AppCompatActivity {
         listItem.put("label", "New Command");
         listItem.put("syntax", "Long press to add a new command");
         LVentries.add(listItem);
-        SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
-                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2}) {
+        SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries,R.layout.gv_list_item,
+                new String[] {"label", "syntax"},new int[] {R.id.text1, R.id.text2}) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position,convertView,parent);
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             view.setBackgroundColor(Color.parseColor(FGBG[0]));
                             if (FGBG.length > 1) {
-                                ((TextView) view.findViewById(android.R.id.text1)).setTextColor(Color.parseColor(FGBG[1]));
-                                ((TextView) view.findViewById(android.R.id.text2)).setTextColor(Color.parseColor(FGBG[1]));
+                                ((TextView) view.findViewById(R.id.text1)).setTextColor(Color.parseColor(FGBG[1]));
+                                ((TextView) view.findViewById(R.id.text2)).setTextColor(Color.parseColor(FGBG[1]));
                             }
                         } catch (IllegalArgumentException e) {
                         }
