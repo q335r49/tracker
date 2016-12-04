@@ -160,12 +160,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position,convertView,parent);
+
                 if (position < commandList.size()) {
                     String entry = commandList.get(position)[1];
                     int ind = entry.lastIndexOf("!");
+                    String[] FGBG;
                     if (ind < entry.length() - 1 && ind > 0) {
+                        FGBG = entry.substring(ind+1,entry.length()).split(",");
                         try {
-                            view.setBackgroundColor(Color.parseColor(entry.substring(ind + 1, entry.length())));
+                            view.setBackgroundColor(Color.parseColor(FGBG[0]));
+                            if (FGBG.length > 1) {
+                                ((TextView) view.findViewById(android.R.id.text1)).setTextColor(Color.parseColor(FGBG[1]));
+                                ((TextView) view.findViewById(android.R.id.text2)).setTextColor(Color.parseColor(FGBG[1]));
+                            }
                         } catch (IllegalArgumentException e) {
                         }
                     }
