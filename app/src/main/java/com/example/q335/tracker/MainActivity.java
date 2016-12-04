@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .show();
                 }
-            }
+                break; }
             case R.id.menuItemGraph:
                 startActivity(new Intent(this, GrapherActivity.class));
                 break;
