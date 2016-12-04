@@ -1,6 +1,8 @@
 package com.example.q335.tracker;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -44,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
     private List<String[]> commandList = new ArrayList<String[]>();
     private ListView LV;
     SharedPreferences pref;
+
+    private ListView ntfLV;
+    private final int NOTE_ID = 888;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private void makeLV() {
         Collections.sort(commandList, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -157,6 +166,22 @@ public class MainActivity extends AppCompatActivity {
         LV.setAdapter(LVadapter);
         LVadapter.notifyDataSetChanged();
         pref.edit().putString("commands",new Gson().toJson(commandList)).apply();
+    }
+    private void makentfLV() {
+        List<Map<String,String>> LVentries = new ArrayList<Map<String,String>>();
+        for (String[] s: commandList) {
+            final Map<String,String> listItem = new HashMap<String,String>();
+            listItem.put("label", s[0]);
+            listItem.put("syntax", s[1]);
+            LVentries.add(listItem);
+        }
+        final Map<String,String> listItem = new HashMap<String,String>();
+        listItem.put("label", "New Command");
+        listItem.put("syntax", "Long press to add a new command");
+        LVentries.add(listItem);
+        SimpleAdapter ntfLVadapter = new SimpleAdapter(this, LVentries,android.R.layout.simple_list_item_2,
+                new String[] {"label", "syntax"},new int[] {android.R.id.text1, android.R.id.text2});
+        ntfLV.setAdapter(ntfLVadapter);
     }
 
     public static void writeString (File file, String data) throws Exception{
@@ -491,6 +516,7 @@ public class MainActivity extends AppCompatActivity {
                 case 9: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8]); break;
                 case 10: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8],logComList[9]); break;
                 case 11: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8],logComList[9],logComList[10]); break;
+                case 12: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8],logComList[9],logComList[10],logComList[11]); break;
                 default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry);
