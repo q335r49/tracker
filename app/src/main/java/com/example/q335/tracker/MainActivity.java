@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -159,15 +160,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position,convertView,parent);
-
                 if (position < commandList.size()) {
                     String entry = commandList.get(position)[1];
                     int ind = entry.lastIndexOf("!");
                     if (ind < entry.length() - 1 && ind > 0) {
                         try {
-                            view.setBackgroundColor(Integer.parseInt(entry.substring(ind + 1, entry.length())));
-                            //1278190335
-                        } catch (NumberFormatException e) {
+                            view.setBackgroundColor(Color.parseColor(entry.substring(ind + 1, entry.length())));
+                        } catch (IllegalArgumentException e) {
                         }
                     }
                 }
