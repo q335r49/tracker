@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position,convertView,parent);
+                //TODO: Pre-parse entries
 
                 if (position < commandList.size()) {
                     String entry = commandList.get(position)[1];
@@ -394,6 +395,9 @@ public class MainActivity extends AppCompatActivity {
                 case "sec": logComList[i] = Integer.toString(now.get(Calendar.SECOND)); break;
                 case "dow": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK)); break;
                 case "mod": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)); break;
+                //TODO: Automatically prepend heading to all entries
+                //TODO: Log syntax: [HEADING],Label:XX,Color:XX,Already:XX,Until:XX,Pos:{Start,End,Mark}
+
                 case "text": case "number": {
                     if (f_arg.length < 2) {
                         ErrorCondition += "| Error: Insufficient args for text/number ";
