@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -107,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    labelInput.setText(((TextView)(view.findViewById(R.id.text1))).getText().toString());
-                    commandInput.setText(((TextView)(view.findViewById(R.id.text2))).getText().toString());
+                    labelInput.setText(commandList.get(pos)[0]);
+                    commandInput.setText(commandList.get(pos)[1]);
                     alertDialogBuilder
                     .setCancelable(true)
                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
@@ -382,7 +383,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean Log(String data, String fname) {
         String ErrorCondition = "";
         logComList = data.split("!");
-        logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ":" + Calendar.getInstance().toString() + ">" + logComList[0]; //toString(): Sat Sep 25 21:27:01 SGT 2010
+        Date now = new Date();
+        logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ":" + now.toString() + ">" + logComList[0]; //toString(): Sat Sep 25 21:27:01 SGT 2010
         promptStack = new LinkedList<>();
         //TODO: Log syntax: [FIXED LENGTH HEADING],b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
         for (int i = 1; i < logComList.length; i++) {
@@ -420,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
                     b.setTitle(f_arg[1]);
-                    final String[] choices = Arrays.copyOfRange(f_arg,2,f_arg.length-1);
+                    final String[] choices = Arrays.copyOfRange(f_arg,2,f_arg.length);
                     final int j = i;
                     final String LogFile = fname;
                     b.setItems(choices, new DialogInterface.OnClickListener() {
@@ -505,6 +507,7 @@ public class MainActivity extends AppCompatActivity {
                 default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry);
+            Toast.makeText(context,entry,Toast.LENGTH_LONG).show();
         } catch (NullPointerException npe) {
             //cannot change actionbar font
         } catch (Exception e) {
