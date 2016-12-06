@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -381,24 +382,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean Log(String data, String fname) {
         String ErrorCondition = "";
         logComList = data.split("!");
+        logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ":" + Calendar.getInstance().toString() + ">" + logComList[0]; //toString(): Sat Sep 25 21:27:01 SGT 2010
         promptStack = new LinkedList<>();
-        Calendar now = Calendar.getInstance();
-        for (int i = 0; i < logComList.length; i++) {
-            String[] f_arg = logComList[i].split(",",2);
+        //TODO: Log syntax: [FIXED LENGTH HEADING],b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
+        for (int i = 1; i < logComList.length; i++) {
+            String[] f_arg = logComList[i].split(",");
             switch (f_arg[0]) {
-                case "dhm": logComList[i] = now.get(Calendar.DAY_OF_YEAR) + "," + now.get(Calendar.HOUR_OF_DAY) + "," + now.get(Calendar.MINUTE); break;
-                case "ts": logComList[i] = Long.toString(System.currentTimeMillis() / 1000); break;
-                case "doy": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_YEAR)); break;
-                case "year": logComList[i] = Integer.toString(now.get(Calendar.YEAR)); break;
-                case "hour": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY)); break;
-                case "min": logComList[i] = Integer.toString(now.get(Calendar.MINUTE)); break;
-                case "sec": logComList[i] = Integer.toString(now.get(Calendar.SECOND)); break;
-                case "dow": logComList[i] = Integer.toString(now.get(Calendar.DAY_OF_WEEK)); break;
-                case "mod": logComList[i] = Integer.toString(now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)); break;
-                //TODO: Automatically prepend heading to all entries
-                //TODO: Log syntax: [HEADING],Label:XX,Color:XX,Already:XX,Until:XX,Pos:{Start,End,Mark}
-
-                case "text": case "number": {
+                case "text": case "number": {   // text:prompt Text,number:prompt Text
                     if (f_arg.length < 2) {
                         ErrorCondition += "| Error: Insufficient args for text/number ";
                         break;
@@ -424,18 +414,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case "pick": {
-                    if (f_arg.length < 2) {
+                    if (f_arg.length < 4) {
                         ErrorCondition += "| Error: Insufficient args for pick ";
                         break;
                     }
-                    String[] prompt_choices = f_arg[1].split(",",2);
-                    if (prompt_choices.length < 2) {
-                        ErrorCondition += "| Error: Insufficient choices for pick ";
-                        break;
-                    }
                     AlertDialog.Builder b = new AlertDialog.Builder(this);
-                    b.setTitle(prompt_choices[0]);
-                    final String[] choices = prompt_choices[1].split(",");
+                    b.setTitle(f_arg[1]);
+                    final String[] choices = Arrays.copyOfRange(f_arg,2,f_arg.length-1);
                     final int j = i;
                     final String LogFile = fname;
                     b.setItems(choices, new DialogInterface.OnClickListener() {
@@ -453,18 +438,17 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case "seek": {
-                    String[] prompt_MIN_MAX = f_arg[1].split(",");
-                    if (prompt_MIN_MAX.length < 3) {
+                    if (f_arg.length < 4) {
                         ErrorCondition += "| Error: Insufficient args for seek ";
                     } else {
-                        final String prompt = prompt_MIN_MAX[0];
-                        final float MIN = Float.parseFloat(prompt_MIN_MAX[1]);
-                        final float MAX = Float.parseFloat(prompt_MIN_MAX[2]);
+                        final String prompt = f_arg[1];
+                        final float MIN = Float.parseFloat(f_arg[2]);
+                        final float MAX = Float.parseFloat(f_arg[3]);
                         final SeekBar input = new SeekBar(this);
                         final int j = i;
                         final String LogFile = fname;
                         AlertDialog.Builder b = new AlertDialog.Builder(context);
-                        b.setTitle(prompt + prompt_MIN_MAX[1]);
+                        b.setTitle(prompt + f_arg[2]);
                         b.setView(input);
                         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
@@ -482,14 +466,10 @@ public class MainActivity extends AppCompatActivity {
                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                                 handle.setTitle(prompt + String.format("%.02f", MIN + progress * (MAX - MIN) / 100));
                             }
-
                             @Override
-                            public void onStartTrackingTouch(SeekBar seekBar) {
-                            }
-
+                            public void onStartTrackingTouch(SeekBar seekBar) {}
                             @Override
-                            public void onStopTrackingTouch(SeekBar seekBar) {
-                            }
+                            public void onStopTrackingTouch(SeekBar seekBar) {}
                         });
                         promptStack.add(handle);
                     }
