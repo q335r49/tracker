@@ -390,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 1; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",");
             switch (f_arg[0]) {
-                case "text": case "number": {   // text:prompt Text,number:prompt Text
+                case "text": case "number": {   // text,prompt Text!number,prompt Text
                     if (f_arg.length < 2) {
                         ErrorCondition += "| Error: Insufficient args for text/number ";
                         break;
@@ -415,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
                     promptStack.add(b.create());
                     break;
                 }
-                case "pick": {
+                case "pick": {  //pick,prompt text,choice 1, choice 2, choice 3
                     if (f_arg.length < 4) {
                         ErrorCondition += "| Error: Insufficient args for pick ";
                         break;
@@ -439,13 +439,14 @@ public class MainActivity extends AppCompatActivity {
                     promptStack.add(b.create());
                     break;
                 }
-                case "seek": {
+                case "seek": {  //seek,prompt text,min, max
                     if (f_arg.length < 4) {
                         ErrorCondition += "| Error: Insufficient args for seek ";
                     } else {
                         final String prompt = f_arg[1];
                         final float MIN = Float.parseFloat(f_arg[2]);
                         final float MAX = Float.parseFloat(f_arg[3]);
+                        final boolean SEEK_INT = ((f_arg[2] + f_arg[3]).indexOf(".") < 0);
                         final SeekBar input = new SeekBar(this);
                         final int j = i;
                         final String LogFile = fname;
@@ -455,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
                         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                logComList[j] = String.format("%.02f", MIN + (MAX - MIN) * input.getProgress() / 100);
+                                logComList[j] = SEEK_INT ? Integer.toString(Math.round(MIN + (MAX - MIN) * input.getProgress() / 100)) : String.format("%.02f", MIN + (MAX - MIN) * input.getProgress() / 100);
                                 if (promptStack.isEmpty())
                                     writeLog(LogFile);
                                 else
@@ -466,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                         input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                             @Override
                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                handle.setTitle(prompt + String.format("%.02f", MIN + progress * (MAX - MIN) / 100));
+                                handle.setTitle(prompt + (SEEK_INT ? Integer.toString(Math.round(MIN + progress * (MAX - MIN) / 100)) : String.format("%.02f", MIN + progress * (MAX - MIN) / 100)));
                             }
                             @Override
                             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -489,6 +490,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeLog(String fname) {
+        //Prompt syntax: some string %s %s %s!text,lbl!number,lbl2!pick,lbl3,choice1,choice2!!!bgcolor,fgcolor
         String entry = null;
         try {
             switch (logComList.length) {
@@ -506,7 +508,7 @@ public class MainActivity extends AppCompatActivity {
                 case 12: entry = String.format(logComList[0], logComList[1], logComList[2], logComList[3], logComList[4],logComList[5],logComList[6],logComList[7],logComList[8],logComList[9],logComList[10],logComList[11]); break;
                 default: entry = logComList[0]; break;
             }
-            getSupportActionBar().setTitle(entry);
+            getSupportActionBar().setTitle(entry.split(">")[1]);
             Toast.makeText(context,entry,Toast.LENGTH_LONG).show();
         } catch (NullPointerException npe) {
             //cannot change actionbar font
