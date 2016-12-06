@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    labelInput.setText(((TextView)(view.findViewById(android.R.id.text1))).getText().toString());
-                    commandInput.setText(((TextView)(view.findViewById(android.R.id.text2))).getText().toString());
+                    labelInput.setText(((TextView)(view.findViewById(R.id.text1))).getText().toString());
+                    commandInput.setText(((TextView)(view.findViewById(R.id.text2))).getText().toString());
                     alertDialogBuilder
                     .setCancelable(true)
                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
