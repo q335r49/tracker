@@ -69,6 +69,7 @@ public class GrapherActivity extends Activity {
             }
         }
 
+        CW = new CalendarWindow(100,100,1421280000L,-1,-1,10,20);
         CG = new CalendarGraph(this);
         setContentView(CG);
     }
@@ -82,8 +83,7 @@ public class GrapherActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            //TODO: initialize CW
-
+            CW.updateCanvas(canvas.getWidth(), canvas.getHeight());
             Paint paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
             for (int i=0; i<CS.size(); i++) {
@@ -121,7 +121,7 @@ class CalendarWindow {
     private float vh;
     private float unit_width;
 
-    public CalendarWindow(int height, int width, long zero, float v0x, float v0y, float vw, float vh) {
+    public CalendarWindow(int width, int height, long zero, float v0x, float v0y, float vw, float vh) {
         this.height = height;
         this.width = width;
         this.zero = zero;
@@ -129,6 +129,11 @@ class CalendarWindow {
         this.v0y = v0y;
         this.vw = vw;
         this.vh = vh;
+        this.unit_width = width/vw;
+    }
+    public void updateCanvas(int width, int height) {
+        this.width = width;
+        this.height = height;
         this.unit_width = width/vw;
     }
     public float getUnitWidth() {
@@ -141,7 +146,6 @@ class CalendarWindow {
         int[] ret = {(int) ((dow-v0x)/vw*width), (int) ((weeks-v0y)/vh*height)};
         return ret;
     }
-
 }
 
 /*
