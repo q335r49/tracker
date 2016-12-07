@@ -379,73 +379,71 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String[] logComList;
-    Queue<AlertDialog> promptStack;
+    private Queue<AlertDialog> promptStack;
     public boolean Log(String data, String fname) {
         String ErrorCondition = "";
         logComList = data.split("!");
         Date now = new Date();
-        logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ":" + now.toString() + ">" + logComList[0]; //toString(): Sat Sep 25 21:27:01 SGT 2010
+        logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + logComList[0];
         promptStack = new LinkedList<>();
-        //TODO: Log syntax: [FIXED LENGTH HEADING],b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
+        //TODO: Log syntax: 1421299830>Sat Sep 25 21:27:01 SGT 2010>b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
         for (int i = 1; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",");
             switch (f_arg[0]) {
                 case "text": case "number": {   // text,prompt Text!number,prompt Text
-                    if (f_arg.length < 2) {
-                        ErrorCondition += "| Error: Insufficient args for text/number ";
-                        break;
+                    if (f_arg.length < 2)
+                        ErrorCondition += "> Insufficient args: text/number,prompt";
+                    else {
+                        AlertDialog.Builder b = new AlertDialog.Builder(context);
+                        b.setTitle(f_arg[1]);
+                        final EditText input = new EditText(this);
+                        input.setInputType(f_arg[0].equals("text") ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
+                        b.setView(input);
+                        final int j = i;
+                        final String LogFile = fname;
+                        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                logComList[j] = input.getText().toString();
+                                if (promptStack.isEmpty())
+                                    writeLog(LogFile);
+                                else
+                                    promptStack.remove().show();
+                            }
+                        });
+                        promptStack.add(b.create());
                     }
-                    AlertDialog.Builder b = new AlertDialog.Builder(context);
-                    b.setTitle(f_arg[1]);
-                    final EditText input = new EditText(this);
-                    input.setInputType(f_arg[0].equals("text")? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
-                    b.setView(input);
-                    final int j = i;
-                    final String LogFile = fname;
-                    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logComList[j] = input.getText().toString();
-                            if (promptStack.isEmpty())
-                                writeLog(LogFile);
-                            else
-                                promptStack.remove().show();
-                        }
-                    });
-                    promptStack.add(b.create());
-                    break;
-                }
-                case "pick": {  //pick,prompt text,choice 1, choice 2, choice 3
-                    if (f_arg.length < 4) {
-                        ErrorCondition += "| Error: Insufficient args for pick ";
-                        break;
+                    break; }
+                case "pick": {
+                    if (f_arg.length < 4)
+                        ErrorCondition += "> Insufficient args: pick,prompt,choice1,choice2,...";
+                    else {
+                        AlertDialog.Builder b = new AlertDialog.Builder(this);
+                        b.setTitle(f_arg[1]);
+                        final String[] choices = Arrays.copyOfRange(f_arg, 2, f_arg.length);
+                        final int j = i;
+                        final String LogFile = fname;
+                        b.setItems(choices, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                logComList[j] = choices[which];
+                                if (promptStack.isEmpty())
+                                    writeLog(LogFile);
+                                else
+                                    promptStack.remove().show();
+                            }
+                        });
+                        promptStack.add(b.create());
                     }
-                    AlertDialog.Builder b = new AlertDialog.Builder(this);
-                    b.setTitle(f_arg[1]);
-                    final String[] choices = Arrays.copyOfRange(f_arg,2,f_arg.length);
-                    final int j = i;
-                    final String LogFile = fname;
-                    b.setItems(choices, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            logComList[j] = choices[which];
-                            if (promptStack.isEmpty())
-                                writeLog(LogFile);
-                            else
-                                promptStack.remove().show();
-                        }
-                    });
-                    promptStack.add(b.create());
-                    break;
-                }
-                case "seek": {  //seek,prompt text,min, max
-                    if (f_arg.length < 4) {
-                        ErrorCondition += "| Error: Insufficient args for seek ";
-                    } else {
+                    break; }
+                case "seek": {
+                    if (f_arg.length < 4)
+                        ErrorCondition += "> Insufficient args: seek,prompt,min,max";
+                    else {
                         final String prompt = f_arg[1];
                         final float MIN = Float.parseFloat(f_arg[2]);
-                        final float MAX = Float.parseFloat(f_arg[3]);
+                        final float STEP = (Float.parseFloat(f_arg[3]) - MIN)/100;
                         final boolean SEEK_INT = ((f_arg[2] + f_arg[3]).indexOf(".") < 0);
                         final SeekBar input = new SeekBar(this);
                         final int j = i;
@@ -456,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
                         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                logComList[j] = SEEK_INT ? Integer.toString(Math.round(MIN + (MAX - MIN) * input.getProgress() / 100)) : String.format("%.02f", MIN + (MAX - MIN) * input.getProgress() / 100);
+                                logComList[j] = SEEK_INT ? Integer.toString(Math.round(MIN + STEP * input.getProgress())) : String.format("%.02f", MIN + STEP * input.getProgress());
                                 if (promptStack.isEmpty())
                                     writeLog(LogFile);
                                 else
@@ -467,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
                         input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                             @Override
                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                handle.setTitle(prompt + (SEEK_INT ? Integer.toString(Math.round(MIN + progress * (MAX - MIN) / 100)) : String.format("%.02f", MIN + progress * (MAX - MIN) / 100)));
+                                handle.setTitle(prompt + (SEEK_INT ? Integer.toString(Math.round(MIN + progress * STEP)) : String.format("%.02f", MIN + progress * STEP)));
                             }
                             @Override
                             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -489,8 +487,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void writeLog(String fname) {
-        //Prompt syntax: some string %s %s %s!text,lbl!number,lbl2!pick,lbl3,choice1,choice2!!!bgcolor,fgcolor
+    private void writeLog(String fname) { //Prompt syntax: some string %s %s %s!text,lbl!number,lbl2!pick,lbl3,choice1,choice2!!!bgcolor,fgcolor
         String entry = null;
         try {
             switch (logComList.length) {
@@ -509,7 +506,6 @@ public class MainActivity extends AppCompatActivity {
                 default: entry = logComList[0]; break;
             }
             getSupportActionBar().setTitle(entry.split(">")[1]);
-            Toast.makeText(context,entry,Toast.LENGTH_LONG).show();
         } catch (NullPointerException npe) {
             //cannot change actionbar font
         } catch (Exception e) {

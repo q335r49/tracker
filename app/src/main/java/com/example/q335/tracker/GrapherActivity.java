@@ -1,23 +1,29 @@
 package com.example.q335.tracker;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class GrapherActivity extends Activity {
     private CalendarGraph CG;
-    //TODO: Log syntax: [HEADING],Label:XX,Color:XX,Already:XX,Until:XX,Pos:{Start,End,Mark}
-    public List<String> Log = Arrays.asList(
+    private ArrayList<CalendarShape> CS = new ArrayList<CalendarShape>();
+    private CalendarWindow CW;
 
+    //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
+    public List<String> TestLog = Arrays.asList(
+        "1421299830>1-15-2015 5:30:30>t1|red|s|comment",
+        "1421303400>1-15-2015 6:30:00>t1|red|e|comment",
+        "1421314200>1-15-2015 9:30:00>t2|blue|s|com",
+        "1421319600>1-15-2015 11:00:00>t2|blue|s|com",
+        "1421319600>1-15-2015 11:00:00>s|label1|color|comment"
     );
 
     @Override
@@ -25,11 +31,47 @@ public class GrapherActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
 
+        CalendarShape curTD = new CalendarShape();
+        CS.add(curTD);
+
+        for (int i=0; i<TestLog.size(); i++) {
+            String[] LogParts = TestLog.get(i).split(">",-1);
+            long ts = Long.parseLong(LogParts[0]);
+            String[] ArgParts = LogParts[2].split("|",-1);
+            if (ArgParts.length > 0) {
+                switch (ArgParts[0]) {
+                    case "s":
+                        curTD.end = ts;
+                        curTD = new CalendarShape();
+                        CS.add(curTD);
+                        curTD.start = ts;
+                        if (ArgParts.length > 1)
+                            curTD.label = LogParts[1];
+                        if (ArgParts.length > 2)
+                            curTD.color = Color.parseColor(LogParts[2]);
+                        if (ArgParts.length > 3)
+                            curTD.comment = LogParts[3];
+                        break;
+                    case "e":
+                        curTD.end = ts;
+                        break;
+                    case "m":
+                        CalendarShape markTD = new CalendarShape();
+                        markTD.mark = ts;
+                        if (ArgParts.length > 1)
+                            markTD.label = LogParts[1];
+                        if (ArgParts.length > 2)
+                            markTD.color = Color.parseColor(LogParts[2]);
+                        if (ArgParts.length > 3)
+                            markTD.comment = LogParts[3];
+                        break;
+                }
+            }
+        }
+
         CG = new CalendarGraph(this);
         setContentView(CG);
     }
-
-
 
     private class CalendarGraph extends View {
         public CalendarGraph(Context context) {
@@ -40,6 +82,69 @@ public class GrapherActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
+            //TODO: initialize CW
+
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            for (int i=0; i<CS.size(); i++) {
+                CS.get(i).draw(CW,canvas,paint);
+            }
+        }
+    }
+}
+
+class CalendarShape {
+    long start=-1;
+    long end=-1;
+    long mark=-1;
+    int color=-1;
+    String label=null;
+    String comment=null;
+
+    public void draw(CalendarWindow cw, Canvas canvas, Paint paint) {
+        if (start == -1 || end == -1)
+            return;
+
+        int[] rectTL = cw.toScreenCoord(start);
+        int[] rectBR = cw.toScreenCoord(end);
+        canvas.drawRect(rectTL[0], rectTL[1], rectBR[0] + cw.getUnitWidth(), rectBR[1], paint);
+    }
+}
+
+class CalendarWindow {
+    private int height;
+    private int width;
+    private long zero;
+    private float v0x;
+    private float v0y;
+    private float vw;
+    private float vh;
+    private float unit_width;
+
+    public CalendarWindow(int height, int width, long zero, float v0x, float v0y, float vw, float vh) {
+        this.height = height;
+        this.width = width;
+        this.zero = zero;
+        this.v0x = v0x;
+        this.v0y = v0y;
+        this.vw = vw;
+        this.vh = vh;
+        this.unit_width = width/vw;
+    }
+    public float getUnitWidth() {
+        return unit_width;
+    }
+    public int[] toScreenCoord(long ts) {
+        long days = ts > zero ? (ts-zero)/86400 : (ts-zero)/86400 - 1;
+        float dow = (float) (days+4611686018427387900L)%7;
+        float weeks = (days >= 0? days/7 : (days+1)/7-1) + (float) (ts+4611686018427360000L)%86400 / 86400;
+        int[] ret = {(int) ((dow-v0x)/vw*width), (int) ((weeks-v0y)/vh*height)};
+        return ret;
+    }
+
+}
+
+/*
             // custom drawing code here
             Paint paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
@@ -71,128 +176,4 @@ public class GrapherActivity extends Activity {
 
             //undo the rotate
             //canvas.restore();
-        }
-    }
-}
-
-
-/*
-class TrackerGrapher extends GLSurfaceView {
-    private final com.example.q335.tracker.TrackerRenderer mRenderer;
-
-    public TrackerGrapher(Context context){
-        super(context);
-
-        setEGLContextClientVersion(2);
-        mRenderer = new com.example.q335.tracker.TrackerRenderer();
-        setRenderer(mRenderer);
-
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-    }
-}
-
-class TrackerRenderer implements GLSurfaceView.Renderer {
-
-    private Triangle mTriangle;
-
-    @Override
-    public void onSurfaceCreated(GL10 gl, javax.microedition.khronos.egl.EGLConfig config) {
-        // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    }
-
-    @Override
-    public void onDrawFrame(GL10 unused) {
-        // Redraw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
-        mTriangle.draw();
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-        GLES20.glViewport(0, 0, width, height);
-        mTriangle = new Triangle();
-    }
-
-    public static int loadShader(int type, String shaderCode) {
-        int shader= GLES20.glCreateShader(type);
-
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-
-        return shader;
-    }
-}
-
-class Triangle {
-
-    private FloatBuffer vertexBuffer;
-    private final int mProgram;
-
-    private int mPositionHandle;
-    private int mColorHandle;
-
-    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4;
-
-    private final String vertexShaderCode =
-            "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    "  gl_Position = vPosition;" +
-                    "}";
-
-    private final String fragmentShaderCode =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
-
-
-    static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = {
-            0.0f,  0.622008459f, 0.0f, // top
-            -0.5f, -0.311004243f, 0.0f, // bottom left
-            0.5f, -0.311004243f, 0.0f  // bottom right
-    };
-
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
-
-    public Triangle() {
-        ByteBuffer bb = ByteBuffer.allocateDirect(triangleCoords.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(triangleCoords);
-        vertexBuffer.position(0);
-
-        int vertexShader = TrackerRenderer.loadShader(GLES20.GL_VERTEX_SHADER,vertexShaderCode);
-        int fragmentShader = TrackerRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,fragmentShaderCode);
-
-        mProgram = GLES20.glCreateProgram();
-        GLES20.glAttachShader(mProgram,vertexShader);
-        GLES20.glAttachShader(mProgram,fragmentShader);
-        GLES20.glLinkProgram(mProgram);
-
-    }
-
-    public void draw() {
-        GLES20.glUseProgram(mProgram);
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram,"vPosition");
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
-
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-        GLES20.glUniform4fv(mColorHandle,1,color,0);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-
-    }
-
-
-
-}
-*/
-
+ */
