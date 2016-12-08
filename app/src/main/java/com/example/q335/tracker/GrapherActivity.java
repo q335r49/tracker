@@ -9,16 +9,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class GrapherActivity extends Activity {
-    private MainView View;
     private CalendarView CV;
-
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: Invisible (i?)
+    //TODO: month, day, labels
+    //TODO: labels on tapping
+    //TODO: further testing
+    //TODO: multi-day activities
+    //TODO: further testing
+    //TODO: drag
+
     public List<String> TestLog = Arrays.asList(
         "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
         "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
@@ -26,26 +33,19 @@ public class GrapherActivity extends Activity {
         "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
         "1421319600>1-15-2015 11:00:00>s|L4|red|comment"
     );
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
 
-        CV = new CalendarView(100,100,1421280000L,-1,-1,10,2);
+        CV = new CalendarView(1421280000L,-1,-1,10,4);
         CV.processLog(TestLog);
-
-
-
-        View = new MainView(this);
-        setContentView(View);
+        setContentView(new MainView(this));
     }
-
     private class MainView extends View {
         public MainView(Context context) {
             super(context);
         }
-
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
@@ -76,13 +76,12 @@ class CalendarShape {
             return false;
         }
     }
-    public void draw(CalendarView cw, Canvas canvas) {
+    public void draw(CalendarView cv, Canvas canvas) {
         if (start == -1 || end == -1)
             return;
-
-        int[] rectTL = cw.toScreenCoord(start);
-        int[] rectBR = cw.toScreenCoord(end);
-        canvas.drawRect(rectTL[0], rectTL[1], rectBR[0] + cw.getUnitWidth(), rectBR[1], paint);
+        int[] rectTL = cv.conv_ts_screen(start);
+        int[] rectBR = cv.conv_ts_screen(end);
+        canvas.drawRect(rectTL[0], rectTL[1], rectBR[0] + cv.getUnitWidth(), rectBR[1], paint);
         Log.d("Tag",rectTL[0] + "," + rectTL[1] + "," + rectBR[0] + "," + rectBR[1]);
     }
     @Override
@@ -92,23 +91,43 @@ class CalendarShape {
 }
 
 class CalendarView {
-    private int height;
-    private int width;
-    private long zero;
-    private float v0x;
-    private float v0y;
-    private float vw;
-    private float vh;
+    private int screenH;
+    private int screenW;
+    private long orig;
+    private float g0x;
+    private float g0y;
+    private float gridW;
+    private float gridH;
     private float unit_width;
 
     private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
 
+    private Paint textStyle;
+
+    public CalendarView(long orig, float g0x, float g0y, float gridW, float gridH) {
+        this.screenH = 100;
+        this.screenW = 100;
+        this.orig = orig;
+        this.g0x = g0x;
+        this.g0y = g0y;
+        this.gridW = gridW;
+        this.gridH = gridH;
+
+        unit_width = screenW / gridW;
+        textStyle = new Paint();
+        textStyle.setStyle(Paint.Style.FILL);
+    }
+    public void updateCanvas(int width, int height) {
+        this.screenW = width;
+        this.screenH = height;
+        this.unit_width = width/ gridW;
+    }
     public void processLog(List<String> log) {
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
 
-        for (int i=0; i<log.size(); i++) {
-            String[] LogParts = log.get(i).split(">",-1);
+        for (String line : log) {
+            String[] LogParts = line.split(">",-1);
             long ts = Long.parseLong(LogParts[0]);
             String[] ArgParts = LogParts[2].split("\\|",-1);
             if (ArgParts.length > 0) {
@@ -144,35 +163,38 @@ class CalendarView {
         }
     }
     public void draw(Canvas canvas) {
-        for (int i=0; i<shapes.size(); i++) {
-            shapes.get(i).draw(this,canvas);
+        for (CalendarShape s : shapes) {
+            s.draw(this,canvas);
         }
-    }
-
-    public CalendarView(int width, int height, long zero, float v0x, float v0y, float vw, float vh) {
-        this.height = height;
-        this.width = width;
-        this.zero = zero;
-        this.v0x = v0x;
-        this.v0y = v0y;
-        this.vw = vw;
-        this.vh = vh;
-        this.unit_width = width/vw;
-    }
-    public void updateCanvas(int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.unit_width = width/vw;
+        float startDate = (float) Math.floor(g0x);
+        for (int i = 0; i< gridH +1; i++ ) {
+            //TODO
+            int[] lblXY = conv_grid_screen(-1,startDate+i);
+            canvas.drawText(new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000)), lblXY[0], lblXY[1], textStyle);
+        }
     }
     public float getUnitWidth() {
         return unit_width;
     }
-    public int[] toScreenCoord(long ts) {
-        long days = ts > zero ? (ts-zero)/86400 : (ts-zero)/86400 - 1;
-        float dow = (float) ((days+4611686018427387900L)%7);
-        float weeks = (float) (days >= 0? days/7 : (days+1)/7-1) + ((float) ((ts-zero+4611686018427360000L)%86400) / 86400);
-        int[] ret = {(int) ((dow-v0x)/vw*width), (int) ((weeks-v0y)/vh*height)};
+
+    public int[] conv_ts_screen(long ts) {
+        long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
+        float dow = (float) ((days + 4611686018427387900L)%7);
+        float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
+        int[] ret = {(int) ((dow - g0x)/ gridW * screenW), (int) ((weeks - g0y)/ gridH * screenH)};
         return ret;
+    }
+    public int[] conv_grid_screen(float x, float y) {
+       int[] ret = {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
+       return ret;
+    }
+    public float conv_grid_num(float x, float y) {
+        float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
+        float weeks = (float) Math.floor(y)*7;
+        return (float) (weeks + dow + (y-Math.floor(y)));
+    }
+    public long conv_grid_ts(float x, float y) {
+        return (long) (conv_grid_num(x,y)*86400) + orig;
     }
 }
 
