@@ -92,12 +92,21 @@ class CalendarShape {
         }
     }
     public void draw(CalendarView cv, Canvas canvas) {
+        int[] rectC1;
+        int[] rectC2;
+
         if (start == -1 || end == -1)
             return;
-        int[] rectTL = cv.conv_ts_screen(start);
-        int[] rectBR = cv.conv_ts_screen(end);
-        canvas.drawRect(rectTL[0], rectTL[1], rectBR[0] + cv.getUnitWidth(), rectBR[1], paint);
-        Log.d("Tag",rectTL[0] + "," + rectTL[1] + "," + rectBR[0] + "," + rectBR[1]);
+        long rect0 = start;
+        for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86400; nextMidnight < end; nextMidnight+=86400) {
+            rectC1 = cv.conv_ts_screen(rect0);
+            rectC2 = cv.conv_ts_screen(nextMidnight);
+            canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
+            rect0 = nextMidnight+1;
+        }
+        rectC1 = cv.conv_ts_screen(rect0);
+        rectC2 = cv.conv_ts_screen(end);
+        canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
     }
     @Override
     public String toString() {
@@ -106,9 +115,10 @@ class CalendarShape {
 }
 
 class CalendarView {
+    public long orig;
+
     private int screenH;
     private int screenW;
-    private long orig;
     private float g0x;
     private float g0y;
     private float gridW;

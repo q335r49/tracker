@@ -387,6 +387,8 @@ public class MainActivity extends AppCompatActivity {
         logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + logComList[0];
         promptStack = new LinkedList<>();
         //TODO: Log syntax: 1421299830>Sat Sep 25 21:27:01 SGT 2010>b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
+        //TODO: Color picker
+        //TODO: favorite colors
         for (int i = 1; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",");
             switch (f_arg[0]) {
