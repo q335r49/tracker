@@ -19,7 +19,6 @@ import java.util.List;
 public class GrapherActivity extends Activity {
     private CalendarView CV;
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: month, day, labels
     //TODO: labels on tapping
     //TODO: further testing
     //TODO: multi-day activities
@@ -169,8 +168,16 @@ class CalendarView {
         float startDate = (float) Math.floor(g0x);
         for (int i = 0; i< gridH +1; i++ ) {
             //TODO
-            int[] lblXY = conv_grid_screen(-1,startDate+i);
+            int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
             canvas.drawText(new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000)), lblXY[0], lblXY[1], textStyle);
+            int[] l0 = conv_grid_screen(0,startDate+i);
+            int[] l1 = conv_grid_screen(7,startDate+i);
+            canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
+        }
+        for (int i=0; i<8; i++) {
+            int[] l0 = conv_grid_screen(i,g0y);
+            int[] l1 = conv_grid_screen(i,g0y+gridH);
+            canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
     }
     public float getUnitWidth() {
