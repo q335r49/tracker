@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.text.SimpleDateFormat;
@@ -19,11 +20,10 @@ import java.util.List;
 public class GrapherActivity extends Activity {
     private CalendarView CV;
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: labels on tapping
-    //TODO: further testing
     //TODO: multi-day activities
     //TODO: further testing
     //TODO: drag
+    //TODO: initialize CV from MainActivity
 
     public List<String> TestLog = Arrays.asList(
         "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
@@ -51,6 +51,22 @@ public class GrapherActivity extends Activity {
 
             CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
             CV.draw(canvas);
+        }
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            float eventX = event.getX();
+            float eventY = event.getY();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_UP:
+                    CV.setStatusText("X:" + eventX + " Y:" + eventY);
+
+                    break;
+            }
+            invalidate();
+            return true;
         }
     }
 }
@@ -98,6 +114,7 @@ class CalendarView {
     private float gridW;
     private float gridH;
     private float unit_width;
+    private String statusText;
 
     private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
 
@@ -115,6 +132,7 @@ class CalendarView {
         unit_width = screenW / gridW;
         textStyle = new Paint();
         textStyle.setStyle(Paint.Style.FILL);
+        statusText = "";
     }
     public void updateCanvas(int width, int height) {
         this.screenW = width;
@@ -179,21 +197,27 @@ class CalendarView {
             int[] l1 = conv_grid_screen(i,g0y+gridH);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
+        if (!statusText.isEmpty())
+            canvas.drawText(statusText,20,screenH-50,textStyle);
     }
     public float getUnitWidth() {
         return unit_width;
+    }
+    public void setStatusText(String s) {
+        statusText = s;
+    }
+    public String getStatusText() {
+        return statusText;
     }
 
     public int[] conv_ts_screen(long ts) {
         long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
         float dow = (float) ((days + 4611686018427387900L)%7);
         float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
-        int[] ret = {(int) ((dow - g0x)/ gridW * screenW), (int) ((weeks - g0y)/ gridH * screenH)};
-        return ret;
+        return new int[] {(int) ((dow - g0x)/ gridW * screenW), (int) ((weeks - g0y)/ gridH * screenH)};
     }
     public int[] conv_grid_screen(float x, float y) {
-       int[] ret = {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
-       return ret;
+       return new int[] {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
     }
     public float conv_grid_num(float x, float y) {
         float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
@@ -204,37 +228,3 @@ class CalendarView {
         return (long) (conv_grid_num(x,y)*86400) + orig;
     }
 }
-
-/*
-            // custom drawing code here
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.FILL);
-
-            // make the entire canvas white
-            paint.setColor(Color.WHITE);
-            canvas.drawPaint(paint);
-
-            // draw blue circle with anti aliasing turned off
-            paint.setAntiAlias(false);
-            paint.setColor(Color.BLUE);
-            canvas.drawCircle(20, 20, 15, paint);
-
-            // draw green circle with anti aliasing turned on
-            paint.setAntiAlias(true);
-            paint.setColor(Color.GREEN);
-            canvas.drawCircle(60, 20, 15, paint);
-
-            // draw red rectangle with anti aliasing turned off
-            paint.setAntiAlias(false);
-            paint.setColor(Color.RED);
-            canvas.drawRect(100, 5, 200, 30, paint);
-
-            // draw the rotated text
-            canvas.rotate(-45);
-
-            paint.setStyle(Paint.Style.FILL);
-            canvas.drawText("Graphics Rotation", 40, 180, paint);
-
-            //undo the rotate
-            //canvas.restore();
- */
