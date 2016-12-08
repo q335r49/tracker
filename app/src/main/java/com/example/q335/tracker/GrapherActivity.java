@@ -6,7 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,12 +20,13 @@ public class GrapherActivity extends Activity {
     private CalendarWindow CW;
 
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
+    //TODO: Invisible (i?)
     public List<String> TestLog = Arrays.asList(
-        "1421299830>1-15-2015 5:30:30>t1|red|s|comment",
-        "1421303400>1-15-2015 6:30:00>t1|red|e|comment",
-        "1421314200>1-15-2015 9:30:00>t2|blue|s|com",
-        "1421319600>1-15-2015 11:00:00>t2|blue|s|com",
-        "1421319600>1-15-2015 11:00:00>s|label1|color|comment"
+        "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
+        "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
+        "1421314200>1-15-2015 9:30:00>s|L2|green|com",
+        "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
+        "1421319600>1-15-2015 11:00:00>s|L4|red|comment"
     );
 
     @Override
@@ -37,7 +40,7 @@ public class GrapherActivity extends Activity {
         for (int i=0; i<TestLog.size(); i++) {
             String[] LogParts = TestLog.get(i).split(">",-1);
             long ts = Long.parseLong(LogParts[0]);
-            String[] ArgParts = LogParts[2].split("|",-1);
+            String[] ArgParts = LogParts[2].split("\\|",-1);
             if (ArgParts.length > 0) {
                 switch (ArgParts[0]) {
                     case "s":
@@ -46,11 +49,11 @@ public class GrapherActivity extends Activity {
                         CS.add(curTD);
                         curTD.start = ts;
                         if (ArgParts.length > 1)
-                            curTD.label = LogParts[1];
+                            curTD.label = ArgParts[1];
                         if (ArgParts.length > 2)
-                            curTD.color = Color.parseColor(LogParts[2]);
+                            curTD.setColor(Color.parseColor(ArgParts[2]));
                         if (ArgParts.length > 3)
-                            curTD.comment = LogParts[3];
+                            curTD.comment = ArgParts[3];
                         break;
                     case "e":
                         curTD.end = ts;
@@ -59,17 +62,17 @@ public class GrapherActivity extends Activity {
                         CalendarShape markTD = new CalendarShape();
                         markTD.mark = ts;
                         if (ArgParts.length > 1)
-                            markTD.label = LogParts[1];
+                            markTD.label = ArgParts[1];
                         if (ArgParts.length > 2)
-                            markTD.color = Color.parseColor(LogParts[2]);
+                            markTD.setColor(Color.parseColor(ArgParts[2]));
                         if (ArgParts.length > 3)
-                            markTD.comment = LogParts[3];
+                            markTD.comment = ArgParts[3];
                         break;
                 }
             }
         }
 
-        CW = new CalendarWindow(100,100,1421280000L,-1,-1,10,20);
+        CW = new CalendarWindow(100,100,1421280000L,-1,-1,10,2);
         CG = new CalendarGraph(this);
         setContentView(CG);
     }
@@ -84,10 +87,8 @@ public class GrapherActivity extends Activity {
             super.onDraw(canvas);
 
             CW.updateCanvas(canvas.getWidth(), canvas.getHeight());
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.FILL);
             for (int i=0; i<CS.size(); i++) {
-                CS.get(i).draw(CW,canvas,paint);
+                CS.get(i).draw(CW,canvas);
             }
         }
     }
@@ -97,17 +98,34 @@ class CalendarShape {
     long start=-1;
     long end=-1;
     long mark=-1;
-    int color=-1;
     String label=null;
     String comment=null;
+    private Paint paint;
 
-    public void draw(CalendarWindow cw, Canvas canvas, Paint paint) {
+    public CalendarShape() {
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+    }
+    public boolean setColor(int color) {
+        try {
+            paint.setColor(color);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+    public void draw(CalendarWindow cw, Canvas canvas) {
         if (start == -1 || end == -1)
             return;
 
         int[] rectTL = cw.toScreenCoord(start);
         int[] rectBR = cw.toScreenCoord(end);
         canvas.drawRect(rectTL[0], rectTL[1], rectBR[0] + cw.getUnitWidth(), rectBR[1], paint);
+        Log.d("Tag",rectTL[0] + "," + rectTL[1] + "," + rectBR[0] + "," + rectBR[1]);
+    }
+    @Override
+    public String toString() {
+        return "CalendarShape>start:" + start + ",end:" + end + ",mark:" + mark + ",label:" + label + ",comment:" + comment;
     }
 }
 
@@ -141,8 +159,8 @@ class CalendarWindow {
     }
     public int[] toScreenCoord(long ts) {
         long days = ts > zero ? (ts-zero)/86400 : (ts-zero)/86400 - 1;
-        float dow = (float) (days+4611686018427387900L)%7;
-        float weeks = (days >= 0? days/7 : (days+1)/7-1) + (float) (ts+4611686018427360000L)%86400 / 86400;
+        float dow = (float) ((days+4611686018427387900L)%7);
+        float weeks = (float) (days >= 0? days/7 : (days+1)/7-1) + ((float) ((ts-zero+4611686018427360000L)%86400) / 86400);
         int[] ret = {(int) ((dow-v0x)/vw*width), (int) ((weeks-v0y)/vh*height)};
         return ret;
     }
