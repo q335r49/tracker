@@ -8,16 +8,15 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class GrapherActivity extends Activity {
-    private CalendarGraph CG;
+    private MainView View;
     private ArrayList<CalendarShape> CS = new ArrayList<CalendarShape>();
-    private CalendarWindow CW;
+    private CalendarView CV;
 
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
     //TODO: Invisible (i?)
@@ -72,13 +71,13 @@ public class GrapherActivity extends Activity {
             }
         }
 
-        CW = new CalendarWindow(100,100,1421280000L,-1,-1,10,2);
-        CG = new CalendarGraph(this);
-        setContentView(CG);
+        CV = new CalendarView(100,100,1421280000L,-1,-1,10,2);
+        View = new MainView(this);
+        setContentView(View);
     }
 
-    private class CalendarGraph extends View {
-        public CalendarGraph(Context context) {
+    private class MainView extends View {
+        public MainView(Context context) {
             super(context);
         }
 
@@ -86,9 +85,9 @@ public class GrapherActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            CW.updateCanvas(canvas.getWidth(), canvas.getHeight());
+            CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
             for (int i=0; i<CS.size(); i++) {
-                CS.get(i).draw(CW,canvas);
+                CS.get(i).draw(CV,canvas);
             }
         }
     }
@@ -114,7 +113,7 @@ class CalendarShape {
             return false;
         }
     }
-    public void draw(CalendarWindow cw, Canvas canvas) {
+    public void draw(CalendarView cw, Canvas canvas) {
         if (start == -1 || end == -1)
             return;
 
@@ -129,7 +128,7 @@ class CalendarShape {
     }
 }
 
-class CalendarWindow {
+class CalendarView {
     private int height;
     private int width;
     private long zero;
@@ -139,7 +138,7 @@ class CalendarWindow {
     private float vh;
     private float unit_width;
 
-    public CalendarWindow(int width, int height, long zero, float v0x, float v0y, float vw, float vh) {
+    public CalendarView(int width, int height, long zero, float v0x, float v0y, float vw, float vh) {
         this.height = height;
         this.width = width;
         this.zero = zero;
