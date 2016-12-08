@@ -8,7 +8,15 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +25,7 @@ import java.util.List;
 
 public class GrapherActivity extends Activity {
     private CalendarView CV;
+    private final String LOG_FILE_NAME = "log.txt";
     //Log syntax: [HEADING]>Label|Color|Pos|comment
     //TODO: use shredPrefs in GrapherActivity
     //TODO: filename in sharedPrefs
@@ -29,18 +38,44 @@ public class GrapherActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
 
-        Log = Arrays.asList(
-                "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
-                "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
-                "1421314200>1-15-2015 9:30:00>s|L2|green|com",
-                "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
-                "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
-        );
+//        Log = Arrays.asList(
+//                "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
+//                "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
+//                "1421314200>1-15-2015 9:30:00>s|L2|green|com",
+//                "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
+//                "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
+//        );
+        Log = read_file(getApplicationContext(),LOG_FILE_NAME);
+        if (Log == null) {
+            Toast.makeText(this, "Cannot read from log file", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         CV = new CalendarView(1421280000L,-1,-1,10,4);
         CV.processLog(Log);
         setContentView(new MainView(this));
     }
+    public static List<String> read_file(Context context, String filename) {
+        try {
+            FileInputStream fis = context.openFileInput(filename);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+            BufferedReader bufferedReader = new BufferedReader(isr);
+            ArrayList<String> sb = new ArrayList<>();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.add(line);
+            }
+            return sb;
+        } catch (FileNotFoundException e) {
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+
     private class MainView extends View {
         public MainView(Context context) {
             super(context);
@@ -83,9 +118,9 @@ class CalendarShape {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
     }
-    public boolean setColor(int color) {
+    public boolean setColor(String color) {
         try {
-            paint.setColor(color);
+            paint.setColor(Color.parseColor(color));
             return true;
         } catch (IllegalArgumentException e) {
             return false;
@@ -152,10 +187,14 @@ class CalendarView {
     public void processLog(List<String> log) {
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
+        long ts;
 
         for (String line : log) {
             String[] LogParts = line.split(">",-1);
-            long ts = Long.parseLong(LogParts[0]);
+            try {
+                ts = Long.parseLong(LogParts[0]);
+            } catch (NumberFormatException e)
+                continue;
             String[] ArgParts = LogParts[2].split("\\|",-1);
             if (ArgParts.length > 0) {
                 switch (ArgParts[0]) {
@@ -167,7 +206,7 @@ class CalendarView {
                         if (ArgParts.length > 1)
                             curTD.label = ArgParts[1];
                         if (ArgParts.length > 2)
-                            curTD.setColor(Color.parseColor(ArgParts[2]));
+                            curTD.setColor(ArgParts[2]);
                         if (ArgParts.length > 3)
                             curTD.comment = ArgParts[3];
                         break;
@@ -180,7 +219,7 @@ class CalendarView {
                         if (ArgParts.length > 1)
                             markTD.label = ArgParts[1];
                         if (ArgParts.length > 2)
-                            markTD.setColor(Color.parseColor(ArgParts[2]));
+                            markTD.setColor(ArgParts[2]);
                         if (ArgParts.length > 3)
                             markTD.comment = ArgParts[3];
                         shapes.add(markTD);

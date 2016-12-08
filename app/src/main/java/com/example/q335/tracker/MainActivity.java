@@ -46,17 +46,9 @@ public class MainActivity extends AppCompatActivity {
     final Context context = this;
     private List<String[]> commandList = new ArrayList<String[]>();
     private GridView GV;
-    private String LOG_FILE_NAME;
-        public void setLOG_FILE_NAME(String s) {
-            LOG_FILE_NAME = s;}
-    private String COMMAND_FILE_NAME;
-        public void setCOMMAND_FILE_NAME(String s) {
-            COMMAND_FILE_NAME = s;}
-    private String EXT_STORAGE_DIR_NAME;
-        public void setEXT_STORAGE_DIR_NAME(String s) {
-            EXT_STORAGE_DIR_NAME = s;
-        }
-
+    private final String LOG_FILE_NAME = "log.txt";
+    private final String COMMAND_FILE_NAME = "commands.json";
+    private final String EXT_STORAGE_DIR_NAME = "tracker";
     SharedPreferences pref;
 
     @Override
@@ -64,14 +56,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        LOG_FILE_NAME = pref.getString("LOG_FILE_NAME","log.txt");
-        COMMAND_FILE_NAME = pref.getString("COMMAND_FILE_NAME","commands.json");
-        EXT_STORAGE_DIR_NAME = pref.getString("EXT_STORAGE_DIR_NAME","tracker");
-
         GV = (GridView) findViewById(R.id.GV);
+        pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
-        String jsonText = pref.getString("commands", null);
+        String jsonText = pref.getString("commands", "");
         if (jsonText == null) {
             commandList.add(new String[]{"02 Day of year, Hour, Minute", "%s!dhm"});
             commandList.add(new String[]{"03 Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
