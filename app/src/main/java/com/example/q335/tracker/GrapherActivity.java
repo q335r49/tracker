@@ -20,9 +20,6 @@ import java.util.List;
 public class GrapherActivity extends Activity {
     private CalendarView CV;
     //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: multi-day activities
-    //TODO: further testing
-    //TODO: drag
     //TODO: initialize CV from MainActivity
 
     public List<String> TestLog = Arrays.asList(
@@ -30,7 +27,7 @@ public class GrapherActivity extends Activity {
         "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
         "1421314200>1-15-2015 9:30:00>s|L2|green|com",
         "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
-        "1421319600>1-15-2015 11:00:00>s|L4|red|comment"
+        "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
     );
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +95,7 @@ class CalendarShape {
         if (start == -1 || end == -1)
             return;
         long rect0 = start;
-        for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86400; nextMidnight < end; nextMidnight+=86400) {
+        for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86399; nextMidnight < end; nextMidnight+=86400) {
             rectC1 = cv.conv_ts_screen(rect0);
             rectC2 = cv.conv_ts_screen(nextMidnight);
             canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
