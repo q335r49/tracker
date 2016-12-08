@@ -33,7 +33,6 @@ import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -46,8 +45,19 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
     private List<String[]> commandList = new ArrayList<String[]>();
-    SharedPreferences pref;
     private GridView GV;
+    private String LOG_FILE_NAME;
+        public void setLOG_FILE_NAME(String s) {
+            LOG_FILE_NAME = s;}
+    private String COMMAND_FILE_NAME;
+        public void setCOMMAND_FILE_NAME(String s) {
+            COMMAND_FILE_NAME = s;}
+    private String EXT_STORAGE_DIR_NAME;
+        public void setEXT_STORAGE_DIR_NAME(String s) {
+            EXT_STORAGE_DIR_NAME = s;
+        }
+
+    SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
+        LOG_FILE_NAME = pref.getString("LOG_FILE_NAME","log.txt");
+        COMMAND_FILE_NAME = pref.getString("COMMAND_FILE_NAME","commands.json");
+        EXT_STORAGE_DIR_NAME = pref.getString("EXT_STORAGE_DIR_NAME","tracker");
+
         GV = (GridView) findViewById(R.id.GV);
 
         String jsonText = pref.getString("commands", null);
@@ -78,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         GV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 if (position< commandList.size())
-                    Log(commandList.get(position)[1], "log.txt");
+                    Log(commandList.get(position)[1]);
             }
         });
         GV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -232,11 +246,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
-                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
+                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR_NAME + File.separator;
                 final File directory = new File(extStorPath);
                 directory.mkdirs();
-                final File outputLog = new File(extStorPath,"log.txt");
-                final File outputCmd = new File(extStorPath,"commands.json");
+                final File outputLog = new File(extStorPath,LOG_FILE_NAME);
+                final File outputCmd = new File(extStorPath,COMMAND_FILE_NAME);
 
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                 alertBuilder
@@ -249,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     writeString(outputCmd, pref.getString("commands",""));
-                                    Toast.makeText(context, "commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, COMMAND_FILE_NAME + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -261,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     copyFile(new File(getFilesDir(), "log.txt"),outputLog);
-                                    Toast.makeText(context, "log.txt exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, LOG_FILE_NAME + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -274,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                                 try {
                                     copyFile(new File(getFilesDir(), "log.txt"),outputLog);
                                     writeString(outputCmd, pref.getString("commands",""));
-                                    Toast.makeText(context, "log.txt and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, LOG_FILE_NAME + " and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -286,8 +300,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menuItemImport: {
                 final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
                 final File directory = new File(extStorPath);
-                final File inputCmd = new File(extStorPath, "commands.json");
-                final File inputLog = new File(extStorPath, "log.txt");
+                final File inputCmd = new File(extStorPath, COMMAND_FILE_NAME);
+                final File inputLog = new File(extStorPath, LOG_FILE_NAME);
 
                 if (!directory.isDirectory()) {
                     Toast.makeText(context, "Import error: " + extStorPath + "not found!", Toast.LENGTH_SHORT).show();
@@ -310,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
                                         }.getType();
                                         commandList = new Gson().fromJson(jsonText, listType);
                                         makeGV();
-                                        Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, COMMAND_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -326,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                                 } else {
                                     try {
                                         copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                        Toast.makeText(context, "log.txt import successful", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, LOG_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
                                     } catch (Exception e) {
                                         Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                         Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -346,18 +360,18 @@ public class MainActivity extends AppCompatActivity {
                                         }.getType();
                                         commandList = new Gson().fromJson(jsonText, listType);
                                         makeGV();
-                                        Toast.makeText(context, "commands.json import successful", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, COMMAND_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                     Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
                                 }
                                 if (!inputLog.exists()) {
-                                    Toast.makeText(context, "log.txt failed: no file", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, LOG_FILE_NAME + " failed: no file", Toast.LENGTH_SHORT).show();
                                 } else {
                                     try {
                                         copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                        Toast.makeText(context, "log.txt import successful", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, LOG_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
                                     } catch (Exception e) {
                                         Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                         Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -375,20 +389,19 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
         return true;
-        //TODO: Request access
+        //TODO: Request access / pick from tree
     }
 
     private String[] logComList;
     private Queue<AlertDialog> promptStack;
-    public boolean Log(String data, String fname) {
+    public boolean Log(String data) {
         String ErrorCondition = "";
         logComList = data.split("!");
         Date now = new Date();
         logComList[0]=Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + logComList[0];
         promptStack = new LinkedList<>();
-        //TODO: Log syntax: 1421299830>Sat Sep 25 21:27:01 SGT 2010>b:[+/-]XX,e:[+/-]XX,l:XX,c:XX,m:{Start,End,Mark},[comment]
-        //TODO: Color picker
-        //TODO: favorite colors
+        //TODO: !!! Color picker, favorite colors in sharedPrefs
+        //TODO: Parse log for favorite colors
         for (int i = 1; i < logComList.length; i++) {
             String[] f_arg = logComList[i].split(",");
             switch (f_arg[0]) {
@@ -402,13 +415,12 @@ public class MainActivity extends AppCompatActivity {
                         input.setInputType(f_arg[0].equals("text") ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_CLASS_NUMBER);
                         b.setView(input);
                         final int j = i;
-                        final String LogFile = fname;
                         b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 logComList[j] = input.getText().toString();
                                 if (promptStack.isEmpty())
-                                    writeLog(LogFile);
+                                    Log_helper();
                                 else
                                     promptStack.remove().show();
                             }
@@ -424,14 +436,13 @@ public class MainActivity extends AppCompatActivity {
                         b.setTitle(f_arg[1]);
                         final String[] choices = Arrays.copyOfRange(f_arg, 2, f_arg.length);
                         final int j = i;
-                        final String LogFile = fname;
                         b.setItems(choices, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 logComList[j] = choices[which];
                                 if (promptStack.isEmpty())
-                                    writeLog(LogFile);
+                                    Log_helper();
                                 else
                                     promptStack.remove().show();
                             }
@@ -449,7 +460,6 @@ public class MainActivity extends AppCompatActivity {
                         final boolean SEEK_INT = ((f_arg[2] + f_arg[3]).indexOf(".") < 0);
                         final SeekBar input = new SeekBar(this);
                         final int j = i;
-                        final String LogFile = fname;
                         AlertDialog.Builder b = new AlertDialog.Builder(context);
                         b.setTitle(prompt + f_arg[2]);
                         b.setView(input);
@@ -458,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 logComList[j] = SEEK_INT ? Integer.toString(Math.round(MIN + STEP * input.getProgress())) : String.format("%.02f", MIN + STEP * input.getProgress());
                                 if (promptStack.isEmpty())
-                                    writeLog(LogFile);
+                                    Log_helper();
                                 else
                                     promptStack.remove().show();
                             }
@@ -483,13 +493,12 @@ public class MainActivity extends AppCompatActivity {
         if (!ErrorCondition.isEmpty())
             Toast.makeText(context, ErrorCondition, Toast.LENGTH_SHORT).show();
         else if (promptStack.isEmpty())
-            writeLog(fname);
+            Log_helper();
         else
             promptStack.remove().show();
         return true;
     }
-
-    private void writeLog(String fname) { //Prompt syntax: some string %s %s %s!text,lbl!number,lbl2!pick,lbl3,choice1,choice2!!!bgcolor,fgcolor
+    private void Log_helper() { //Prompt syntax: some string %s %s %s!text,lbl!number,lbl2!pick,lbl3,choice1,choice2!!!bgcolor,fgcolor
         String entry = null;
         try {
             switch (logComList.length) {
@@ -514,14 +523,14 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
         if (entry != null) {
-            File internalFile = new File(getFilesDir(), fname);
+            File internalFile = new File(getFilesDir(), LOG_FILE_NAME);
             try {
                 FileOutputStream out = new FileOutputStream(internalFile, true);
                 out.write(entry.getBytes());
                 out.write(System.getProperty("line.separator").getBytes());
                 out.close();
             } catch (Exception e) {
-                Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -6,36 +6,39 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class GrapherActivity extends Activity {
     private CalendarView CV;
-    //TODO: Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: initialize CV from MainActivity
+    //Log syntax: [HEADING]>Label|Color|Pos|comment
+    //TODO: use shredPrefs in GrapherActivity
+    //TODO: filename in sharedPrefs
+    //TODO: parse file into Log
+    //TODO: finalize Log formatting
 
-    public List<String> TestLog = Arrays.asList(
-        "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
-        "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
-        "1421314200>1-15-2015 9:30:00>s|L2|green|com",
-        "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
-        "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
-    );
+    public List<String> Log;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
 
+        Log = Arrays.asList(
+                "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
+                "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
+                "1421314200>1-15-2015 9:30:00>s|L2|green|com",
+                "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
+                "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
+        );
+
         CV = new CalendarView(1421280000L,-1,-1,10,4);
-        CV.processLog(TestLog);
+        CV.processLog(Log);
         setContentView(new MainView(this));
     }
     private class MainView extends View {
@@ -192,7 +195,7 @@ class CalendarView {
         }
         float startDate = (float) Math.floor(g0x);
         for (int i = 0; i< gridH +1; i++ ) {
-            //TODO
+            //TODO: Better date labeling
             int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
             canvas.drawText(new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000)), lblXY[0], lblXY[1], textStyle);
             int[] l0 = conv_grid_screen(0,startDate+i);
