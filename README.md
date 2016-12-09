@@ -1,8 +1,8 @@
-## Track every minute of your life
+## Track every minute of your day
 
 Tracker is a simple app for android consisting of buttons to log your time. This log is then painted onto a calendar display.
 
 At present, it is in the "minimum working state", but is being updated daily.
 
-![alt tag](http://image.prntscr.com/image/c82496daf7104babb7832c4794b6c1e6.png)
-![alt tag](http://image.prntscr.com/image/d3396389a931457dbe804b20ed2c8727.png)
+<a href="url"><img src="http://image.prntscr.com/image/2a3691e352ad4cb3844b48ce98c640ac.png" align="left"></a>
+<a href="url"><img src="http://image.prntscr.com/image/645edcf8c8a3430b9604716eae30e731.png" align="left" width="348" ></a>
