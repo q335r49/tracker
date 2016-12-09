@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
         String jsonText = pref.getString("commands", "");
-        if (jsonText == null) {
+        if (jsonText.isEmpty()) {
             commandList.add(new String[]{"02 Day of year, Hour, Minute", "%s!dhm"});
             commandList.add(new String[]{"03 Day of year, hour:minute:sec", "%s %s:%s:%s!doy!hour!min!sec"});
             commandList.add(new String[]{"04 Timestamp", "timestamp: %s!ts"});

@@ -27,10 +27,8 @@ public class GrapherActivity extends Activity {
     private CalendarView CV;
     private final String LOG_FILE_NAME = "log.txt";
     //Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: use shredPrefs in GrapherActivity
-    //TODO: filename in sharedPrefs
-    //TODO: parse file into Log
     //TODO: finalize Log formatting
+    //TODO: start logging exceptions in logcat rather than Toasting, tag Debug
 
     public List<String> Log;
     @Override
@@ -189,12 +187,14 @@ class CalendarView {
         shapes.add(curTD);
         long ts;
 
+        //TODO: determine initial window from Log
         for (String line : log) {
             String[] LogParts = line.split(">",-1);
             try {
                 ts = Long.parseLong(LogParts[0]);
-            } catch (NumberFormatException e)
+            } catch (NumberFormatException e) {
                 continue;
+            }
             String[] ArgParts = LogParts[2].split("\\|",-1);
             if (ArgParts.length > 0) {
                 switch (ArgParts[0]) {
