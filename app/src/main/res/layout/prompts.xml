@@ -5,21 +5,60 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:padding="10dp" >
-
-    <EditText
-        android:id="@+id/promptTextView"
-        android:layout_width="match_parent"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:inputType="text" />
-
-    <EditText
-        android:id="@+id/userInput"
-        android:layout_width="match_parent"
-        android:inputType="text"
-        android:layout_height="wrap_content" >
-
+        android:orientation="horizontal">
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Comment:">
+        </TextView>
+        <EditText
+            android:id="@+id/commentInput"
+            android:layout_width="0dp"
+            android:layout_weight=".50"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
         <requestFocus />
-
-    </EditText>
-
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="start:" >
+        </TextView>
+        <EditText
+            android:id="@+id/startInput"
+            android:layout_width="0dp"
+            android:layout_weight=".30"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="end:" >
+        </TextView>
+        <EditText
+            android:id="@+id/endInput"
+            android:layout_width="0dp"
+            android:layout_weight=".30"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Color:">
+        </TextView>
+        <EditText
+            android:id="@+id/colorInput"
+            android:layout_width="0dp"
+            android:layout_weight=".50"
+            android:layout_height="wrap_content"
+        android:inputType="text" />
+    </LinearLayout>
 </LinearLayout>

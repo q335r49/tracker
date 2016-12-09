@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,9 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -32,15 +29,12 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
@@ -60,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
         String jsonText = pref.getString("commands", "");
-        jsonText = "";
         if (jsonText.isEmpty()) {
             commandList.add(new String[]{"Work now", "red", "0", ""});
             commandList.add(new String[]{"Play1", "blue", "0", ""});
@@ -80,15 +73,16 @@ public class MainActivity extends AppCompatActivity {
         GV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                //TODO: !!! Color picker, favorite colors in sharedPrefs
-                //TODO: Parse log for favorite colors
+                //TODO: Color picker
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptView);
 
-                final EditText labelInput = (EditText) promptView.findViewById(R.id.promptTextView);
-                final EditText commandInput = (EditText) promptView.findViewById(R.id.userInput);
+                final EditText commInput = (EditText) promptView.findViewById(R.id.commentInput);
+                final EditText colInput = (EditText) promptView.findViewById(R.id.colorInput);
+                final EditText startInput = (EditText) promptView.findViewById(R.id.startInput);
+                final EditText endInput = (EditText) promptView.findViewById(R.id.endInput);
                 final int listIndex = pos;
 
                 if (listIndex >= commandList.size()) {
@@ -96,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                             .setCancelable(true)
                             .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    commandList.add(new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                    commandList.add(new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
                                     makeGV();
                                 }
                             })
@@ -106,16 +100,19 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                 } else {
-                    labelInput.setText(commandList.get(pos)[0]);
-                    commandInput.setText(commandList.get(pos)[1]);
+                    commInput.setText(commandList.get(pos)[COMMENT_POS]);
+                    colInput.setText(commandList.get(pos)[COLOR_POS]);
+                    startInput.setText(commandList.get(pos)[START_POS]);
+                    endInput.setText(commandList.get(pos)[END_POS]);
                     alertDialogBuilder
                             .setCancelable(true)
                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
+                                    //TODO: why is this conditional being performed??
                                     if (listIndex >= commandList.size())
-                                        commandList.add(new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                        commandList.add(new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
                                     else
-                                        commandList.set(listIndex, new String[]{labelInput.getText().toString(), commandInput.getText().toString()});
+                                        commandList.set(listIndex, new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
                                     makeGV();
                                 }
                             })
@@ -148,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         for (String[] s : commandList) {
             final Map<String, String> listItem = new HashMap<String, String>();
             listItem.put("label", s[0]);
-            listItem.put("syntax", "s:" + s[1] + " e:" + s[2]);
+            listItem.put("syntax", "s:" + s[2] + " e:" + s[3]);
             LVentries.add(listItem);
         }
         final Map<String, String> listItem = new HashMap<String, String>();
@@ -388,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
             out.write(entry.getBytes());
             out.write(System.getProperty("line.separator").getBytes());
             out.close();
+            getSupportActionBar().setTitle(args[COMMENT_POS]);
             return true;
         } catch (Exception e) {
             Toast.makeText(this, "Internal Storage Write Error!", Toast.LENGTH_LONG).show();
