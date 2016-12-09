@@ -19,8 +19,11 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 public class GrapherActivity extends Activity {
     private CalendarView CV;
@@ -94,7 +97,6 @@ public class GrapherActivity extends Activity {
 class CalendarShape {
     long start=-1;
     long end=-1;
-    long mark=-1;
     String comment=null;
     private Paint paint;
 
@@ -132,6 +134,7 @@ class CalendarShape {
 
 class CalendarView {
     public long orig;
+        public void setOrig(long orig) { this.orig = orig; }
     private int screenH;
     private int screenW;
     private float g0x;
@@ -182,7 +185,6 @@ class CalendarView {
     private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
     //TS>READABLE>COLOR>S>E>COMMENT
     private final static int TIMESTAMP_POS = 0;
-    private final static int READABLE_POS = 1;
     private final static int COLOR_POS = 2;
     private final static int START_POS = 3;
     private final static int END_POS = 4;
@@ -191,8 +193,7 @@ class CalendarView {
     void log_to_shapes(List<String> log) {
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
-        long ts;
-        //TODO: **** determine initial window from newLogEntry
+        long ts=0;
         for (String line : log) {
             String[] args = line.split(">",-1);
             if (args.length < ARG_LEN) {
@@ -227,6 +228,15 @@ class CalendarView {
                 Log.e("tracker:","Bad color or number format: "+line);
             }
         }
+
+        Calendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(ts*1000L-86400000L*7);
+        cal.set(Calendar.DAY_OF_WEEK,0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        setOrig(cal.getTimeInMillis()/1000);
     }
 
     private String statusText;
