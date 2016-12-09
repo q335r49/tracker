@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -23,22 +24,20 @@ import java.util.List;
 
 public class GrapherActivity extends Activity {
     private CalendarView CV;
-    private final String LOG_FILE_NAME = "log.txt";
-    //TODO: start logging exceptions in logcat rather than Toasting, tag Debug
+    private final String LOG_FILE = "log.txt";
 
-    public List<String> Log;
+    public List<String> logEntries;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
-        Log = read_file(getApplicationContext(),LOG_FILE_NAME);
-        if (Log == null) {
-            Toast.makeText(this, "Cannot read from log file", Toast.LENGTH_SHORT).show();
+        logEntries = read_file(getApplicationContext(), LOG_FILE);
+        if (logEntries == null) {
+            Toast.makeText(this, "Cannot read from log file", Toast.LENGTH_LONG).show();
             return;
         }
-
         CV = new CalendarView(1421280000L,-1,-1,10,4);
-        CV.log_to_shapes(Log);
+        CV.log_to_shapes(logEntries);
         setContentView(new MainView(this));
     }
     public static List<String> read_file(Context context, String filename) {
@@ -53,10 +52,13 @@ public class GrapherActivity extends Activity {
             }
             return sb;
         } catch (FileNotFoundException e) {
+            Log.e("tracker:","Log file not found!");
             return null;
         } catch (UnsupportedEncodingException e) {
+            Log.e("tracker:","Log file bad encoding!");
             return null;
         } catch (IOException e) {
+            Log.e("tracker:","Log file IO exception!");
             return null;
         }
     }
@@ -68,7 +70,6 @@ public class GrapherActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-
             CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
             CV.draw(canvas);
         }
@@ -76,13 +77,12 @@ public class GrapherActivity extends Activity {
         public boolean onTouchEvent(MotionEvent event) {
             float eventX = event.getX();
             float eventY = event.getY();
-
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_MOVE:
                 case MotionEvent.ACTION_UP:
                     CV.setStatusText("X:" + eventX + " Y:" + eventY);
-
+                    //TODO: get rid of statusbar
                     break;
             }
             invalidate();
@@ -107,7 +107,8 @@ class CalendarShape {
             paint.setColor(Color.parseColor(color));
             return true;
         } catch (IllegalArgumentException e) {
-            return false; //TODO: catlog
+            Log.e("tracker:","Bad color format: "+color);
+            return false;
         }
     }
     public void draw(CalendarView cv, Canvas canvas) {
@@ -191,11 +192,12 @@ class CalendarView {
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
         long ts;
-        //TODO: determine initial window from Log
+        //TODO: **** determine initial window from newLogEntry
         for (String line : log) {
             String[] args = line.split(">",-1);
             if (args.length < ARG_LEN) {
-                continue; //TODO: catlog
+                Log.e("tracker:","Insufficient args: "+line);
+                continue;
             }
             try {
                 ts = Long.parseLong(args[TIMESTAMP_POS]);
@@ -209,7 +211,7 @@ class CalendarView {
                         curTD.setColor(args[COLOR_POS]);
                         curTD.comment = args[COMMENT_POS];
                     } else {
-                        //TODO: log error condition
+                        Log.e("tracker:","Empty start and end: "+line);
                     }
                 } else if (args[START_POS].isEmpty()) {
                     curTD.end = ts + Long.parseLong(args[END_POS]);
@@ -222,7 +224,7 @@ class CalendarView {
                     shapes.add(markTD);
                 }
             } catch (IllegalArgumentException e) {
-                //TODO: log bad number
+                Log.e("tracker:","Bad color or number format: "+line);
             }
         }
     }

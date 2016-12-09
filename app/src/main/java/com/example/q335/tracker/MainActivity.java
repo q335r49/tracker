@@ -1,14 +1,20 @@
 package com.example.q335.tracker;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,60 +44,58 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     final Context context = this;
-    private List<String[]> commandList = new ArrayList<String[]>();
-    private GridView GV;
-    private final String LOG_FILE_NAME = "log.txt";
-    private final String COMMAND_FILE_NAME = "commands.json";
-    private final String EXT_STORAGE_DIR_NAME = "tracker";
-    SharedPreferences pref;
+    SharedPreferences sprefs;
+    private GridView mainView;
+    private List<String[]> commands = new ArrayList<String[]>();
+    private static final String LOG_FILE = "log.txt";
+    private static final String COMMANDS_FILE = "commands.json";
+    private static final String EXT_STORAGE_DIR = "tracker";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GV = (GridView) findViewById(R.id.GV);
-        pref = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
+        mainView = (GridView) findViewById(R.id.GV);
+        sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
-        String jsonText = pref.getString("commands", "");
+        String jsonText = sprefs.getString("commands", "");
         if (jsonText.isEmpty()) {
-            commandList.add(new String[]{"Work now", "red", "0", ""});
-            commandList.add(new String[]{"Play1", "blue", "0", ""});
+            commands.add(new String[]{"Work now", "red", "0", ""});
+            commands.add(new String[]{"Play1", "blue", "0", ""});
         } else {
             Type listType = new TypeToken<List<String[]>>() {
             }.getType();
-            commandList = new Gson().fromJson(jsonText, listType);
+            commands = new Gson().fromJson(jsonText, listType);
         }
-        makeGV();
+        makeView();
 
-        GV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mainView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                if (position < commandList.size())
-                    Log(position);
+                if (position < commands.size())
+                    newLogEntry(position);
             }
         });
-        GV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mainView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
-                //TODO: Color picker
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptView);
 
-                final EditText commInput = (EditText) promptView.findViewById(R.id.commentInput);
-                final EditText colInput = (EditText) promptView.findViewById(R.id.colorInput);
-                final EditText startInput = (EditText) promptView.findViewById(R.id.startInput);
-                final EditText endInput = (EditText) promptView.findViewById(R.id.endInput);
-                final int listIndex = pos;
-
-                if (listIndex >= commandList.size()) {
+                final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+                final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
+                final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
+                final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
+                final int commandsIx = pos;
+                if (commandsIx >= commands.size()) {
                     alertDialogBuilder
                             .setCancelable(true)
                             .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    commandList.add(new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
-                                    makeGV();
+                                    commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(),startEntry.getText().toString(),endEntry.getText().toString()});
+                                    makeView();
                                 }
                             })
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -100,26 +104,22 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                 } else {
-                    commInput.setText(commandList.get(pos)[COMMENT_POS]);
-                    colInput.setText(commandList.get(pos)[COLOR_POS]);
-                    startInput.setText(commandList.get(pos)[START_POS]);
-                    endInput.setText(commandList.get(pos)[END_POS]);
+                    commentEntry.setText(commands.get(pos)[COMMENT_POS]);
+                    colorEntry.setText(commands.get(pos)[COLOR_POS]);
+                    startEntry.setText(commands.get(pos)[START_POS]);
+                    endEntry.setText(commands.get(pos)[END_POS]);
                     alertDialogBuilder
                             .setCancelable(true)
                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    //TODO: why is this conditional being performed??
-                                    if (listIndex >= commandList.size())
-                                        commandList.add(new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
-                                    else
-                                        commandList.set(listIndex, new String[]{commInput.getText().toString(), colInput.getText().toString(),startInput.getText().toString(),endInput.getText().toString()});
-                                    makeGV();
+                                    commands.set(commandsIx, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(),startEntry.getText().toString(),endEntry.getText().toString()});
+                                    makeView();
                                 }
                             })
                             .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    commandList.remove(listIndex);
-                                    makeGV();
+                                    commands.remove(commandsIx);
+                                    makeView();
                                 }
                             })
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -128,21 +128,20 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                 }
-                AlertDialog alertD = alertDialogBuilder.create();
-                alertD.show();
+                alertDialogBuilder.create().show();
                 return true;
             }
         });
     }
 
-    private void makeGV() {
-        Collections.sort(commandList, new Comparator<String[]>() {
+    private void makeView() {
+        Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
                 return s1[0].compareToIgnoreCase(s2[0]);
             }
         });
         List<Map<String, String>> LVentries = new ArrayList<Map<String, String>>();
-        for (String[] s : commandList) {
+        for (String[] s : commands) {
             final Map<String, String> listItem = new HashMap<String, String>();
             listItem.put("label", s[0]);
             listItem.put("syntax", "s:" + s[2] + " e:" + s[3]);
@@ -150,27 +149,26 @@ public class MainActivity extends AppCompatActivity {
         }
         final Map<String, String> listItem = new HashMap<String, String>();
         listItem.put("label", "New Command");
-        listItem.put("syntax", "Long press to add a new command");
+        listItem.put("syntax", "Long press to add");
         LVentries.add(listItem);
         SimpleAdapter LVadapter = new SimpleAdapter(this, LVentries, R.layout.gv_list_item,
                 new String[]{"label", "syntax"}, new int[]{R.id.text1, R.id.text2}) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-
-                if (position < commandList.size()) {
+                if (position < commands.size()) {
                     try {
-                        view.setBackgroundColor(Color.parseColor(commandList.get(position)[COLOR_POS]));
+                        view.setBackgroundColor(Color.parseColor(commands.get(position)[COLOR_POS]));
                     } catch (IllegalArgumentException e) {
-                        //TODO: logcat
+                        Log.d("tracker:","Bad background color @ " + position);
                     }
                 }
                 return view;
             }
         };
-        GV.setAdapter(LVadapter);
+        mainView.setAdapter(LVadapter);
         LVadapter.notifyDataSetChanged();
-        pref.edit().putString("commands", new Gson().toJson(commandList)).apply();
+        sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
 
     public static void writeString(File file, String data) throws Exception {
@@ -181,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
             stream.close();
         }
     }
-
     public static String readString(File file) throws Exception {
         int length = (int) file.length();
         byte[] bytes = new byte[length];
@@ -194,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return new String(bytes);
     }
-
     public static void copyFile(File src, File dst) throws Exception {
         FileChannel inChannel = null;
         FileChannel outChannel = null;
@@ -220,11 +216,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
-                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR_NAME + File.separator;
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }
+                final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
                 final File directory = new File(extStorPath);
                 directory.mkdirs();
-                final File outputLog = new File(extStorPath, LOG_FILE_NAME);
-                final File outputCmd = new File(extStorPath, COMMAND_FILE_NAME);
+                final File outputLog = new File(extStorPath, LOG_FILE);
+                final File outputCmd = new File(extStorPath, COMMANDS_FILE);
 
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                 alertBuilder
@@ -236,8 +235,8 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    writeString(outputCmd, pref.getString("commands", ""));
-                                    Toast.makeText(context, COMMAND_FILE_NAME + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    writeString(outputCmd, sprefs.getString("commands", ""));
+                                    Toast.makeText(context, COMMANDS_FILE + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -249,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     copyFile(new File(getFilesDir(), "log.txt"), outputLog);
-                                    Toast.makeText(context, LOG_FILE_NAME + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, LOG_FILE + " exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -261,8 +260,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     copyFile(new File(getFilesDir(), "log.txt"), outputLog);
-                                    writeString(outputCmd, pref.getString("commands", ""));
-                                    Toast.makeText(context, LOG_FILE_NAME + " and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
+                                    writeString(outputCmd, sprefs.getString("commands", ""));
+                                    Toast.makeText(context, LOG_FILE + " and commands.json exported to " + extStorPath, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                     Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -273,10 +272,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.menuItemImport: {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+                }
                 final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + "tracker" + File.separator;
                 final File directory = new File(extStorPath);
-                final File inputCmd = new File(extStorPath, COMMAND_FILE_NAME);
-                final File inputLog = new File(extStorPath, LOG_FILE_NAME);
+                final File inputCmd = new File(extStorPath, COMMANDS_FILE);
+                final File inputLog = new File(extStorPath, LOG_FILE);
 
                 if (!directory.isDirectory()) {
                     Toast.makeText(context, "Import error: " + extStorPath + "not found!", Toast.LENGTH_SHORT).show();
@@ -297,9 +299,9 @@ public class MainActivity extends AppCompatActivity {
                                         } else {
                                             Type listType = new TypeToken<List<String[]>>() {
                                             }.getType();
-                                            commandList = new Gson().fromJson(jsonText, listType);
-                                            makeGV();
-                                            Toast.makeText(context, COMMAND_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
+                                            commands = new Gson().fromJson(jsonText, listType);
+                                            makeView();
+                                            Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -315,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                            Toast.makeText(context, LOG_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                             Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -333,20 +335,20 @@ public class MainActivity extends AppCompatActivity {
                                         } else {
                                             Type listType = new TypeToken<List<String[]>>() {
                                             }.getType();
-                                            commandList = new Gson().fromJson(jsonText, listType);
-                                            makeGV();
-                                            Toast.makeText(context, COMMAND_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
+                                            commands = new Gson().fromJson(jsonText, listType);
+                                            makeView();
+                                            Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         Toast.makeText(context, "Import failed:" + e.toString(), Toast.LENGTH_SHORT).show();
                                     }
                                     if (!inputLog.exists()) {
-                                        Toast.makeText(context, LOG_FILE_NAME + " failed: no file", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, LOG_FILE + " failed: no file", Toast.LENGTH_SHORT).show();
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                            Toast.makeText(context, LOG_FILE_NAME + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                                             Toast.makeText(context, "Verify storage permission (Settings > Apps > tracker > Permissions)", Toast.LENGTH_SHORT).show();
@@ -365,7 +367,6 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
         return true;
-        //TODO: Request access / pick from tree
     }
 
     final static int COMMENT_POS = 0;
@@ -375,11 +376,11 @@ public class MainActivity extends AppCompatActivity {
 //    private String[] logComList;
 //    private Queue<AlertDialog> promptStack;
 
-    public boolean Log(int position) {
-        String[] args = commandList.get(position);
+    public boolean newLogEntry(int position) {
+        String[] args = commands.get(position);
         Date now = new Date();
         String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + args[COLOR_POS] + ">" + args[START_POS] + ">" + args[END_POS] + ">" + args[COMMENT_POS];
-        File internalFile = new File(getFilesDir(), LOG_FILE_NAME);
+        File internalFile = new File(getFilesDir(), LOG_FILE);
         try {
             FileOutputStream out = new FileOutputStream(internalFile, true);
             out.write(entry.getBytes());
@@ -518,7 +519,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(context, "Syntax error: wrong number of parameters", Toast.LENGTH_SHORT).show();
         }
         if (entry != null) {
-            File internalFile = new File(getFilesDir(), LOG_FILE_NAME);
+            File internalFile = new File(getFilesDir(), LOG_FILE);
             try {
                 FileOutputStream out = new FileOutputStream(internalFile, true);
                 out.write(entry.getBytes());
