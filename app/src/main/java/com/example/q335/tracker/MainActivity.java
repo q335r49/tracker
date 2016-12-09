@@ -55,10 +55,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mainView = (GridView) findViewById(R.id.GV);
-        sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
+        sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         if (jsonText.isEmpty()) {
             commands.add(new String[]{"Work now", "red", "0", ""});
@@ -361,7 +360,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.menuItemGraph:
-                startActivity(new Intent(this, GrapherActivity.class));
+                //startActivity(new Intent(this, GrapherActivity.class));
+                startActivity(new Intent(this, Main2Activity.class));
                 break;
             default:
                 return super.onOptionsItemSelected(item);

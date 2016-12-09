@@ -28,8 +28,8 @@ import java.util.TimeZone;
 public class GrapherActivity extends Activity {
     private CalendarView CV;
     private final String LOG_FILE = "log.txt";
-
     public List<String> logEntries;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -263,6 +263,6 @@ class CalendarView {
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
         if (!statusText.isEmpty())
-            canvas.drawText(statusText,20,screenH-50,textStyle);
+            canvas.drawText(statusText,20,screenH-150,textStyle);
     }
 }
