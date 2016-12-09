@@ -24,8 +24,6 @@ import java.util.List;
 public class GrapherActivity extends Activity {
     private CalendarView CV;
     private final String LOG_FILE_NAME = "log.txt";
-    //Log syntax: [HEADING]>Label|Color|Pos|comment
-    //TODO: finalize Log formatting
     //TODO: start logging exceptions in logcat rather than Toasting, tag Debug
 
     public List<String> Log;
@@ -33,14 +31,6 @@ public class GrapherActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grapher);
-
-//        Log = Arrays.asList(
-//                "1421299830>1-15-2015 5:30:30>s|L1|red|comment",
-//                "1421303400>1-15-2015 6:30:00>s|L1|blue|comment",
-//                "1421314200>1-15-2015 9:30:00>s|L2|green|com",
-//                "1421319600>1-15-2015 11:00:00>s|L3|grey|com",
-//                "1421460000>1-17-2015 2:00:00>s|L4|red|comment"
-//        );
         Log = read_file(getApplicationContext(),LOG_FILE_NAME);
         if (Log == null) {
             Toast.makeText(this, "Cannot read from log file", Toast.LENGTH_SHORT).show();
@@ -70,7 +60,6 @@ public class GrapherActivity extends Activity {
             return null;
         }
     }
-
 
     private class MainView extends View {
         public MainView(Context context) {
@@ -118,15 +107,15 @@ class CalendarShape {
             paint.setColor(Color.parseColor(color));
             return true;
         } catch (IllegalArgumentException e) {
-            return false;
+            return false; //TODO: catlog
         }
     }
     public void draw(CalendarView cv, Canvas canvas) {
         int[] rectC1;
         int[] rectC2;
-
         if (start==-1 || end==-1)
             return;
+        //TODO: Draw marks
         long rect0 = start;
         for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86399; nextMidnight < end; nextMidnight+=86400) {
             rectC1 = cv.conv_ts_screen(rect0);
@@ -138,24 +127,20 @@ class CalendarShape {
         rectC2 = cv.conv_ts_screen(end);
         canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
     }
-    @Override
-    public String toString() {
-        return "CalendarShape>start:" + start + ",end:" + end + ",mark:" + mark + ",comment:" + comment;
-    }
 }
 
 class CalendarView {
-        public long orig;
-        private int screenH;
-        private int screenW;
-        private float g0x;
-        private float g0y;
-        private float gridW;
-        private float gridH;
-        private float unit_width;
-            float getUnitWidth() {
-        return unit_width;
-    }
+    public long orig;
+    private int screenH;
+    private int screenW;
+    private float g0x;
+    private float g0y;
+    private float gridW;
+    private float gridH;
+    private float unit_width;
+        float getUnitWidth() {
+    return unit_width;
+}
     int[] conv_ts_screen(long ts) {
         long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
         float dow = (float) ((days + 4611686018427387900L)%7);
@@ -173,9 +158,6 @@ class CalendarView {
     long conv_grid_ts(float x, float y) {
         return (long) (conv_grid_num(x,y)*86400) + orig;
     }
-
-    private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
-
     public CalendarView(long orig, float g0x, float g0y, float gridW, float gridH) {
         this.screenH = 100;
         this.screenW = 100;
@@ -196,6 +178,7 @@ class CalendarView {
         this.unit_width = width/ gridW;
     }
 
+    private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
     //TS>READABLE>COLOR>S>E>COMMENT
     private final static int TIMESTAMP_POS = 0;
     private final static int READABLE_POS = 1;
