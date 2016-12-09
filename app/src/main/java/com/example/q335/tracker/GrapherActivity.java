@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -50,7 +48,7 @@ public class GrapherActivity extends Activity {
         }
 
         CV = new CalendarView(1421280000L,-1,-1,10,4);
-        CV.processLog(Log);
+        CV.log_to_shapes(Log);
         setContentView(new MainView(this));
     }
     public static List<String> read_file(Context context, String filename) {
@@ -108,7 +106,6 @@ class CalendarShape {
     long start=-1;
     long end=-1;
     long mark=-1;
-    String label=null;
     String comment=null;
     private Paint paint;
 
@@ -128,7 +125,7 @@ class CalendarShape {
         int[] rectC1;
         int[] rectC2;
 
-        if (start == -1 || end == -1)
+        if (start==-1 || end==-1)
             return;
         long rect0 = start;
         for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86399; nextMidnight < end; nextMidnight+=86400) {
@@ -143,25 +140,41 @@ class CalendarShape {
     }
     @Override
     public String toString() {
-        return "CalendarShape>start:" + start + ",end:" + end + ",mark:" + mark + ",label:" + label + ",comment:" + comment;
+        return "CalendarShape>start:" + start + ",end:" + end + ",mark:" + mark + ",comment:" + comment;
     }
 }
 
 class CalendarView {
-    public long orig;
-
-    private int screenH;
-    private int screenW;
-    private float g0x;
-    private float g0y;
-    private float gridW;
-    private float gridH;
-    private float unit_width;
-    private String statusText;
+        public long orig;
+        private int screenH;
+        private int screenW;
+        private float g0x;
+        private float g0y;
+        private float gridW;
+        private float gridH;
+        private float unit_width;
+            float getUnitWidth() {
+        return unit_width;
+    }
+    int[] conv_ts_screen(long ts) {
+        long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
+        float dow = (float) ((days + 4611686018427387900L)%7);
+        float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
+        return new int[] {(int) ((dow - g0x)/ gridW * screenW), (int) ((weeks - g0y)/ gridH * screenH)};
+    }
+    int[] conv_grid_screen(float x, float y) {
+        return new int[] {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
+    }
+    float conv_grid_num(float x, float y) {
+        float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
+        float weeks = (float) Math.floor(y)*7;
+        return (float) (weeks + dow + (y-Math.floor(y)));
+    }
+    long conv_grid_ts(float x, float y) {
+        return (long) (conv_grid_num(x,y)*86400) + orig;
+    }
 
     private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
-
-    private Paint textStyle;
 
     public CalendarView(long orig, float g0x, float g0y, float gridW, float gridH) {
         this.screenH = 100;
@@ -182,53 +195,61 @@ class CalendarView {
         this.screenH = height;
         this.unit_width = width/ gridW;
     }
-    public void processLog(List<String> log) {
+
+    //TS>READABLE>COLOR>S>E>COMMENT
+    private final static int TIMESTAMP_POS = 0;
+    private final static int READABLE_POS = 1;
+    private final static int COLOR_POS = 2;
+    private final static int START_POS = 3;
+    private final static int END_POS = 4;
+    private final static int COMMENT_POS = 5;
+    private final static int ARG_LEN = 6;
+    void log_to_shapes(List<String> log) {
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
         long ts;
-
         //TODO: determine initial window from Log
         for (String line : log) {
-            String[] LogParts = line.split(">",-1);
-            try {
-                ts = Long.parseLong(LogParts[0]);
-            } catch (NumberFormatException e) {
-                continue;
+            String[] args = line.split(">",-1);
+            if (args.length < ARG_LEN) {
+                continue; //TODO: catlog
             }
-            String[] ArgParts = LogParts[2].split("\\|",-1);
-            if (ArgParts.length > 0) {
-                switch (ArgParts[0]) {
-                    case "s":
-                        curTD.end = ts;
+            try {
+                ts = Long.parseLong(args[TIMESTAMP_POS]);
+                if (args[END_POS].isEmpty()) {
+                    if (!args[START_POS].isEmpty()) {
+                        if (curTD.end == -1)
+                            curTD.end = ts + Long.parseLong(args[START_POS]);
                         curTD = new CalendarShape();
                         shapes.add(curTD);
-                        curTD.start = ts;
-                        if (ArgParts.length > 1)
-                            curTD.label = ArgParts[1];
-                        if (ArgParts.length > 2)
-                            curTD.setColor(ArgParts[2]);
-                        if (ArgParts.length > 3)
-                            curTD.comment = ArgParts[3];
-                        break;
-                    case "e":
-                        curTD.end = ts;
-                        break;
-                    case "m":
-                        CalendarShape markTD = new CalendarShape();
-                        markTD.mark = ts;
-                        if (ArgParts.length > 1)
-                            markTD.label = ArgParts[1];
-                        if (ArgParts.length > 2)
-                            markTD.setColor(ArgParts[2]);
-                        if (ArgParts.length > 3)
-                            markTD.comment = ArgParts[3];
-                        shapes.add(markTD);
-                        break;
+                        curTD.start = ts + Long.parseLong(args[START_POS]);
+                        curTD.setColor(args[COLOR_POS]);
+                        curTD.comment = args[COMMENT_POS];
+                    } else {
+                        //TODO: log error condition
+                    }
+                } else if (args[START_POS].isEmpty()) {
+                    curTD.end = ts + Long.parseLong(args[END_POS]);
+                } else {
+                    CalendarShape markTD = new CalendarShape();
+                    markTD.start = ts + Long.parseLong(args[START_POS]);
+                    markTD.end = ts + Long.parseLong(args[END_POS]);
+                    markTD.setColor(args[COLOR_POS]);
+                    markTD.comment = args[COMMENT_POS];
+                    shapes.add(markTD);
                 }
+            } catch (IllegalArgumentException e) {
+                //TODO: log bad number
             }
         }
     }
-    public void draw(Canvas canvas) {
+
+    private String statusText;
+        void setStatusText(String s) {
+            statusText = s;
+        }
+        private Paint textStyle;
+    void draw(Canvas canvas) {
         for (CalendarShape s : shapes) {
             s.draw(this,canvas);
         }
@@ -248,32 +269,5 @@ class CalendarView {
         }
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,screenH-50,textStyle);
-    }
-    public float getUnitWidth() {
-        return unit_width;
-    }
-    public void setStatusText(String s) {
-        statusText = s;
-    }
-    public String getStatusText() {
-        return statusText;
-    }
-
-    public int[] conv_ts_screen(long ts) {
-        long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
-        float dow = (float) ((days + 4611686018427387900L)%7);
-        float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
-        return new int[] {(int) ((dow - g0x)/ gridW * screenW), (int) ((weeks - g0y)/ gridH * screenH)};
-    }
-    public int[] conv_grid_screen(float x, float y) {
-       return new int[] {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
-    }
-    public float conv_grid_num(float x, float y) {
-        float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
-        float weeks = (float) Math.floor(y)*7;
-        return (float) (weeks + dow + (y-Math.floor(y)));
-    }
-    public long conv_grid_ts(float x, float y) {
-        return (long) (conv_grid_num(x,y)*86400) + orig;
     }
 }
