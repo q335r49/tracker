@@ -1,6 +1,7 @@
 package com.example.q335.tracker;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -39,6 +40,7 @@ public class CalendarFrag extends Fragment {
 
     public void processNewEntry(String E) {
         CV.addLogEntry(E);
+        mView.invalidate();
     }
 
     // Rename parameter arguments, choose names that match
@@ -163,7 +165,7 @@ public class CalendarFrag extends Fragment {
             extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            //TODO: Scale and zoom at once
+            //TODO: Scale and pan at once
             CV.reScale(detector.getScaleFactor());
             mView.invalidate();
             return true;
@@ -246,6 +248,8 @@ class CalendarView {
         unit_width = screenW / gridW;
         textStyle = new Paint();
         textStyle.setStyle(Paint.Style.FILL);
+        //TODO: Dynamically set text size
+        textStyle.setTextSize(24f);
         statusText = "";
         ratio_grid_screen_W = this.gridW/screenW;
         ratio_grid_screen_H = this.gridH/screenH;
@@ -263,6 +267,8 @@ class CalendarView {
         unit_width = screenW / gridW;
         textStyle = new Paint();
         textStyle.setStyle(Paint.Style.FILL);
+        //TODO: Dynamically set text size
+        textStyle.setTextSize(24f);
         statusText = "";
         ratio_grid_screen_W = this.gridW/screenW;
         ratio_grid_screen_H = this.gridH/screenH;
@@ -276,7 +282,7 @@ class CalendarView {
     }
 
     public void shiftWindow(float x, float y) {
-        //TODO: Limit horizontal pan
+        //TODO: Limit horizontal pan range
         g0x -= x * ratio_grid_screen_W;
         g0y -= y * ratio_grid_screen_H;
     }
@@ -382,20 +388,18 @@ class CalendarView {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         setOrig(cal.getTimeInMillis()/1000);
-        //TODO: figure out initialization logic
+        //TODO: Clean up origin initialization logic
     }
 
     private String statusText;
         void setStatusText(String s) { statusText = s; }
     private Paint textStyle;
     void draw(Canvas canvas) {
-        //TODO: fix grid drawing bug
         for (CalendarRect s : shapes) {
             s.draw(this,canvas);
         }
         float startDate = (float) Math.floor(g0y);
         for (int i = 0; i< gridH +1; i++ ) {
-            //TODO: Better date labeling
             int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
             canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), screenW/10, lblXY[1], textStyle);
             int[] l0 = conv_grid_screen(0,startDate+i);
