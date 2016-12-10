@@ -38,12 +38,12 @@ import static android.content.Context.MODE_PRIVATE;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link Buttons.OnFragmentInteractionListener} interface
+ * {@link CommandsFrag.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link Buttons#newInstance} factory method to
+ * Use the {@link CommandsFrag#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Buttons extends Fragment {
+public class CommandsFrag extends Fragment {
     SharedPreferences sprefs;
     private GridView mainView;
     private List<String[]> commands = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Buttons extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public Buttons() {
+    public CommandsFrag() {
         // Required empty public constructor
     }
 
@@ -75,11 +75,11 @@ public class Buttons extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment Buttons.
+     * @return A new instance of fragment CommandsFrag.
      */
     // TODO: Rename and change types and number of parameters
-    public static Buttons newInstance(String param1, String param2) {
-        Buttons fragment = new Buttons();
+    public static CommandsFrag newInstance(String param1, String param2) {
+        CommandsFrag fragment = new CommandsFrag();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -102,8 +102,8 @@ public class Buttons extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
-        View view = inflater.inflate(R.layout.activity_main,container, false);
+        //setContentView(R.layout.fragment_commands);
+        View view = inflater.inflate(R.layout.fragment_commands,container, false);
         mainView = (GridView) view.findViewById(R.id.GV);
 
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
