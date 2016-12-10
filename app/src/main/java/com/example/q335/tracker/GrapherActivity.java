@@ -29,6 +29,7 @@ public class GrapherActivity extends Activity {
     private CalendarView CV;
     private final String LOG_FILE = "log.txt";
     public List<String> logEntries;
+    View mView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,8 @@ public class GrapherActivity extends Activity {
         }
         CV = new CalendarView();
         CV.log_to_shapes(logEntries);
-        setContentView(new MainView(this));
+        mView = new MainView(this);
+        setContentView(mView);
     }
     public static List<String> read_file(Context context, String filename) {
         try {
@@ -201,9 +203,46 @@ class CalendarView {
     private final static int END_POS = 4;
     private final static int COMMENT_POS = 5;
     private final static int ARG_LEN = 6;
+    private CalendarShape curTD;
+
+    public void addLogEntry(String line) {
+        long ts;
+        String[] args = line.split(">",-1);
+        if (args.length < ARG_LEN) {
+            Log.e("tracker:","Insufficient args: "+line);
+            return;
+        }
+        try {
+            ts = Long.parseLong(args[TIMESTAMP_POS]);
+            if (args[END_POS].isEmpty()) {
+                if (!args[START_POS].isEmpty()) {
+                    if (curTD.end == -1)
+                        curTD.end = ts + Long.parseLong(args[START_POS]);
+                    curTD = new CalendarShape();
+                    shapes.add(curTD);
+                    curTD.start = ts + Long.parseLong(args[START_POS]);
+                    curTD.setColor(args[COLOR_POS]);
+                    curTD.comment = args[COMMENT_POS];
+                } else {
+                    Log.e("tracker:","Empty start and end: "+line);
+                }
+            } else if (args[START_POS].isEmpty()) {
+                curTD.end = ts + Long.parseLong(args[END_POS]);
+            } else {
+                CalendarShape markTD = new CalendarShape();
+                markTD.start = ts + Long.parseLong(args[START_POS]);
+                markTD.end = ts + Long.parseLong(args[END_POS]);
+                markTD.setColor(args[COLOR_POS]);
+                markTD.comment = args[COMMENT_POS];
+                shapes.add(markTD);
+            }
+        } catch (IllegalArgumentException e) {
+            Log.e("tracker:","Bad color or number format: "+line);
+        }
+    }
     void log_to_shapes(List<String> log) {
         shapes = new ArrayList<>();
-        CalendarShape curTD = new CalendarShape();
+        curTD = new CalendarShape();
         shapes.add(curTD);
         long ts=0;
         for (String line : log) {

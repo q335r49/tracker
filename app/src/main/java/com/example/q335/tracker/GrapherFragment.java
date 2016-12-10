@@ -34,6 +34,11 @@ public class GrapherFragment extends Fragment {
     private static final String LOG_FILE = "log.txt";
     public List<String> logEntries;
     Context context;
+    View mView;
+
+    public void processNewEntry(String E) {
+        CV.addLogEntry(E);
+    }
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -97,7 +102,8 @@ public class GrapherFragment extends Fragment {
         //Toast.makeText(context, "Grapher activity: OnCreateView", Toast.LENGTH_LONG).show();
         //TODO: receive communications from Buttons / Main2Activity (eg, "Import") and update view
         //update();
-        return new MainView(getContext());
+        mView = new MainView(getContext());
+        return mView;
     }
 
     public static List<String> read_file(Context context, String filename) {
@@ -128,6 +134,8 @@ public class GrapherFragment extends Fragment {
         }
         @Override
         protected void onDraw(Canvas canvas) {
+            //Toast.makeText(getActivity().getApplicationContext(), "Draw!!!!", Toast.LENGTH_SHORT).show();
+            //TODO: Investigate why draw is happening multiple times
             super.onDraw(canvas);
             CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
             CV.draw(canvas);
@@ -158,12 +166,12 @@ public class GrapherFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override

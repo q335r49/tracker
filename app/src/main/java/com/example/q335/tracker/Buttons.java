@@ -185,6 +185,13 @@ public class Buttons extends Fragment {
         Toast.makeText(context, "Executed wholes startup routine!", Toast.LENGTH_LONG).show();
         return view;
     }
+
+    public void loadCommands(String com) {
+        Type listType = new TypeToken<List<String[]>>() {
+        }.getType();
+        commands = new Gson().fromJson(com, listType);
+        makeView();
+    }
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -221,7 +228,7 @@ public class Buttons extends Fragment {
         LVadapter.notifyDataSetChanged();
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
-    public boolean newLogEntry(int position) {
+    private void newLogEntry(int position) {
         String[] args = commands.get(position);
         Date now = new Date();
         String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + args[COLOR_POS] + ">" + args[START_POS] + ">" + args[END_POS] + ">" + args[COMMENT_POS];
@@ -231,30 +238,28 @@ public class Buttons extends Fragment {
             out.write(entry.getBytes());
             out.write(System.getProperty("line.separator").getBytes());
             out.close();
-            //context.getSupportActionBar().setTitle(args[COMMENT_POS]);
-            return true;
         } catch (Exception e) {
-            Toast.makeText(context, "Internal Storage Write Error!", Toast.LENGTH_LONG).show();
-            return false;
+            Toast.makeText(context, "Cannot write entry to internal storage", Toast.LENGTH_LONG).show();
         }
+        mListener.processNewLogEntry(entry);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+//        if (mListener != null) {
+//            mListener.onFragmentInteraction(uri);
+//        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -263,18 +268,7 @@ public class Buttons extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void processNewLogEntry(String E);
     }
 }

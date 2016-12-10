@@ -40,7 +40,13 @@ import java.lang.reflect.Type;
 import java.nio.channels.FileChannel;
 import java.util.List;
 
-public class Main2Activity extends AppCompatActivity {
+public class Main2Activity extends AppCompatActivity implements Buttons.OnFragmentInteractionListener, GrapherFragment.OnFragmentInteractionListener {
+    public void processNewLogEntry(String E) {
+        GF.processNewEntry(E);
+    }
+    public void onFragmentInteraction(Uri uri) {
+        //TODO: Implement fragment listeners
+    }
 
     Context context;
     SharedPreferences sprefs;
@@ -225,11 +231,7 @@ public class Main2Activity extends AppCompatActivity {
                                         if (jsonText == null) {
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         } else {
-                                            Type listType = new TypeToken<List<String[]>>() {
-                                            }.getType();
-                                            //TODO: communicate to Buttons, GrapherFragment
-                                            //commands = new Gson().fromJson(jsonText, listType);
-                                            //makeView();
+                                            BF.loadCommands(jsonText);
                                             Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
@@ -246,6 +248,7 @@ public class Main2Activity extends AppCompatActivity {
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
+                                            GF.update();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
@@ -262,11 +265,7 @@ public class Main2Activity extends AppCompatActivity {
                                         if (jsonText == null) {
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         } else {
-                                            Type listType = new TypeToken<List<String[]>>() {
-                                            }.getType();
-                                            //TODO: communicate to Buttons, GrapherFragment
-//                                            commands = new Gson().fromJson(jsonText, listType);
-//                                            makeView();
+                                            BF.loadCommands(jsonText);
                                             Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
@@ -278,6 +277,7 @@ public class Main2Activity extends AppCompatActivity {
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
+                                            GF.update();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
@@ -285,8 +285,7 @@ public class Main2Activity extends AppCompatActivity {
                                         }
                                     }
                                 }
-                            })
-                            .show();
+                            }).show();
                 }
                 break;
             }
