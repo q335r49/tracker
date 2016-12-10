@@ -1,9 +1,10 @@
-## tracker
+## Track every minute of your day
 
-*Data is our new god* - Cosmos
+Tracker is a simple app for android consisting of buttons to log your time. This log is then painted onto a calendar display.
 
-Tracker is an Android app that is intended to help you track *every single minute of your day*. Right now, it is simply an interface to allow you to append a custom formatted log line to a file with a button press.
+At present, it is in the "minimum working state", but is being updated daily.
 
-When it is complete (soon), it will generate cool visualizations based on the logged entries and have an Android watch interface.
+<a href="url"><img src="http://image.prntscr.com/image/2a3691e352ad4cb3844b48ce98c640ac.png" width="300"></a>
+<a href="url"><img src="http://image.prntscr.com/image/645edcf8c8a3430b9604716eae30e731.png" width="300"></a>
 
-![alt tag](http://image.prntscr.com/image/89da00133ca54b37a3a0cbf9661662ab.png)
+
