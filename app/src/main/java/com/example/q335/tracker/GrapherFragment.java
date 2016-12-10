@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -31,14 +30,9 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class GrapherFragment extends Fragment {
-    // My code <<<
     private CalendarView CV;
-    private final String LOG_FILE = "log.txt";
+    private static final String LOG_FILE = "log.txt";
     public List<String> logEntries;
-     // >>>
-
-
-
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,7 +74,9 @@ public class GrapherFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
+        update();
+    }
+    public void update() {
         logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
         if (logEntries == null) {
             Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
@@ -88,7 +84,7 @@ public class GrapherFragment extends Fragment {
         }
         CV = new CalendarView(1421280000L,-1,-1,10,4);
         CV.log_to_shapes(logEntries);
-
+        //TODO: Less naive update function
     }
 
     @Override
@@ -97,9 +93,8 @@ public class GrapherFragment extends Fragment {
         // Inflate the layout for this fragment
 
         //inflater.inflate(R.layout.activity_grapher, container, false);
-        //Toast.makeText(getContext(), "onCreatView called!", Toast.LENGTH_LONG).show();
+        update();
         return new MainView(getContext());
-
     }
 
     public static List<String> read_file(Context context, String filename) {

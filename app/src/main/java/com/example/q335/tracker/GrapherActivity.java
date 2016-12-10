@@ -103,13 +103,11 @@ class CalendarShape {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
     }
-    public boolean setColor(String color) {
+    public void setColor(String color) {
         try {
             paint.setColor(Color.parseColor(color));
-            return true;
         } catch (IllegalArgumentException e) {
             Log.e("tracker:","Bad color format: "+color);
-            return false;
         }
     }
     public void draw(CalendarView cv, Canvas canvas) {
@@ -195,7 +193,7 @@ class CalendarView {
         this.unit_width = width/ gridW;
     }
 
-    private ArrayList<CalendarShape> shapes = new ArrayList<CalendarShape>();
+    private ArrayList<CalendarShape> shapes;
     //TS>READABLE>COLOR>S>E>COMMENT
     private final static int TIMESTAMP_POS = 0;
     private final static int COLOR_POS = 2;
@@ -204,6 +202,7 @@ class CalendarView {
     private final static int COMMENT_POS = 5;
     private final static int ARG_LEN = 6;
     void log_to_shapes(List<String> log) {
+        shapes = new ArrayList<>();
         CalendarShape curTD = new CalendarShape();
         shapes.add(curTD);
         long ts=0;
