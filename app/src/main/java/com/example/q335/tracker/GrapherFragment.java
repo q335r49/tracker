@@ -143,7 +143,6 @@ public class GrapherFragment extends Fragment {
                 case MotionEvent.ACTION_MOVE:
                 case MotionEvent.ACTION_UP:
                     CV.setStatusText("X:" + eventX + " Y:" + eventY);
-                    //TODO: get rid of statusbar
                     break;
             }
             invalidate();

@@ -39,7 +39,7 @@ public class GrapherActivity extends Activity {
             Toast.makeText(this, "Cannot read from log file", Toast.LENGTH_LONG).show();
             return;
         }
-        CV = new CalendarView(1421280000L,-1,-1,10,4);
+        CV = new CalendarView();
         CV.log_to_shapes(logEntries);
         setContentView(new MainView(this));
     }
@@ -85,7 +85,6 @@ public class GrapherActivity extends Activity {
                 case MotionEvent.ACTION_MOVE:
                 case MotionEvent.ACTION_UP:
                     CV.setStatusText("X:" + eventX + " Y:" + eventY);
-                    //TODO: get rid of statusbar
                     break;
             }
             invalidate();
@@ -118,9 +117,8 @@ class CalendarShape {
         int[] rectC2;
         if (start==-1 || end==-1)
             return;
-        //TODO: Draw marks
         long rect0 = start;
-        for (long nextMidnight = start-(start-cv.orig +4611686018427360000L)%86400+86399; nextMidnight < end; nextMidnight+=86400) {
+        for (long nextMidnight = start-(start-cv.getOrig() +4611686018427360000L)%86400+86399; nextMidnight < end; nextMidnight+=86400) {
             rectC1 = cv.conv_ts_screen(rect0);
             rectC2 = cv.conv_ts_screen(nextMidnight);
             canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
@@ -133,8 +131,9 @@ class CalendarShape {
 }
 
 class CalendarView {
-    public long orig;
+    private long orig;
         public void setOrig(long orig) { this.orig = orig; }
+        public long getOrig() { return orig; }
     private int screenH;
     private int screenW;
     private float g0x;
@@ -170,6 +169,20 @@ class CalendarView {
         this.g0y = g0y;
         this.gridW = gridW;
         this.gridH = gridH;
+
+        unit_width = screenW / gridW;
+        textStyle = new Paint();
+        textStyle.setStyle(Paint.Style.FILL);
+        statusText = "";
+    }
+    public CalendarView() {
+        this.screenH = 100;
+        this.screenW = 100;
+        this.orig = System.currentTimeMillis() / 1000;
+        this.g0x = -1;
+        this.g0y = -2;
+        this.gridW = 10;
+        this.gridH = 4;
 
         unit_width = screenW / gridW;
         textStyle = new Paint();
