@@ -1,7 +1,6 @@
 package com.example.q335.tracker;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,8 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -29,14 +26,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import static android.view.MotionEvent.INVALID_POINTER_ID;
-
 public class CalendarFrag extends Fragment {
-    private CalendarView CV;
+    private CalendarWin CV;
     private static final String LOG_FILE = "log.txt";
     public List<String> logEntries;
     Context context;
-    MainView mView;
+    ScaleView mView;
 
     public void processNewEntry(String E) {
         CV.addLogEntry(E);
@@ -74,9 +69,17 @@ public class CalendarFrag extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         context = getActivity().getApplicationContext();
-        update();
     }
-    public void update() {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
+        mView = (ScaleView) (view.findViewById(R.id.drawing));
+        loadCalendarView();
+        return view;
+    }
+    public void loadCalendarView() {
         logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
         if (logEntries == null) {
             Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
@@ -89,17 +92,9 @@ public class CalendarFrag extends Fragment {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        CV = new CalendarView(cal.getTimeInMillis()/1000,-1,-1,10,4);
+        CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
         CV.log_to_shapes(logEntries);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
-        mView = (MainView) (view.findViewById(R.id.drawing));
         mView.setCV(CV);
-        return view;
     }
 
     public static List<String> read_file(Context context, String filename) {
@@ -125,7 +120,7 @@ public class CalendarFrag extends Fragment {
         }
     }
 
-    // Rename method, update argument and hook method into UI event
+    // Rename method, loadCalendarView argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -154,9 +149,8 @@ public class CalendarFrag extends Fragment {
     }
 }
 
-class CalendarView {
+class CalendarWin {
     private long orig;
-    public void setOrig(long orig) { this.orig = orig; }
     public long getOrig() { return orig; }
     private int screenH;
     private int screenW;
@@ -189,7 +183,7 @@ class CalendarView {
         return (long) (conv_grid_num(x,y)*86400) + orig;
     }
 
-    public CalendarView(long orig, float g0x, float g0y, float gridW, float gridH) {
+    public CalendarWin(long orig, float g0x, float g0y, float gridW, float gridH) {
         this.screenH = 100;
         this.screenW = 100;
         this.orig = orig;
@@ -208,7 +202,7 @@ class CalendarView {
         ratio_grid_screen_H = this.gridH/screenH;
 
     }
-    public CalendarView() {
+    public CalendarWin() {
         this.screenH = 100;
         this.screenW = 100;
         this.orig = System.currentTimeMillis() / 1000;
@@ -376,7 +370,7 @@ class CalendarRect {
             Log.e("tracker:","Bad color format: "+color);
         }
     }
-    void draw(CalendarView cv, Canvas canvas) {
+    void draw(CalendarWin cv, Canvas canvas) {
         int[] rectC1;
         int[] rectC2;
         if (start==-1 || end==-1)

@@ -225,7 +225,7 @@ public class CommandsFrag extends Fragment {
         mListener.processNewLogEntry(entry);
     }
 
-    //Rename method, update argument and hook method into UI event
+    //Rename method, loadCalendarView argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
 //            mListener.onFragmentInteraction(uri);

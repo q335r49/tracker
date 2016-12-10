@@ -7,20 +7,20 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-public class MainView extends View {
-    CalendarView CV;
+public class ScaleView extends View {
+    CalendarWin CV;
     ScaleListener SL;
-        public void setCV(CalendarView CV) {
+        public void setCV(CalendarWin CV) {
             this.CV = CV;
             SL.setCV(CV);
         }
 
-    public MainView(Context context) {
+    public ScaleView(Context context) {
         super(context);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
     }
-    public MainView(Context context, AttributeSet attrs) {
+    public ScaleView(Context context, AttributeSet attrs) {
         super(context, attrs);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
@@ -41,7 +41,6 @@ public class MainView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mScaleDetector.onTouchEvent(ev);
-
         float x = ev.getX();
         float y = ev.getY();
         switch (ev.getAction()) {
@@ -50,9 +49,8 @@ public class MainView extends View {
                 mLastTouchY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                //final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
-                invalidate();
+                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 25)
+                    CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
                 mLastTouchX = x;
                 mLastTouchY = y;
                 break;
@@ -60,8 +58,6 @@ public class MainView extends View {
                 //CV.setStatusText("X:" + eventX + " Y:" + eventY);
                 break;
         }
-
-
         invalidate();
         return true;
     }
@@ -75,6 +71,6 @@ class ScaleListener
         return true;
     }
 
-    private CalendarView CV;
-        public void setCV(CalendarView CV) { this.CV = CV; }
+    private CalendarWin CV;
+        public void setCV(CalendarWin CV) { this.CV = CV; }
 }

@@ -4,7 +4,7 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context="com.example.q335.tracker.CalendarFrag">
 
-    <com.example.q335.tracker.MainView
+    <com.example.q335.tracker.ScaleView
         android:id="@+id/drawing"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -13,6 +13,6 @@ tools:context="com.example.q335.tracker.CalendarFrag">
         android:layout_marginRight="5dp"
         android:layout_marginTop="3dp"
         android:background="@android:color/transparent" >
-    </com.example.q335.tracker.MainView>
+    </com.example.q335.tracker.ScaleView>
 
 </FrameLayout>

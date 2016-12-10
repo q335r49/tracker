@@ -20,7 +20,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -233,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                            GF.update();
+                                            GF.loadCalendarView();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
@@ -262,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     } else {
                                         try {
                                             copyFile(inputLog, new File(getFilesDir(), "log.txt"));
-                                            GF.update();
+                                            GF.loadCalendarView();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
