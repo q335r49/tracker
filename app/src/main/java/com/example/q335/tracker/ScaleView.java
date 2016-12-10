@@ -10,10 +10,8 @@ import android.view.View;
 public class ScaleView extends View {
     CalendarWin CV;
     ScaleListener SL;
-        public void setCV(CalendarWin CV) {
-            this.CV = CV;
-            SL.setCV(CV);
-        }
+    ScaleGestureDetector mScaleDetector;
+    public void setCV(CalendarWin CV) { this.CV = CV; }
 
     public ScaleView(Context context) {
         super(context);
@@ -34,7 +32,6 @@ public class ScaleView extends View {
         CV.draw(canvas);
     }
 
-    ScaleGestureDetector mScaleDetector;
     private float mLastTouchX=-1;
     private float mLastTouchY=-1;
 
@@ -49,7 +46,7 @@ public class ScaleView extends View {
                 mLastTouchY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 25)
+                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150)
                     CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
                 mLastTouchX = x;
                 mLastTouchY = y;
@@ -61,16 +58,13 @@ public class ScaleView extends View {
         invalidate();
         return true;
     }
-}
 
-class ScaleListener
-        extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-    @Override
-    public boolean onScale(ScaleGestureDetector detector) {
-        CV.reScale(detector.getScaleFactor());
-        return true;
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            CV.reScale(detector.getScaleFactor());
+            return true;
+        }
     }
-
-    private CalendarWin CV;
-        public void setCV(CalendarWin CV) { this.CV = CV; }
 }
+
