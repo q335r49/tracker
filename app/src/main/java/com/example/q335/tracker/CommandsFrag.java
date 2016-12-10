@@ -34,15 +34,6 @@ import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CommandsFrag.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link CommandsFrag#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class CommandsFrag extends Fragment {
     SharedPreferences sprefs;
     private GridView mainView;
@@ -54,12 +45,11 @@ public class CommandsFrag extends Fragment {
     final static int END_POS = 3;
     Context context;
 
-    // TODO: Rename parameter arguments, choose names that match
+    //Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
+    //Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -69,15 +59,6 @@ public class CommandsFrag extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CommandsFrag.
-     */
-    // TODO: Rename and change types and number of parameters
     public static CommandsFrag newInstance(String param1, String param2) {
         CommandsFrag fragment = new CommandsFrag();
         Bundle args = new Bundle();
@@ -244,7 +225,7 @@ public class CommandsFrag extends Fragment {
         mListener.processNewLogEntry(entry);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+    //Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
 //            mListener.onFragmentInteraction(uri);

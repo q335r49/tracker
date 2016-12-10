@@ -24,9 +24,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -39,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         GF.processNewEntry(E);
     }
     public void onFragmentInteraction(Uri uri) {
-        //TODO: Implement fragment listeners
     }
 
     Context context;
@@ -57,10 +53,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     private ViewPager mViewPager;
 
     @Override
@@ -93,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         });
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -290,10 +281,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         return true;
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment F0;
         Fragment F1;
@@ -309,9 +296,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0)
-                return BF;
+                return F0;
             else
-                return GF;
+                return F1;
         }
 
         @Override
