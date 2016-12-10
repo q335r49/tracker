@@ -171,8 +171,13 @@ class CalendarWin {
         float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
         return new int[] {(int) ((dow - g0x)/ ratio_grid_screen_W), (int) ((weeks - g0y)/ ratio_grid_screen_H)};
     }
-    int[] conv_grid_screen(float x, float y) {
+    int[] conv_grid_screen(float x, float y) { //TODO:Should be float[]
         return new int[] {(int) ((x - g0x)/ ratio_grid_screen_W), (int) ((y - g0y)/ ratio_grid_screen_H)};
+    }
+    float[] conv_screen_grid(float sx, float sy) {
+        float SOx = (-g0x)/ratio_grid_screen_W;
+        float SOy = (-g0y)/ratio_grid_screen_H;
+        return new float[] {(sx-SOx)*ratio_grid_screen_W, (sy-SOy)*ratio_grid_screen_H};
     }
     float conv_grid_num(float x, float y) {
         float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
@@ -233,13 +238,16 @@ class CalendarWin {
         g0x -= x * ratio_grid_screen_W;
         g0y -= y * ratio_grid_screen_H;
     }
-    public void reScale(float scale) {
+    public void reScale(float scale, float x0, float y0) {
+        float[] newGridOrig = conv_screen_grid(x0-x0/scale,y0-y0/scale);
+        g0x = newGridOrig[0];
+        g0y = newGridOrig[1];
         gridW /=scale;
         gridH /=scale;
+        //TODO: this ratio is prob just /= scale
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
-        //TODO: Reset view in menu
-        //TODO: Import COMMAND in Commands screen, import LOG in calendar screen!!
+        setStatusText("scale: " + Float.toString(scale) + " x0:" + Float.toString(x0) + "y0:" + Float.toString(y0) + " g0x:" + Float.toString(g0x) + " g0y:" + Float.toString(g0y));
     }
 
     private ArrayList<CalendarRect> shapes;

@@ -2,6 +2,7 @@ package com.example.q335.tracker;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -62,7 +63,7 @@ public class ScaleView extends View {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            CV.reScale(detector.getScaleFactor());
+            CV.reScale(detector.getScaleFactor(),detector.getFocusX(),detector.getFocusY());
             return true;
         }
     }
