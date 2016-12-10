@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -114,10 +115,11 @@ public class CalendarFrag extends Fragment {
         }
     }
     private class MainView extends View {
-        private int mActivePointerId = INVALID_POINTER_ID;
         public MainView(Context context) {
             super(context);
+            mScaleDetector = new ScaleGestureDetector(getActivity().getApplicationContext(), new ScaleListener());
         }
+
         @Override
         protected void onDraw(Canvas canvas) {
             //Toast.makeText(getActivity().getApplicationContext(), "Draw!!!!", Toast.LENGTH_SHORT).show();
@@ -127,14 +129,13 @@ public class CalendarFrag extends Fragment {
             CV.draw(canvas);
         }
 
-        //ScaleGestureDetector mScaleDetector;
+        ScaleGestureDetector mScaleDetector;
         private float mLastTouchX=-1;
         private float mLastTouchY=-1;
-        private float mPosX;
-        private float mPosY;
+
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
-            //mScaleDetector.onTouchEvent(ev);
+            mScaleDetector.onTouchEvent(ev);
 
             float x = ev.getX();
             float y = ev.getY();
@@ -154,6 +155,17 @@ public class CalendarFrag extends Fragment {
                     //CV.setStatusText("X:" + eventX + " Y:" + eventY);
                     break;
             }
+            return true;
+        }
+    }
+
+    private class ScaleListener
+            extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            //TODO: Scale and zoom at once
+            CV.reScale(detector.getScaleFactor());
+            mView.invalidate();
             return true;
         }
     }
@@ -211,7 +223,7 @@ class CalendarView {
         return new int[] {(int) ((dow - g0x)/ ratio_grid_screen_W), (int) ((weeks - g0y)/ ratio_grid_screen_H)};
     }
     int[] conv_grid_screen(float x, float y) {
-        return new int[] {(int) ((x - g0x)/ gridW * screenW), (int) ((y - g0y)/ gridH * screenH)};
+        return new int[] {(int) ((x - g0x)/ ratio_grid_screen_W), (int) ((y - g0y)/ ratio_grid_screen_H)};
     }
     float conv_grid_num(float x, float y) {
         float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
@@ -259,13 +271,22 @@ class CalendarView {
         this.screenW = width;
         this.screenH = height;
         this.unit_width = width/ gridW;
-        ratio_grid_screen_W = this.gridW/screenW;
-        ratio_grid_screen_H = this.gridH/screenH;
+        ratio_grid_screen_W = gridW/screenW;
+        ratio_grid_screen_H = gridH/screenH;
     }
 
     public void shiftWindow(float x, float y) {
+        //TODO: Limit horizontal pan
         g0x -= x * ratio_grid_screen_W;
         g0y -= y * ratio_grid_screen_H;
+    }
+    public void reScale(float scale) {
+        gridW /=scale;
+        gridH /=scale;
+        ratio_grid_screen_W = gridW/screenW;
+        ratio_grid_screen_H = gridH/screenH;
+        //TODO: Reset view in menu
+        //TODO: Import COMMAND in Commands screen, import LOG in calendar screen!!
     }
 
     private ArrayList<CalendarRect> shapes;
@@ -361,22 +382,22 @@ class CalendarView {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         setOrig(cal.getTimeInMillis()/1000);
+        //TODO: figure out initialization logic
     }
 
     private String statusText;
-    void setStatusText(String s) {
-        statusText = s;
-    }
+        void setStatusText(String s) { statusText = s; }
     private Paint textStyle;
     void draw(Canvas canvas) {
+        //TODO: fix grid drawing bug
         for (CalendarRect s : shapes) {
             s.draw(this,canvas);
         }
-        float startDate = (float) Math.floor(g0x);
+        float startDate = (float) Math.floor(g0y);
         for (int i = 0; i< gridH +1; i++ ) {
             //TODO: Better date labeling
             int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
-            canvas.drawText(new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000)), lblXY[0], lblXY[1], textStyle);
+            canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), screenW/10, lblXY[1], textStyle);
             int[] l0 = conv_grid_screen(0,startDate+i);
             int[] l1 = conv_grid_screen(7,startDate+i);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
