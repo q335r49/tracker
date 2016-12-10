@@ -4,10 +4,15 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context="com.example.q335.tracker.CalendarFrag">
 
-<!-- TODO: Update blank fragment layout -->
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:text="@string/hello_blank_fragment" />
+    <com.example.q335.tracker.MainView
+        android:id="@+id/drawing"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="3dp"
+        android:background="@android:color/transparent" >
+    </com.example.q335.tracker.MainView>
 
 </FrameLayout>

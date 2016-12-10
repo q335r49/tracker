@@ -36,7 +36,7 @@ public class CalendarFrag extends Fragment {
     private static final String LOG_FILE = "log.txt";
     public List<String> logEntries;
     Context context;
-    View mView;
+    MainView mView;
 
     public void processNewEntry(String E) {
         CV.addLogEntry(E);
@@ -82,16 +82,24 @@ public class CalendarFrag extends Fragment {
             Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
             return;
         }
-        CV = new CalendarView(1421280000L,-1,-1,10,4);
+        Calendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
+        cal.set(Calendar.DAY_OF_WEEK,1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        CV = new CalendarView(cal.getTimeInMillis()/1000,-1,-1,10,4);
         CV.log_to_shapes(logEntries);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // inflate view?
-        mView = new MainView(getContext());
-        return mView;
+        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
+        mView = (MainView) (view.findViewById(R.id.drawing));
+        mView.setCV(CV);
+        return view;
     }
 
     public static List<String> read_file(Context context, String filename) {
@@ -114,61 +122,6 @@ public class CalendarFrag extends Fragment {
         } catch (IOException e) {
             Log.e("tracker:","Log file IO exception!");
             return null;
-        }
-    }
-    private class MainView extends View {
-        public MainView(Context context) {
-            super(context);
-            mScaleDetector = new ScaleGestureDetector(getActivity().getApplicationContext(), new ScaleListener());
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            //Toast.makeText(getActivity().getApplicationContext(), "Draw!!!!", Toast.LENGTH_SHORT).show();
-            //TODO: Investigate why draw is happening multiple times
-            super.onDraw(canvas);
-            CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
-            CV.draw(canvas);
-        }
-
-        ScaleGestureDetector mScaleDetector;
-        private float mLastTouchX=-1;
-        private float mLastTouchY=-1;
-
-        @Override
-        public boolean onTouchEvent(MotionEvent ev) {
-            mScaleDetector.onTouchEvent(ev);
-
-            float x = ev.getX();
-            float y = ev.getY();
-            switch (ev.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mLastTouchX = x;
-                    mLastTouchY = y;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    //final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                    CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
-                    invalidate();
-                    mLastTouchX = x;
-                    mLastTouchY = y;
-                    break;
-                case MotionEvent.ACTION_UP:
-                    //CV.setStatusText("X:" + eventX + " Y:" + eventY);
-                    break;
-            }
-            return true;
-        }
-    }
-
-    private class ScaleListener
-            extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            //TODO: Scale and pan at once
-            CV.reScale(detector.getScaleFactor());
-            mView.invalidate();
-            return true;
         }
     }
 
@@ -379,16 +332,6 @@ class CalendarView {
                 Log.e("tracker:","Bad color or number format: "+line);
             }
         }
-
-        Calendar cal = new GregorianCalendar();
-        cal.setTimeInMillis(ts*1000L-86400000L*7);
-        cal.set(Calendar.DAY_OF_WEEK,0);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        setOrig(cal.getTimeInMillis()/1000);
-        //TODO: Clean up origin initialization logic
     }
 
     private String statusText;
@@ -401,7 +344,8 @@ class CalendarView {
         float startDate = (float) Math.floor(g0y);
         for (int i = 0; i< gridH +1; i++ ) {
             int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
-            canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), screenW/10, lblXY[1], textStyle);
+            //TODO: Change labeling based on scale
+            canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), 25, lblXY[1], textStyle);
             int[] l0 = conv_grid_screen(0,startDate+i);
             int[] l1 = conv_grid_screen(7,startDate+i);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
