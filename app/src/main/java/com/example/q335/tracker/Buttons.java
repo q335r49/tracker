@@ -46,25 +46,13 @@ import static android.content.Context.MODE_PRIVATE;
 public class Buttons extends Fragment {
     SharedPreferences sprefs;
     private GridView mainView;
-    private List<String[]> commands = new ArrayList<String[]>();
+    private List<String[]> commands = new ArrayList<>();
     private static final String LOG_FILE = "log.txt";
-    private static final String COMMANDS_FILE = "commands.json";
-    private static final String EXT_STORAGE_DIR = "tracker";
     final static int COMMENT_POS = 0;
     final static int COLOR_POS = 1;
     final static int START_POS = 2;
     final static int END_POS = 3;
     Context context;
-
-
-
-
-
-
-
-
-
-
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -194,6 +182,7 @@ public class Buttons extends Fragment {
             }
         });
         // Inflate the layout for this fragment
+        Toast.makeText(context, "Executed wholes startup routine!", Toast.LENGTH_LONG).show();
         return view;
     }
     private void makeView() {

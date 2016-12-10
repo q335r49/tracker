@@ -33,6 +33,7 @@ public class GrapherFragment extends Fragment {
     private CalendarView CV;
     private static final String LOG_FILE = "log.txt";
     public List<String> logEntries;
+    Context context;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -74,6 +75,7 @@ public class GrapherFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        context = getActivity().getApplicationContext();
         update();
     }
     public void update() {
@@ -91,9 +93,10 @@ public class GrapherFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         //inflater.inflate(R.layout.activity_grapher, container, false);
-        update();
+        //Toast.makeText(context, "Grapher activity: OnCreateView", Toast.LENGTH_LONG).show();
+        //TODO: receive communications from Buttons / Main2Activity (eg, "Import") and update view
+        //update();
         return new MainView(getContext());
     }
 
