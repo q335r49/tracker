@@ -165,27 +165,25 @@ class CalendarWin {
         return unit_width;
     }
 
-    int[] conv_ts_screen(long ts) {
+    float[] conv_ts_screen(long ts) {
         long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
         float dow = (float) ((days + 4611686018427387900L)%7);
         float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
-        return new int[] {(int) ((dow - g0x)/ ratio_grid_screen_W), (int) ((weeks - g0y)/ ratio_grid_screen_H)};
+        return new float[] {(dow - g0x)/ ratio_grid_screen_W, (weeks - g0y)/ ratio_grid_screen_H};
     }
-    int[] conv_grid_screen(float x, float y) { //TODO:Should be float[]
-        return new int[] {(int) ((x - g0x)/ ratio_grid_screen_W), (int) ((y - g0y)/ ratio_grid_screen_H)};
+    float[] conv_grid_screen(float gx, float gy) {
+        return new float[] { (gx - g0x)/ ratio_grid_screen_W, (gy - g0y)/ ratio_grid_screen_H};
     }
     float[] conv_screen_grid(float sx, float sy) {
-        float SOx = (-g0x)/ratio_grid_screen_W;
-        float SOy = (-g0y)/ratio_grid_screen_H;
-        return new float[] {(sx-SOx)*ratio_grid_screen_W, (sy-SOy)*ratio_grid_screen_H};
+        return new float[] {sx*ratio_grid_screen_W+g0x, sy*ratio_grid_screen_H+g0y};
     }
-    float conv_grid_num(float x, float y) {
-        float dow = x < 0 ?  0 : x >= 6 ? 6 : x;
-        float weeks = (float) Math.floor(y)*7;
-        return (float) (weeks + dow + (y-Math.floor(y)));
+    float conv_grid_num(float gx, float gy) {
+        float dow = gx < 0 ?  0 : gx >= 6 ? 6 : gx;
+        float weeks = (float) Math.floor(gy)*7;
+        return (float) (weeks + dow + (gy-Math.floor(gy)));
     }
-    long conv_grid_ts(float x, float y) {
-        return (long) (conv_grid_num(x,y)*86400) + orig;
+    long conv_grid_ts(float gx, float gy) {
+        return (long) (conv_grid_num(gx,gy)*86400) + orig;
     }
 
     public CalendarWin(long orig, float g0x, float g0y, float gridW, float gridH) {
@@ -244,10 +242,8 @@ class CalendarWin {
         g0y = newGridOrig[1];
         gridW /=scale;
         gridH /=scale;
-        //TODO: this ratio is prob just /= scale
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
-        setStatusText("scale: " + Float.toString(scale) + " x0:" + Float.toString(x0) + "y0:" + Float.toString(y0) + " g0x:" + Float.toString(g0x) + " g0y:" + Float.toString(g0y));
     }
 
     private ArrayList<CalendarRect> shapes;
@@ -345,19 +341,19 @@ class CalendarWin {
         }
         float startDate = (float) Math.floor(g0y);
         for (int i = 0; i< gridH +1; i++ ) {
-            int[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
-            //TODO: Change labeling based on scale
+            float[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
+            //TODO: Change grid and labeling based on scale
             canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), 25, lblXY[1], textStyle);
-            int[] l0 = conv_grid_screen(0,startDate+i);
-            int[] l1 = conv_grid_screen(7,startDate+i);
+            float[] l0 = conv_grid_screen(0,startDate+i);
+            float[] l1 = conv_grid_screen(7,startDate+i);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
         for (int i=0; i<8; i++) {
-            int[] l0 = conv_grid_screen(i,g0y);
-            int[] l1 = conv_grid_screen(i,g0y+gridH);
+            float[] l0 = conv_grid_screen(i,g0y);
+            float[] l1 = conv_grid_screen(i,g0y+gridH);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
-        if (!statusText.isEmpty())
+        if (!statusText.isEmpty())  //TODO: Fix status bar
             canvas.drawText(statusText,20,screenH-150,textStyle);
     }
 }
@@ -379,8 +375,8 @@ class CalendarRect {
         }
     }
     void draw(CalendarWin cv, Canvas canvas) {
-        int[] rectC1;
-        int[] rectC2;
+        float[] rectC1;
+        float[] rectC2;
         if (start==-1 || end==-1)
             return;
         long rect0 = start;

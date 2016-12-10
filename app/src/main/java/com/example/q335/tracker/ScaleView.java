@@ -27,7 +27,7 @@ public class ScaleView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //TODO: Investigate why draw is happening multiple times
+        //TODO: Investigate why draw is happening multiple times [After status bar fix]
         super.onDraw(canvas);
         CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
         CV.draw(canvas);
