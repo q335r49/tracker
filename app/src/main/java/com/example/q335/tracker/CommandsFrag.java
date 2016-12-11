@@ -12,6 +12,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -101,7 +104,16 @@ public class CommandsFrag extends Fragment {
 
         mainView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
-                if (position < commands.size())
+                if (position < commands.size()) {
+                    final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
+                    animation.setDuration(500); // duration - half a second
+                    animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+                    animation.setRepeatCount(1); // Repeat animation infinitely
+                    animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
+                    view.startAnimation(animation);
+
+
+                }
                     newLogEntry(position);
             }
         });
@@ -110,7 +122,9 @@ public class CommandsFrag extends Fragment {
             public boolean onItemLongClick(AdapterView<?> arg0, View view, int pos, long id) {
                 Context context = getContext();
                 LayoutInflater layoutInflater = LayoutInflater.from(context);
+
                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
+
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                 alertDialogBuilder.setView(promptView);
 
@@ -163,7 +177,6 @@ public class CommandsFrag extends Fragment {
             }
         });
         // Inflate the layout for this fragment
-        Toast.makeText(context, "Executed wholes startup routine!", Toast.LENGTH_LONG).show();
         return view;
     }
 
@@ -238,8 +251,7 @@ public class CommandsFrag extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 

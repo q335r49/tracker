@@ -1,55 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp" >
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LL1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <TextView android:layout_height="wrap_content"
+        <TextView
+            android:id="@+id/CommentLabel"
+            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:text="Comment:">
         </TextView>
         <EditText
             android:id="@+id/commentInput"
-            android:layout_width="0dp"
-            android:layout_weight=".50"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
-        <requestFocus />
+            android:inputType="text">
+            <requestFocus />
+        </EditText>
     </LinearLayout>
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LL2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_below="@id/LL1">
         <TextView android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="start:" >
+            android:text="Start:" >
         </TextView>
         <EditText
             android:id="@+id/startInput"
+            android:inputType="number"
             android:layout_width="0dp"
             android:layout_weight=".30"
-            android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:layout_height="wrap_content"/>
         <TextView android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="end:" >
+            android:text="End:" >
         </TextView>
         <EditText
             android:id="@+id/endInput"
+            android:inputType="number"
             android:layout_width="0dp"
             android:layout_weight=".30"
-            android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:layout_height="wrap_content"/>
     </LinearLayout>
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/LL3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_below="@id/LL2">
         <TextView android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:text="Color:">
@@ -59,6 +68,69 @@
             android:layout_width="0dp"
             android:layout_weight=".50"
             android:layout_height="wrap_content"
-        android:inputType="text" />
+            android:inputType="text" />
     </LinearLayout>
-</LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/LL3">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp">
+            <View
+                android:id="@+id/swatch1"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+            <View
+                android:id="@+id/swatch2"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+            <View
+                android:id="@+id/swatch3"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+            <View
+                android:id="@+id/swatch4"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+            <View
+                android:id="@+id/swatch5"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+            <View
+                android:id="@+id/swatch6"
+                android:background="#DDDDDD"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight ="5dp"
+                />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </TableLayout>
+</RelativeLayout>

@@ -69,6 +69,20 @@ public class CalendarFrag extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         context = getActivity().getApplicationContext();
+        logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
+        if (logEntries == null) {
+            Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Calendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
+        cal.set(Calendar.DAY_OF_WEEK,1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
+        CV.log_to_shapes(logEntries);
     }
 
     @Override
@@ -76,7 +90,7 @@ public class CalendarFrag extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (view.findViewById(R.id.drawing));
-        loadCalendarView();
+        mView.setCV(CV);
         return view;
     }
     public void loadCalendarView() {
@@ -230,7 +244,6 @@ class CalendarWin {
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
     }
-
     public void shiftWindow(float x, float y) {
         //TODO: Limit horizontal pan range
         g0x -= x * ratio_grid_screen_W;
@@ -353,7 +366,7 @@ class CalendarWin {
             float[] l1 = conv_grid_screen(i,g0y+gridH);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
-        if (!statusText.isEmpty())  //TODO: Fix status bar
+        if (!statusText.isEmpty())  //TODO: **** Fix status bar
             canvas.drawText(statusText,20,screenH-150,textStyle);
     }
 }
