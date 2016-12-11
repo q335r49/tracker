@@ -26,39 +26,11 @@
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/LL2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/LL1">
-        <TextView android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="Start:" >
-        </TextView>
-        <EditText
-            android:id="@+id/startInput"
-            android:inputType="number"
-            android:layout_width="0dp"
-            android:layout_weight=".30"
-            android:layout_height="wrap_content"/>
-        <TextView android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="End:" >
-        </TextView>
-        <EditText
-            android:id="@+id/endInput"
-            android:inputType="number"
-            android:layout_width="0dp"
-            android:layout_weight=".30"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LL3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/LL2">
+        android:layout_below="@id/LL1">
         <TextView android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:text="Color:">

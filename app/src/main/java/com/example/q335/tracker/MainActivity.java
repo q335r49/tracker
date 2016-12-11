@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     SharedPreferences sprefs;
 
     //TODO: Set up OnFirstInstall
+    //TODO: Initialize action bar with current actiivty
     public void processNewLogEntry(String E) {
         GF.procMess(E);
     }

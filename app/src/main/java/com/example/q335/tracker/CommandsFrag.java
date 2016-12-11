@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -46,10 +45,10 @@ public class CommandsFrag extends Fragment {
     private static final String LOG_FILE = "log.txt";
     private final static int COMMENT_IX = 0;
     private final static int COLOR_IX = 1;
-    private final static int START_IX = 2;
-    private final static int END_IX = 3;
     Context context;
     //TODO: Textcolor in commandviews should be white
+    //TODO: Set foreground color
+    //TODO: Handle bad color case
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,15 +96,14 @@ public class CommandsFrag extends Fragment {
         for (String[] s : commands) {
             final Map<String, String> listItem = new HashMap<>();
             listItem.put("label", s[0]);
-            listItem.put("syntax", "");
+            listItem.put("syntax", ""); //TODO: find better use for second row
             LVentries.add(listItem);
         }
-        final Map<String, String> listItem = new HashMap<String, String>();
+        final Map<String, String> listItem = new HashMap<>();
         listItem.put("label", "New Command");
-        listItem.put("syntax", "Long press to add");
+        listItem.put("syntax", "");
         LVentries.add(listItem);
-        SimpleAdapter LVadapter = new SimpleAdapter(getContext(), LVentries, R.layout.gv_list_item,
-                new String[]{"label", "syntax"}, new int[]{R.id.text1, R.id.text2}) {
+        SimpleAdapter LVadapter = new SimpleAdapter(getContext(), LVentries, R.layout.gv_list_item, new String[]{"label", "syntax"}, new int[]{R.id.text1, R.id.text2}) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -114,61 +112,48 @@ public class CommandsFrag extends Fragment {
                     try {
                         testColor = Color.parseColor(commands.get(position)[COLOR_IX]);
                     } catch (IllegalArgumentException e) {
-                        Log.d("tracker:","Bad background color @ " + position);
-                        testColor = Color.parseColor("black");
+                        Log.e("tracker:",e.toString());
+                        testColor = Color.parseColor("darkgrey");
                     }
-                    final int bg = testColor;
-                    final int finalPosition = position;
-                    view.setBackgroundColor(bg);
+                    final int bg_Norm = testColor;
+                    final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
+                    final int pos = position;
+                    view.setBackgroundColor(bg_Norm);
                     view.setOnTouchListener(new View.OnTouchListener() {
-                        private final int bg_normal=bg;
-                        private final int bg_pressed=CommandsFrag.darkenColor(bg,0.7f);
-                        private Rect rect;
-                        private final int pos = finalPosition;
                         private ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-                        private float offset;
-                        private float duration;
-                        boolean offset_mode = false;
-                        float offset_0x;
-                        float offset_0y;
-
+                        private Rect viewBounds;
+                        private boolean offset_mode = false;
+                        private float offset_0x;
+                        private float offset_0y;
                         private final Handler handler = new Handler();
                         private Runnable mLongPressed;
-
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
-                            //TODO draw visualization of start and delay
                             switch (event.getActionMasked()) {
                                 case MotionEvent.ACTION_DOWN:
                                     v.getParent().requestDisallowInterceptTouchEvent(true);
-                                    v.setBackgroundColor(bg_pressed);
-                                    rect = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
+                                    v.setBackgroundColor(bg_Press);
+                                    viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
                                     offset_mode = false;
                                     final View finalView = v;
                                     mLongPressed = new Runnable() {
                                         public void run() {
-                                            finalView.setBackgroundColor(bg_normal);
+                                            finalView.setBackgroundColor(bg_Norm);
                                             Context context = getContext();
                                             LayoutInflater layoutInflater = LayoutInflater.from(context);
-
                                             View promptView = layoutInflater.inflate(R.layout.prompts, null);
-
                                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                                             alertDialogBuilder.setView(promptView);
 
                                             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                             final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
-                                            final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
-                                            final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
                                             commentEntry.setText(commands.get(pos)[COMMENT_IX]);
                                             colorEntry.setText(commands.get(pos)[COLOR_IX]);
-                                            startEntry.setText(commands.get(pos)[START_IX]);
-                                            endEntry.setText(commands.get(pos)[END_IX]);
                                             alertDialogBuilder
                                                     .setCancelable(true)
                                                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            commands.set(pos, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
+                                                            commands.set(pos, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), "0", ""});
                                                             makeView();
                                                         }
                                                     })
@@ -186,50 +171,74 @@ public class CommandsFrag extends Fragment {
                                             alertDialogBuilder.create().show();
                                         }
                                     };
-                                    handler.postDelayed(mLongPressed,2000);
+                                    handler.postDelayed(mLongPressed,1800);
                                     return true;
                                 case MotionEvent.ACTION_MOVE:
-                                    if(offset_mode || !rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
+                                    if(offset_mode || !viewBounds.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
                                         handler.removeCallbacks(mLongPressed);
                                         if (!offset_mode) {
                                             offset_mode = true;
                                             offset_0x = event.getX();
                                             offset_0y = event.getY();
-                                            ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
+                                            ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
                                         } else {
-                                            offset = event.getX()-offset_0x;
-                                            String offsetPrint;
-                                            offset = offset > 100 ? offset - 100 : offset < -100 ? offset+100 : 0;
-                                            if (offset >= 0) {
-                                                offsetPrint = "delay: " + (offset > 60 ? ((int) offset / 60) : "0") + ":" + String.format("%02d",((int) offset % 60));
-                                            } else {
-                                                offsetPrint = "already: " + (-offset > 60 ? ((int) -offset / 60) : "0") + ":" + String.format("%02d",((int) -offset % 60));
-                                            }
-                                            duration = event.getY()-offset_0y;
-                                            duration = duration > 100 ? duration-100 : duration < -100 ? duration + 100 : 0;
-                                            int iOff = (int) offset;
-                                            int iDur = (int) duration;
-                                            String timeStatus = (iOff > 0 ? "delay: " + Integer.toString(iOff) : iOff < 0 ? "already: " + Integer.toString(-iOff) : "") +
-                                                    (iDur > 0 ? " until: " + Integer.toString(iDur) : iDur < 0 ? " until: " + Integer.toString(iDur) : "");
-                                            ab.setTitle(timeStatus.isEmpty()? commands.get(pos)[0] : timeStatus);
+                                            int delay = (int) (event.getX()-offset_0x);
+                                            int duration = (int) (event.getY()-offset_0y);
+                                            delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
+                                            duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
+                                            String abString = "...";
+                                            if (delay > 0)
+                                                abString += " in  " + Integer.toString(delay / 60)  + ":" + String.format("%02d",delay % 60);
+                                            else if (delay < 0)
+                                                abString += " already " + Integer.toString(-delay  / 60) + ":" + String.format("%02d",-delay % 60);
+                                            if (duration > 0)
+                                                abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60);
+                                            else if (duration < 0)
+                                                abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60);
+                                            ab.setTitle(abString.isEmpty()? commands.get(pos)[0] : abString);
                                         }
                                     }
                                     return true;
                                 case MotionEvent.ACTION_UP:
                                     handler.removeCallbacks(mLongPressed);
-                                    v.setBackgroundColor(bg_normal);
-                                    if (pos < commands.size()) {
-                                        ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
-                                        int intDuration = (int) duration;
-                                        int intOffset = (int) offset;
-                                        ab.setTitle(commands.get(pos)[0] + "Dela");
-                                        //TODO: newLogEntry(pos);
-                                        //TODO: Initialize action bar with current actiivty
+                                    v.setBackgroundColor(bg_Norm);
+                                    ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                                    String start = "0";
+                                    String end = "";
+                                    String abString = commands.get(pos)[0] + "...";
+                                    if (offset_mode) {
+                                        int delay = (int) (event.getX() - offset_0x);
+                                        int duration = (int) (event.getY() - offset_0y);
+                                        delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
+                                        duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
+                                        if (delay > 0)
+                                            abString += " in  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60);
+                                        else if (delay < 0)
+                                            abString += " already " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60);
+                                        if (duration > 0)
+                                            abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60);
+                                        else if (duration < 0)
+                                            abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60);
+                                        start = Integer.toString(delay * 60);
+                                        end = duration == 0 ? "" : Integer.toString(duration > 0 ? 60 * (delay + duration) : 60 * (delay - duration));
                                     }
+                                    ab.setTitle(abString);
+                                    String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + commands.get(pos)[COLOR_IX] + ">" + start + ">" + end + ">" + commands.get(pos)[COMMENT_IX];
+                                    File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                                    try {
+                                        FileOutputStream out = new FileOutputStream(internalFile, true);
+                                        out.write(entry.getBytes());
+                                        out.write(System.getProperty("line.separator").getBytes());
+                                        out.close();
+                                    } catch (Exception e) {
+                                        Log.e("tracker:",e.toString());
+                                        Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                                    }
+                                    mListener.processNewLogEntry(entry);
                                     return false;
                                 case MotionEvent.ACTION_CANCEL:
                                     handler.removeCallbacks(mLongPressed);
-                                    v.setBackgroundColor(bg_normal);
+                                    v.setBackgroundColor(bg_Norm);
                                     return false;
                                 default:
                                     return true;
@@ -244,15 +253,13 @@ public class CommandsFrag extends Fragment {
                             View promptView = layoutInflater.inflate(R.layout.prompts, null);
                             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                             final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
-                            final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
-                            final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
                             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setView(promptView);
                             alertDialogBuilder
                             .setCancelable(true)
                             .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
+                                    commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), "0", ""});
                                     makeView();
                                 }
                             })

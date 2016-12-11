@@ -244,6 +244,7 @@ class CalendarRect {
         try {
             paint.setColor(Color.parseColor(color));
         } catch (IllegalArgumentException e) {
+            paint.setColor(Color.parseColor("darkgrey"));
             Log.e("tracker:","Bad color format: "+color);
         }
     }
