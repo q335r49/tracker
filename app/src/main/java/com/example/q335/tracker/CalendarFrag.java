@@ -246,13 +246,6 @@ class CalendarWin {
         ratio_grid_screen_W = this.gridW/screenW;
         ratio_grid_screen_H = this.gridH/screenH;
     }
-    public void updateCanvas(int width, int height) {
-        this.screenW = width;
-        this.screenH = height;
-        this.unit_width = width/ gridW;
-        ratio_grid_screen_W = gridW/screenW;
-        ratio_grid_screen_H = gridH/screenH;
-    }
     public void shiftWindow(float x, float y) {
         //TODO: Limit horizontal pan range
         g0x -= x * ratio_grid_screen_W;
@@ -357,7 +350,13 @@ class CalendarWin {
     private String statusText;
         void setStatusText(String s) { statusText = s; }
     private Paint textStyle;
+
     void draw(Canvas canvas) {
+        screenW = canvas.getWidth();
+        screenH = canvas.getHeight();
+        this.unit_width = screenW/ gridW;
+        ratio_grid_screen_W = gridW/screenW;
+        ratio_grid_screen_H = gridH/screenH;
         for (CalendarRect s : shapes) {
             s.draw(this,canvas);
         }

@@ -29,6 +29,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -171,6 +172,7 @@ public class CommandsFrag extends Fragment {
 
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
+                            //TODO draw visualization of start and delay
                             switch (event.getActionMasked()) {
                                 case MotionEvent.ACTION_DOWN:
                                     v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -231,7 +233,13 @@ public class CommandsFrag extends Fragment {
                                             ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
                                         } else {
                                             offset = event.getX()-offset_0x;
-                                            offset = offset > 100 ? offset-100 : offset < -100 ? offset + 100 : 0;
+                                            String offsetPrint;
+                                            offset = offset > 100 ? offset - 100 : offset < -100 ? offset+100 : 0;
+                                            if (offset >= 0) {
+                                                offsetPrint = "delay: " + (offset > 60 ? ((int) offset / 60) : "0") + ":" + String.format("%02d",((int) offset % 60));
+                                            } else {
+                                                offsetPrint = "already: " + (-offset > 60 ? ((int) -offset / 60) : "0") + ":" + String.format("%02d",((int) -offset % 60));
+                                            }
                                             duration = event.getY()-offset_0y;
                                             duration = duration > 100 ? duration-100 : duration < -100 ? duration + 100 : 0;
                                             int iOff = (int) offset;

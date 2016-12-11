@@ -2,7 +2,6 @@ package com.example.q335.tracker;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -29,7 +28,6 @@ public class ScaleView extends View {
     protected void onDraw(Canvas canvas) {
         //TODO: Investigate why draw is happening multiple times [After status bar fix]
         super.onDraw(canvas);
-        CV.updateCanvas(canvas.getWidth(), canvas.getHeight());
         CV.draw(canvas);
     }
 
