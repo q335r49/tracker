@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -178,6 +180,15 @@ public class CommandsFrag extends Fragment {
         commands = new Gson().fromJson(com, listType);
         makeView();
     }
+
+
+    public static int manipulateColor(int color, float factor) {
+        int a = Color.alpha(color);
+        int r = Math.round(Color.red(color) * factor);
+        int g = Math.round(Color.green(color) * factor);
+        int b = Math.round(Color.blue(color) * factor);
+        return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
+    }
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -202,7 +213,28 @@ public class CommandsFrag extends Fragment {
                 View view = super.getView(position, convertView, parent);
                 if (position < commands.size()) {
                     try {
-                        view.setBackgroundColor(Color.parseColor(commands.get(position)[COLOR_POS]));
+                        final int bg = Color.parseColor(commands.get(position)[COLOR_POS]);
+                        view.setBackgroundColor(bg);
+                        view.setOnTouchListener(new View.OnTouchListener() {
+                            private int bg_normal=bg;
+                            private int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
+
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                switch (event.getAction()) {
+                                    case MotionEvent.ACTION_DOWN:
+                                        v.setBackgroundColor(bg_pressed);
+                                        break;
+                                    case MotionEvent.ACTION_MOVE:
+                                        //TODO: drag event!
+                                        break;
+                                    case MotionEvent.ACTION_UP:
+                                        v.setBackgroundColor(bg_normal);
+                                        break;
+                                }
+                                return true;
+                            }
+                        });
                     } catch (IllegalArgumentException e) {
                         Log.d("tracker:","Bad background color @ " + position);
                     }
