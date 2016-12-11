@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -30,7 +29,7 @@ import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
     private CalendarWin CW;
-    public List<String> logEntries;
+    private static final String LOG_FILE = "log.txt";  //TODO: Make it a passed parameter?
     Context context;
     ScaleView mView;
 
@@ -63,12 +62,12 @@ public class CalendarFrag extends Fragment {
             EntryBuffer.add(E);
         else {
             for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
-                CW.addLogEntry(s);
-            CW.addLogEntry(E);
+                CW.loadEntry(s);
+            CW.loadEntry(E);
             mView.invalidate();
         }
     }
-    private static final String LOG_FILE = "log.txt";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,44 +76,14 @@ public class CalendarFrag extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         context = getActivity().getApplicationContext();
-        logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
-        Calendar cal = new GregorianCalendar();
-            cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
-            cal.set(Calendar.DAY_OF_WEEK,1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CW.log_to_shapes(logEntries);
     }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (view.findViewById(R.id.drawing));
-        mView.setCV(CW);
+        loadCalendarView();
         return view;
     }
-    public void loadCalendarView() {
-        logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
-        if (logEntries == null) {
-            Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
-            return;
-        }
-        Calendar cal = new GregorianCalendar();
-        cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
-        cal.set(Calendar.DAY_OF_WEEK,1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CW.log_to_shapes(logEntries);
-        mView.setCV(CW);
-    }
-
     public static List<String> read_file(Context context, String filename) {
         try {
             FileInputStream fis = context.openFileInput(filename);
@@ -137,6 +106,18 @@ public class CalendarFrag extends Fragment {
             return null;
         }
     }
+    public void loadCalendarView() {
+        Calendar cal = new GregorianCalendar();
+            cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
+            cal.set(Calendar.DAY_OF_WEEK,1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
+        CW.log_to_shapes(read_file(getActivity().getApplicationContext(), LOG_FILE));
+        mView.setCV(CW);
+    }
 
     // Rename method, loadCalendarView argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -144,13 +125,11 @@ public class CalendarFrag extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
-
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
     }
@@ -229,7 +208,8 @@ class CalendarWin {
     private final static int ARG_LEN = 6;
     private CalendarRect curTD;
 
-    public void addLogEntry(String line) {
+    public void loadEntry(String line) {
+        //TODO: Am I adding this to logEntries??
         long ts;
         String[] args = line.split(">",-1);
         if (args.length < ARG_LEN) {
@@ -265,9 +245,8 @@ class CalendarWin {
         }
     }
     void log_to_shapes(List<String> log) {
-        if (log == null) {
-            //TODO: Set up OnFirstInstall log entries
-        }
+        if (log == null)
+            return; //TODO: Set up OnFirstInstall
         shapes = new ArrayList<>();
         curTD = new CalendarRect();
         shapes.add(curTD);
