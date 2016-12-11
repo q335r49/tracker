@@ -49,6 +49,7 @@ public class CommandsFrag extends Fragment {
     final static int START_POS = 2;
     final static int END_POS = 3;
     Context context;
+    //TODO: Textcolor in commandviews should be white
 
     //Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
