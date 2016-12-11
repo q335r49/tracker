@@ -246,6 +246,7 @@ public class CommandsFrag extends Fragment {
                                         ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
                                         ab.setTitle(commands.get(pos)[0]);
                                         newLogEntry(pos);
+                                        //TODO: Initialize action bar with current actiivty
                                     }
                                     return false;
                                 case MotionEvent.ACTION_CANCEL:
