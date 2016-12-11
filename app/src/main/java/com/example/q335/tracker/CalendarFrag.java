@@ -37,12 +37,11 @@ public class CalendarFrag extends Fragment {
 
     private Queue<String> EntryBuffer = new LinkedList<>();
     public void processNewEntry(String E) {
-        if (CV ==  null)
+        if (CV == null)
             EntryBuffer.add(E);
         else {
-            for(String s : EntryBuffer) {
+            for (String s = EntryBuffer.remove(); s!=null; EntryBuffer.remove())
                 CV.addLogEntry(s);
-            }
             CV.addLogEntry(E);
             mView.invalidate();
         }
