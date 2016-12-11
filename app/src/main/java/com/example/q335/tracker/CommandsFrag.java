@@ -158,6 +158,12 @@ public class CommandsFrag extends Fragment {
                         private final int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
                         private Rect rect;
                         private final int pos = finalPosition;
+                        private ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+                        private float offset;
+                        private float duration;
+                        boolean offset_mode = false;
+                        float offset_0x;
+                        float offset_0y;
 
                         private final Handler handler = new Handler();
                         private Runnable mLongPressed;
@@ -169,6 +175,7 @@ public class CommandsFrag extends Fragment {
                                     v.getParent().requestDisallowInterceptTouchEvent(true);
                                     v.setBackgroundColor(bg_pressed);
                                     rect = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
+                                    offset_mode = false;
                                     final View finalView = v;
                                     mLongPressed = new Runnable() {
                                         public void run() {
@@ -186,65 +193,63 @@ public class CommandsFrag extends Fragment {
                                             final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
                                             final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
                                             final int commandsIx = pos;
-                                            if (commandsIx >= commands.size()) {
-                                                alertDialogBuilder
-                                                        .setCancelable(true)
-                                                        .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-                                                                commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
-                                                                makeView();
-                                                            }
-                                                        })
-                                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-                                                                dialog.cancel();
-                                                            }
-                                                        });
-                                            } else {
-                                                commentEntry.setText(commands.get(pos)[COMMENT_POS]);
-                                                colorEntry.setText(commands.get(pos)[COLOR_POS]);
-                                                startEntry.setText(commands.get(pos)[START_POS]);
-                                                endEntry.setText(commands.get(pos)[END_POS]);
-                                                alertDialogBuilder
-                                                        .setCancelable(true)
-                                                        .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-                                                                commands.set(commandsIx, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
-                                                                makeView();
-                                                            }
-                                                        })
-                                                        .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-                                                                commands.remove(commandsIx);
-                                                                makeView();
-                                                            }
-                                                        })
-                                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-                                                                dialog.cancel();
-                                                            }
-                                                        });
-                                            }
+                                            commentEntry.setText(commands.get(pos)[COMMENT_POS]);
+                                            colorEntry.setText(commands.get(pos)[COLOR_POS]);
+                                            startEntry.setText(commands.get(pos)[START_POS]);
+                                            endEntry.setText(commands.get(pos)[END_POS]);
+                                            alertDialogBuilder
+                                                    .setCancelable(true)
+                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            commands.set(commandsIx, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
+                                                            makeView();
+                                                        }
+                                                    })
+                                                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            commands.remove(commandsIx);
+                                                            makeView();
+                                                        }
+                                                    })
+                                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            dialog.cancel();
+                                                        }
+                                                    });
                                             alertDialogBuilder.create().show();
                                         }
                                     };
                                     handler.postDelayed(mLongPressed,2000);
                                     return true;
                                 case MotionEvent.ACTION_MOVE:
-                                    if(!rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
-                                        v.setBackgroundColor(bg_normal);
+                                    if(offset_mode || !rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
                                         handler.removeCallbacks(mLongPressed);
-                                        return false;
-                                    } else {
-                                        return true;
+                                        if (!offset_mode) {
+                                            offset_mode = true;
+                                            offset_0x = event.getX();
+                                            offset_0y = event.getY();
+                                            ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
+                                        } else {
+                                            offset = event.getX()-offset_0x;
+                                            offset = offset > 100 ? offset-100 : offset < -100 ? offset + 100 : 0;
+                                            duration = event.getY()-offset_0y;
+                                            duration = duration > 100 ? duration-100 : duration < -100 ? duration + 100 : 0;
+                                            int iOff = (int) offset;
+                                            int iDur = (int) duration;
+                                            String timeStatus = (iOff > 0 ? "delay: " + Integer.toString(iOff) : iOff < 0 ? "already: " + Integer.toString(-iOff) : "") +
+                                                    (iDur > 0 ? " until: " + Integer.toString(iDur) : iDur < 0 ? " until: " + Integer.toString(iDur) : "");
+                                            ab.setTitle(timeStatus.isEmpty()? commands.get(pos)[0] : timeStatus);
+                                        }
                                     }
+                                    return true;
                                 case MotionEvent.ACTION_UP:
                                     handler.removeCallbacks(mLongPressed);
                                     v.setBackgroundColor(bg_normal);
                                     if (pos < commands.size()) {
-                                        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
                                         ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
-                                        ab.setTitle(commands.get(pos)[0]);
+                                        int intDuration = (int) duration;
+                                        int intOffset = (int) offset;
+                                        ab.setTitle(commands.get(pos)[0] + "Dela");
                                         newLogEntry(pos);
                                         //TODO: Initialize action bar with current actiivty
                                     }
@@ -256,6 +261,35 @@ public class CommandsFrag extends Fragment {
                                 default:
                                     return true;
                             }
+                        }
+                    });
+                } else {
+                    view.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+                            View promptView = layoutInflater.inflate(R.layout.prompts, null);
+                            final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+                            final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
+                            final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
+                            final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
+                            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                            alertDialogBuilder.setView(promptView);
+                            alertDialogBuilder
+                            .setCancelable(true)
+                            .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
+                                    makeView();
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .create().show();
+                            return false;
                         }
                     });
                 }
