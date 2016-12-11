@@ -11,15 +11,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.SimpleAdapter;
@@ -241,6 +239,15 @@ public class CommandsFrag extends Fragment {
                                         return true;
                                     }
                                 case MotionEvent.ACTION_UP:
+                                    handler.removeCallbacks(mLongPressed);
+                                    v.setBackgroundColor(bg_normal);
+                                    if (pos < commands.size()) {
+                                        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+                                        ab.setBackgroundDrawable(new ColorDrawable(bg_normal));
+                                        ab.setTitle(commands.get(pos)[0]);
+                                        newLogEntry(pos);
+                                    }
+                                    return false;
                                 case MotionEvent.ACTION_CANCEL:
                                     handler.removeCallbacks(mLongPressed);
                                     v.setBackgroundColor(bg_normal);
