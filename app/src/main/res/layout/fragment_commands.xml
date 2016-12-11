@@ -8,6 +8,7 @@
         android:layout_height="match_parent"
         android:paddingRight="15dp"
         android:paddingLeft="15dp"
+        android:paddingBottom="20dp"
         android:id="@+id/GV"
 
         android:numColumns="2"

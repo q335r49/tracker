@@ -193,7 +193,6 @@ public class CommandsFrag extends Fragment {
                                             final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
                                             final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
                                             final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
-                                            final int commandsIx = pos;
                                             commentEntry.setText(commands.get(pos)[COMMENT_POS]);
                                             colorEntry.setText(commands.get(pos)[COLOR_POS]);
                                             startEntry.setText(commands.get(pos)[START_POS]);
@@ -202,13 +201,13 @@ public class CommandsFrag extends Fragment {
                                                     .setCancelable(true)
                                                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            commands.set(commandsIx, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
+                                                            commands.set(pos, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), startEntry.getText().toString(), endEntry.getText().toString()});
                                                             makeView();
                                                         }
                                                     })
                                                     .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            commands.remove(commandsIx);
+                                                            commands.remove(pos);
                                                             makeView();
                                                         }
                                                     })
