@@ -210,41 +210,15 @@ class CalendarWin {
     }
 
     public CalendarWin(long orig, float g0x, float g0y, float gridW, float gridH) {
-        this.screenH = 100;
-        this.screenW = 100;
         this.orig = orig;
         this.g0x = g0x;
         this.g0y = g0y;
         this.gridW = gridW;
         this.gridH = gridH;
-
-        unit_width = screenW / gridW;
         textStyle = new Paint();
         textStyle.setStyle(Paint.Style.FILL);
-        //TODO: Dynamically set text size
-        textStyle.setTextSize(24f);
+        textStyle.setTextSize(24f); //TODO: Dynamically set text size
         statusText = "";
-        ratio_grid_screen_W = this.gridW/screenW;
-        ratio_grid_screen_H = this.gridH/screenH;
-
-    }
-    public CalendarWin() {
-        this.screenH = 100;
-        this.screenW = 100;
-        this.orig = System.currentTimeMillis() / 1000;
-        this.g0x = -1;
-        this.g0y = -2;
-        this.gridW = 10;
-        this.gridH = 4;
-
-        unit_width = screenW / gridW;
-        textStyle = new Paint();
-        textStyle.setStyle(Paint.Style.FILL);
-        //TODO: Dynamically set text size
-        textStyle.setTextSize(24f);
-        statusText = "";
-        ratio_grid_screen_W = this.gridW/screenW;
-        ratio_grid_screen_H = this.gridH/screenH;
     }
     public void shiftWindow(float x, float y) {
         //TODO: Limit horizontal pan range
@@ -374,7 +348,7 @@ class CalendarWin {
             float[] l1 = conv_grid_screen(i,g0y+gridH);
             canvas.drawLine(l0[0],l0[1],l1[0],l1[1],textStyle);
         }
-        if (!statusText.isEmpty())  //TODO: **** Fix status bar
+        if (!statusText.isEmpty())
             canvas.drawText(statusText,20,screenH-150,textStyle);
     }
 }

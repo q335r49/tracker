@@ -9,9 +9,9 @@ import android.view.View;
 
 public class ScaleView extends View {
     CalendarWin CV;
+        public void setCV(CalendarWin CV) { this.CV = CV; }
     ScaleListener SL;
     ScaleGestureDetector mScaleDetector;
-    public void setCV(CalendarWin CV) { this.CV = CV; }
 
     public ScaleView(Context context) {
         super(context);
@@ -26,35 +26,23 @@ public class ScaleView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //TODO: Investigate why draw is happening multiple times [After status bar fix]
         super.onDraw(canvas);
-        CV.draw(canvas);
+        CV.draw(canvas); //TODO: Investigate why draw is happening multiple times
     }
 
     private float mLastTouchX=-1;
     private float mLastTouchY=-1;
-
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mScaleDetector.onTouchEvent(ev);
         float x = ev.getX();
         float y = ev.getY();
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mLastTouchX = x;
-                mLastTouchY = y;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150)
-                    CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
-                mLastTouchX = x;
-                mLastTouchY = y;
-                break;
-            case MotionEvent.ACTION_UP:
-                //CV.setStatusText("X:" + eventX + " Y:" + eventY);
-                break;
+        if (ev.getAction() == MotionEvent.ACTION_MOVE && (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150)) {
+            CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
+            invalidate();
         }
-        invalidate();
+        mLastTouchX = x;
+        mLastTouchY = y;
         return true;
     }
 
