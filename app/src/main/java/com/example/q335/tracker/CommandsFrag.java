@@ -105,16 +105,8 @@ public class CommandsFrag extends Fragment {
         mainView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 if (position < commands.size()) {
-                    final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
-                    animation.setDuration(500); // duration - half a second
-                    animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
-                    animation.setRepeatCount(1); // Repeat animation infinitely
-                    animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
-                    view.startAnimation(animation);
-
-
-                }
                     newLogEntry(position);
+                }
             }
         });
         mainView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
     private CalendarWin CV;
@@ -33,9 +35,17 @@ public class CalendarFrag extends Fragment {
     Context context;
     ScaleView mView;
 
+    private Queue<String> EntryBuffer = new LinkedList<>();
     public void processNewEntry(String E) {
-        CV.addLogEntry(E);
-        mView.invalidate();
+        if (CV ==  null)
+            EntryBuffer.add(E);
+        else {
+            for(String s : EntryBuffer) {
+                CV.addLogEntry(s);
+            }
+            CV.addLogEntry(E);
+            mView.invalidate();
+        }
     }
 
     // Rename parameter arguments, choose names that match
