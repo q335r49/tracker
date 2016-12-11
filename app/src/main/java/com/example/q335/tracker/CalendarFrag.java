@@ -21,7 +21,6 @@ import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
     private ScaleView mView;
-
     private Queue<String> EntryBuffer = new LinkedList<>();
     public void procMess(String E) {
         if (mView == null)
@@ -32,7 +31,19 @@ public class CalendarFrag extends Fragment {
             mView.procMess(E);
         }
     }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
+        mView = (ScaleView) (view.findViewById(R.id.drawing));
+        return view;
+    }
 
+    public CalendarFrag() { } // Required empty public constructor
+    private OnFragmentInteractionListener mListener;
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+    private String mParam1;
+    private String mParam2;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,19 +52,6 @@ public class CalendarFrag extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
-        mView = (ScaleView) (view.findViewById(R.id.drawing));
-        return view;
-    }
-
-    private OnFragmentInteractionListener mListener;
-    public CalendarFrag() { } // Required empty public constructor
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
     public static CalendarFrag newInstance(String param1, String param2) {
         CalendarFrag fragment = new CalendarFrag();
         Bundle args = new Bundle();
@@ -84,10 +82,11 @@ public class CalendarFrag extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 }
-
 class CalendarWin {
+    private ArrayList<CalendarRect> shapes;
+    private CalendarRect curTD;
     private long orig;
-    public long getOrig() { return orig; }
+        long getOrig() { return orig; }
     private int screenH;
     private int screenW;
     private float g0x;
@@ -95,11 +94,14 @@ class CalendarWin {
     private float gridW;
     private float gridH;
     private float unit_width;
+        float getUnitWidth() {
+            return unit_width;
+        }
     private float ratio_grid_screen_W;
     private float ratio_grid_screen_H;
-        float getUnitWidth() {
-        return unit_width;
-    }
+    private Paint textStyle;
+    private String statusText;
+        void setStatusText(String s) { statusText = s; }
 
     float[] conv_ts_screen(long ts) {
         long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
@@ -122,7 +124,10 @@ class CalendarWin {
         return (long) (conv_grid_num(gx,gy)*86400) + orig;
     }
 
-    public CalendarWin(long orig, float g0x, float g0y, float gridW, float gridH) {
+    CalendarWin(long orig, float g0x, float g0y, float gridW, float gridH) {
+        shapes = new ArrayList<>();
+        curTD = new CalendarRect();
+        shapes.add(curTD);
         this.orig = orig;
         this.g0x = g0x;
         this.g0y = g0y;
@@ -133,12 +138,12 @@ class CalendarWin {
         textStyle.setTextSize(24f); //TODO: Dynamically set text size
         statusText = "";
     }
-    public void shiftWindow(float x, float y) {
+    void shiftWindow(float x, float y) {
         //TODO: Limit horizontal pan range
         g0x -= x * ratio_grid_screen_W;
         g0y -= y * ratio_grid_screen_H;
     }
-    public void reScale(float scale, float x0, float y0) {
+    void reScale(float scale, float x0, float y0) {
         float[] newGridOrig = conv_screen_grid(x0-x0/scale,y0-y0/scale);
         g0x = newGridOrig[0];
         g0y = newGridOrig[1];
@@ -148,7 +153,6 @@ class CalendarWin {
         ratio_grid_screen_H = gridH/screenH;
     }
 
-    private ArrayList<CalendarRect> shapes;
     //TS>READABLE>COLOR>S>E>COMMENT
     private final static int TIMESTAMP_POS = 0;
     private final static int COLOR_POS = 2;
@@ -156,10 +160,7 @@ class CalendarWin {
     private final static int END_POS = 4;
     private final static int COMMENT_POS = 5;
     private final static int ARG_LEN = 6;
-    private CalendarRect curTD;
-
-    public void loadEntry(String line) {
-        //TODO: Am I adding this to logEntries??
+    void loadEntry(String line) {
         long ts;
         String[] args = line.split(">",-1);
         if (args.length < ARG_LEN) {
@@ -194,53 +195,14 @@ class CalendarWin {
             Log.e("tracker:","Bad color or number format: "+line);
         }
     }
-    void log_to_shapes(List<String> log) {
-        if (log == null)
-            return; //TODO: Set up OnFirstInstall
+    void loadAllEntries(List<String> log) {
         shapes = new ArrayList<>();
         curTD = new CalendarRect();
         shapes.add(curTD);
-        long ts=0;
         for (String line : log) {
-            String[] args = line.split(">",-1);
-            if (args.length < ARG_LEN) {
-                Log.e("tracker:","Insufficient args: "+line);
-                continue;
-            }
-            try {
-                ts = Long.parseLong(args[TIMESTAMP_POS]);
-                if (args[END_POS].isEmpty()) {
-                    if (!args[START_POS].isEmpty()) {
-                        if (curTD.end == -1)
-                            curTD.end = ts + Long.parseLong(args[START_POS]);
-                        curTD = new CalendarRect();
-                        shapes.add(curTD);
-                        curTD.start = ts + Long.parseLong(args[START_POS]);
-                        curTD.setColor(args[COLOR_POS]);
-                        curTD.comment = args[COMMENT_POS];
-                    } else {
-                        Log.e("tracker:","Empty start and end: "+line);
-                    }
-                } else if (args[START_POS].isEmpty()) {
-                    curTD.end = ts + Long.parseLong(args[END_POS]);
-                } else {
-                    CalendarRect markTD = new CalendarRect();
-                    markTD.start = ts + Long.parseLong(args[START_POS]);
-                    markTD.end = ts + Long.parseLong(args[END_POS]);
-                    markTD.setColor(args[COLOR_POS]);
-                    markTD.comment = args[COMMENT_POS];
-                    shapes.add(markTD);
-                }
-            } catch (IllegalArgumentException e) {
-                Log.e("tracker:","Bad color or number format: "+line);
-            }
+            loadEntry(line);
         }
     }
-
-    private String statusText;
-        void setStatusText(String s) { statusText = s; }
-    private Paint textStyle;
-
     void draw(Canvas canvas) {
         screenW = canvas.getWidth();
         screenH = canvas.getHeight();

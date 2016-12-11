@@ -29,13 +29,18 @@ import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
+    private static final String LOG_FILE = "log.txt";
+    private static final String COMMANDS_FILE = "commands.json";
+    private static final String EXT_STORAGE_DIR = "tracker";
+    Context context;
+    SharedPreferences sprefs;
+
+    //TODO: Set up OnFirstInstall
     public void processNewLogEntry(String E) {
         GF.procMess(E);
     }
     public void onFragmentInteraction(Uri uri) { }
 
-    Context context;
-    SharedPreferences sprefs;
     CalendarFrag GF;
     CommandsFrag BF;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -71,44 +76,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
-
-    public static void writeString(File file, String data) throws Exception {
-        FileOutputStream stream = new FileOutputStream(file);
-        try {
-            stream.write(data.getBytes());
-        } finally {
-            stream.close();
-        }
-    }
-    public static String readString(File file) throws Exception {
-        int length = (int) file.length();
-        byte[] bytes = new byte[length];
-
-        FileInputStream in = new FileInputStream(file);
-        try {
-            in.read(bytes);
-        } finally {
-            in.close();
-        }
-        return new String(bytes);
-    }
-    public static void copyFile(File src, File dst) throws Exception {
-        FileChannel inChannel = null;
-        FileChannel outChannel = null;
-        try {
-            inChannel = new FileInputStream(src).getChannel();
-            outChannel = new FileOutputStream(dst).getChannel();
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-        } finally {
-            if (inChannel != null)
-                inChannel.close();
-            if (outChannel != null)
-                outChannel.close();
-        }
-    }
-    private static final String LOG_FILE = "log.txt";
-    private static final String COMMANDS_FILE = "commands.json";
-    private static final String EXT_STORAGE_DIR = "tracker"; //TODO: Change to SquareDays
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
@@ -248,6 +215,40 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
 
+    public static void writeString(File file, String data) throws Exception {
+        FileOutputStream stream = new FileOutputStream(file);
+        try {
+            stream.write(data.getBytes());
+        } finally {
+            stream.close();
+        }
+    }
+    public static String readString(File file) throws Exception {
+        int length = (int) file.length();
+        byte[] bytes = new byte[length];
+
+        FileInputStream in = new FileInputStream(file);
+        try {
+            in.read(bytes);
+        } finally {
+            in.close();
+        }
+        return new String(bytes);
+    }
+    public static void copyFile(File src, File dst) throws Exception {
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            inChannel = new FileInputStream(src).getChannel();
+            outChannel = new FileOutputStream(dst).getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } finally {
+            if (inChannel != null)
+                inChannel.close();
+            if (outChannel != null)
+                outChannel.close();
+        }
+    }
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment F0;
         Fragment F1;

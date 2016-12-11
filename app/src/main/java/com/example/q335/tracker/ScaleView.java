@@ -21,10 +21,10 @@ import java.util.List;
 
 public class ScaleView extends View {
     private static final String LOG_FILE = "log.txt";  //TODO: Make it a passed parameter?
-    CalendarWin CV;
-    ScaleListener SL;
-    ScaleGestureDetector mScaleDetector;
-    Context appContext;
+    private CalendarWin CV;
+    private ScaleListener SL;
+    private ScaleGestureDetector mScaleDetector;
+    private Context appContext;
 
     public static String MESS_RELOAD_LOG = "IM#RELOAD LOG";
     public void procMess(String s) {
@@ -35,20 +35,19 @@ public class ScaleView extends View {
             invalidate();
         }
     }
-
     public ScaleView(Context context) {
         super(context);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
-        loadCalendarView(context);
         appContext = context;
+        loadCalendarView(context);
     }
     public ScaleView(Context context, AttributeSet attrs) {
         super(context, attrs);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
-        loadCalendarView(context);
         appContext = context;
+        loadCalendarView(context);
     }
     public static List<String> read_file(Context context, String filename) {
         try {
@@ -63,16 +62,16 @@ public class ScaleView extends View {
             return sb;
         } catch (FileNotFoundException e) {
             Log.e("tracker:","Log file not found!");
-            return null;
+            return new ArrayList<>();
         } catch (UnsupportedEncodingException e) {
             Log.e("tracker:","Log file bad encoding!");
-            return null;
+            return new ArrayList<>();
         } catch (IOException e) {
             Log.e("tracker:","Log file IO exception!");
-            return null;
+            return new ArrayList<>();
         }
     }
-    public void loadCalendarView(Context context) {
+    private void loadCalendarView(Context context) {
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
         cal.set(Calendar.DAY_OF_WEEK,1);
@@ -81,7 +80,7 @@ public class ScaleView extends View {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CV.log_to_shapes(read_file(context.getApplicationContext(), LOG_FILE));
+        CV.loadAllEntries(read_file(context.getApplicationContext(), LOG_FILE));
     }
 
     @Override

@@ -29,7 +29,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,35 +44,12 @@ public class CommandsFrag extends Fragment {
     private GridView mainView;
     private List<String[]> commands = new ArrayList<>();
     private static final String LOG_FILE = "log.txt";
-    final static int COMMENT_POS = 0;
-    final static int COLOR_POS = 1;
-    final static int START_POS = 2;
-    final static int END_POS = 3;
+    private final static int COMMENT_IX = 0;
+    private final static int COLOR_IX = 1;
+    private final static int START_IX = 2;
+    private final static int END_IX = 3;
     Context context;
     //TODO: Textcolor in commandviews should be white
-
-    //Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    //Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    public CommandsFrag() {
-        // Required empty public constructor
-    }
-
-    public static CommandsFrag newInstance(String param1, String param2) {
-        CommandsFrag fragment = new CommandsFrag();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,41 +58,30 @@ public class CommandsFrag extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
         context = getActivity().getApplicationContext();
     }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.fragment_commands);
         View view = inflater.inflate(R.layout.fragment_commands,container, false);
         mainView = (GridView) view.findViewById(R.id.GV);
-
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
-        if (jsonText.isEmpty()) {
-            commands.add(new String[]{"Work now", "red", "0", ""});
-            commands.add(new String[]{"Play1", "blue", "0", ""});
-        } else {
-            Type listType = new TypeToken<List<String[]>>() {
-            }.getType();
-            commands = new Gson().fromJson(jsonText, listType);
-        }
-        makeView();
+        loadCommands(jsonText);
         return view;
     }
-
-    public void loadCommands(String com) {
-        Type listType = new TypeToken<List<String[]>>() {
-        }.getType();
-        commands = new Gson().fromJson(com, listType);
+    public void loadCommands(String s) {
+        if (s.isEmpty()) {
+            commands.add(new String[]{"Work now", "red", "0", ""});
+            commands.add(new String[]{"Play", "blue", "0", ""});
+        } else {
+            Type listType = new TypeToken<List<String[]>>() { }.getType();
+            commands = new Gson().fromJson(s, listType);
+        }
         makeView();
     }
 
-
-    public static int manipulateColor(int color, float factor) {
+    public static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),
                 Math.min(Math.round(Color.red(color) * factor),255),
                 Math.min(Math.round(Color.green(color) * factor),255),
@@ -128,11 +93,11 @@ public class CommandsFrag extends Fragment {
                 return s1[0].compareToIgnoreCase(s2[0]);
             }
         });
-        List<Map<String, String>> LVentries = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> LVentries = new ArrayList<>();
         for (String[] s : commands) {
-            final Map<String, String> listItem = new HashMap<String, String>();
+            final Map<String, String> listItem = new HashMap<>();
             listItem.put("label", s[0]);
-            listItem.put("syntax", "s:" + s[2] + " e:" + s[3]);
+            listItem.put("syntax", "");
             LVentries.add(listItem);
         }
         final Map<String, String> listItem = new HashMap<String, String>();
@@ -147,7 +112,7 @@ public class CommandsFrag extends Fragment {
                 if (position < commands.size()) {
                     int testColor;
                     try {
-                        testColor = Color.parseColor(commands.get(position)[COLOR_POS]);
+                        testColor = Color.parseColor(commands.get(position)[COLOR_IX]);
                     } catch (IllegalArgumentException e) {
                         Log.d("tracker:","Bad background color @ " + position);
                         testColor = Color.parseColor("black");
@@ -157,7 +122,7 @@ public class CommandsFrag extends Fragment {
                     view.setBackgroundColor(bg);
                     view.setOnTouchListener(new View.OnTouchListener() {
                         private final int bg_normal=bg;
-                        private final int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
+                        private final int bg_pressed=CommandsFrag.darkenColor(bg,0.7f);
                         private Rect rect;
                         private final int pos = finalPosition;
                         private ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -195,10 +160,10 @@ public class CommandsFrag extends Fragment {
                                             final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
                                             final EditText startEntry = (EditText) promptView.findViewById(R.id.startInput);
                                             final EditText endEntry = (EditText) promptView.findViewById(R.id.endInput);
-                                            commentEntry.setText(commands.get(pos)[COMMENT_POS]);
-                                            colorEntry.setText(commands.get(pos)[COLOR_POS]);
-                                            startEntry.setText(commands.get(pos)[START_POS]);
-                                            endEntry.setText(commands.get(pos)[END_POS]);
+                                            commentEntry.setText(commands.get(pos)[COMMENT_IX]);
+                                            colorEntry.setText(commands.get(pos)[COLOR_IX]);
+                                            startEntry.setText(commands.get(pos)[START_IX]);
+                                            endEntry.setText(commands.get(pos)[END_IX]);
                                             alertDialogBuilder
                                                     .setCancelable(true)
                                                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
@@ -258,7 +223,7 @@ public class CommandsFrag extends Fragment {
                                         int intDuration = (int) duration;
                                         int intOffset = (int) offset;
                                         ab.setTitle(commands.get(pos)[0] + "Dela");
-                                        newLogEntry(pos);
+                                        //TODO: newLogEntry(pos);
                                         //TODO: Initialize action bar with current actiivty
                                     }
                                     return false;
@@ -308,10 +273,8 @@ public class CommandsFrag extends Fragment {
         LVadapter.notifyDataSetChanged();
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
-    private void newLogEntry(int position) {
-        String[] args = commands.get(position);
-        Date now = new Date();
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + now.toString() + ">" + args[COLOR_POS] + ">" + args[START_POS] + ">" + args[END_POS] + ">" + args[COMMENT_POS];
+    private void newLogEntry(String color, String start, String end, String comment) {
+        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + color + ">" + start + ">" + end + ">" + comment;
         File internalFile = new File(context.getFilesDir(), LOG_FILE);
         try {
             FileOutputStream out = new FileOutputStream(internalFile, true);
@@ -319,18 +282,35 @@ public class CommandsFrag extends Fragment {
             out.write(System.getProperty("line.separator").getBytes());
             out.close();
         } catch (Exception e) {
-            Toast.makeText(context, "Cannot write entry to internal storage", Toast.LENGTH_LONG).show();
+            Log.e("tracker:",e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
         mListener.processNewLogEntry(entry);
     }
 
-    //Rename method, loadCalendarView argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+//    //Rename method, loadCalendarView argument and hook method into UI event
+//    public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
 //            mListener.onFragmentInteraction(uri);
 //        }
+//    }
+    public interface OnFragmentInteractionListener {
+        void processNewLogEntry(String E);
     }
-
+    public CommandsFrag() { } // Required empty public constructor
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+    private String mParam1;
+    private String mParam2;
+    public static CommandsFrag newInstance(String param1, String param2) {
+        CommandsFrag fragment = new CommandsFrag();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    private OnFragmentInteractionListener mListener;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -340,14 +320,9 @@ public class CommandsFrag extends Fragment {
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void processNewLogEntry(String E);
     }
 }
