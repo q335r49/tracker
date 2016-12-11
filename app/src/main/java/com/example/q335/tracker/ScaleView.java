@@ -12,7 +12,6 @@ public class ScaleView extends View {
         public void setCV(CalendarWin CV) { this.CV = CV; }
     ScaleListener SL;
     ScaleGestureDetector mScaleDetector;
-
     public ScaleView(Context context) {
         super(context);
         SL = new ScaleListener();
@@ -29,7 +28,6 @@ public class ScaleView extends View {
         super.onDraw(canvas);
         CV.draw(canvas); //TODO: Investigate why draw is happening multiple times
     }
-
     private float mLastTouchX=-1;
     private float mLastTouchY=-1;
     @Override
@@ -45,7 +43,6 @@ public class ScaleView extends View {
         mLastTouchY = y;
         return true;
     }
-
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {

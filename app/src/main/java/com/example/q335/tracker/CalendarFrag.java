@@ -29,38 +29,16 @@ import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
-    private CalendarWin CV;
-    private static final String LOG_FILE = "log.txt";
+    private CalendarWin CW;
     public List<String> logEntries;
     Context context;
     ScaleView mView;
 
-    private Queue<String> EntryBuffer = new LinkedList<>();
-    public void processNewEntry(String E) {
-        if (CV == null)
-            EntryBuffer.add(E);
-        else {
-            for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
-                CV.addLogEntry(s);
-            CV.addLogEntry(E);
-            mView.invalidate();
-        }
-    }
-
-    // Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    public CalendarFrag() { } // Required empty public constructor
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    // Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    public CalendarFrag() {
-        // Required empty public constructor
-    }
-
     public static CalendarFrag newInstance(String param1, String param2) {
         CalendarFrag fragment = new CalendarFrag();
         Bundle args = new Bundle();
@@ -69,7 +47,28 @@ public class CalendarFrag extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+    private OnFragmentInteractionListener mListener;
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener)
+            mListener = (OnFragmentInteractionListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+    }
 
+    private Queue<String> EntryBuffer = new LinkedList<>();
+    public void processNewEntry(String E) {
+        if (CW == null)
+            EntryBuffer.add(E);
+        else {
+            for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
+                CW.addLogEntry(s);
+            CW.addLogEntry(E);
+            mView.invalidate();
+        }
+    }
+    private static final String LOG_FILE = "log.txt";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,19 +78,15 @@ public class CalendarFrag extends Fragment {
         }
         context = getActivity().getApplicationContext();
         logEntries = read_file(getActivity().getApplicationContext(), LOG_FILE);
-        if (logEntries == null) {
-            Toast.makeText(getActivity().getApplicationContext(), "Cannot read from log file", Toast.LENGTH_LONG).show();
-            return;
-        }
         Calendar cal = new GregorianCalendar();
-        cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
-        cal.set(Calendar.DAY_OF_WEEK,1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CV.log_to_shapes(logEntries);
+            cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
+            cal.set(Calendar.DAY_OF_WEEK,1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
+        CW.log_to_shapes(logEntries);
     }
 
     @Override
@@ -99,7 +94,7 @@ public class CalendarFrag extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (view.findViewById(R.id.drawing));
-        mView.setCV(CV);
+        mView.setCV(CW);
         return view;
     }
     public void loadCalendarView() {
@@ -115,9 +110,9 @@ public class CalendarFrag extends Fragment {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CV.log_to_shapes(logEntries);
-        mView.setCV(CV);
+        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
+        CW.log_to_shapes(logEntries);
+        mView.setCV(CW);
     }
 
     public static List<String> read_file(Context context, String filename) {
@@ -147,17 +142,6 @@ public class CalendarFrag extends Fragment {
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -281,6 +265,9 @@ class CalendarWin {
         }
     }
     void log_to_shapes(List<String> log) {
+        if (log == null) {
+            //TODO: Set up OnFirstInstall log entries
+        }
         shapes = new ArrayList<>();
         curTD = new CalendarRect();
         shapes.add(curTD);
