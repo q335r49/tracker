@@ -40,7 +40,7 @@ public class CalendarFrag extends Fragment {
         if (CV == null)
             EntryBuffer.add(E);
         else {
-            for (String s = EntryBuffer.remove(); s!=null; EntryBuffer.remove())
+            for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
                 CV.addLogEntry(s);
             CV.addLogEntry(E);
             mView.invalidate();

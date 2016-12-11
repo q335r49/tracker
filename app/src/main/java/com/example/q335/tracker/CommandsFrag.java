@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -211,35 +212,50 @@ public class CommandsFrag extends Fragment {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 if (position < commands.size()) {
+                    int testColor;
                     try {
-                        final int bg = Color.parseColor(commands.get(position)[COLOR_POS]);
-                        view.setBackgroundColor(bg);
-                        view.setOnTouchListener(new View.OnTouchListener() {
-                            private final int bg_normal=bg;
-                            private final int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
-
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                switch (event.getAction()) {
-                                    case MotionEvent.ACTION_DOWN:
-                                        v.getParent().requestDisallowInterceptTouchEvent(true);
-                                        v.setBackgroundColor(bg_pressed);
-                                        return true;
-                                    case MotionEvent.ACTION_MOVE:
-                                        //TODO: drag event!
-                                        return true;
-                                    case MotionEvent.ACTION_UP:
-                                    case MotionEvent.ACTION_CANCEL:
-                                        v.setBackgroundColor(bg_normal);
-                                        return true;
-                                    default:
-                                        return true;
-                                }
-                            }
-                        });
+                        testColor = Color.parseColor(commands.get(position)[COLOR_POS]);
                     } catch (IllegalArgumentException e) {
                         Log.d("tracker:","Bad background color @ " + position);
+                        testColor = Color.parseColor("black");
                     }
+                    final int bg = testColor;
+                    view.setBackgroundColor(bg);
+                    view.setOnTouchListener(new View.OnTouchListener() {
+                        private final int bg_normal=bg;
+                        private final int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
+                        private Rect rect;
+
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            switch (event.getActionMasked()) {
+                                case MotionEvent.ACTION_DOWN:
+                                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                                    v.setBackgroundColor(bg_pressed);
+                                    rect = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
+                                    return true;
+                                case MotionEvent.ACTION_MOVE:
+                                    if(!rect.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
+                                        v.setBackgroundColor(bg_normal);
+                                        return false;
+                                    } else {
+                                        return true;
+                                    }
+                                    //TODO: drag event!
+                                case MotionEvent.ACTION_OUTSIDE:
+                                    v.setBackgroundColor(bg_normal);
+                                    return false;
+                                case MotionEvent.ACTION_UP:
+                                    v.setBackgroundColor(bg_normal);
+                                    return true;
+                                case MotionEvent.ACTION_CANCEL:
+                                    v.setBackgroundColor(bg_normal);
+                                    return true;
+                                default:
+                                    return true;
+                            }
+                        }
+                    });
                 }
                 return view;
             }
