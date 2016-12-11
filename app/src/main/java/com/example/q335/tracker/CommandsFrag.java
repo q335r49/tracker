@@ -183,11 +183,10 @@ public class CommandsFrag extends Fragment {
 
 
     public static int manipulateColor(int color, float factor) {
-        int a = Color.alpha(color);
-        int r = Math.round(Color.red(color) * factor);
-        int g = Math.round(Color.green(color) * factor);
-        int b = Math.round(Color.blue(color) * factor);
-        return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
+        return Color.argb(Color.alpha(color),
+                Math.min(Math.round(Color.red(color) * factor),255),
+                Math.min(Math.round(Color.green(color) * factor),255),
+                Math.min(Math.round(Color.blue(color) * factor),255));
     }
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
@@ -216,23 +215,26 @@ public class CommandsFrag extends Fragment {
                         final int bg = Color.parseColor(commands.get(position)[COLOR_POS]);
                         view.setBackgroundColor(bg);
                         view.setOnTouchListener(new View.OnTouchListener() {
-                            private int bg_normal=bg;
-                            private int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
+                            private final int bg_normal=bg;
+                            private final int bg_pressed=CommandsFrag.manipulateColor(bg,0.7f);
 
                             @Override
                             public boolean onTouch(View v, MotionEvent event) {
                                 switch (event.getAction()) {
                                     case MotionEvent.ACTION_DOWN:
+                                        v.getParent().requestDisallowInterceptTouchEvent(true);
                                         v.setBackgroundColor(bg_pressed);
-                                        break;
+                                        return true;
                                     case MotionEvent.ACTION_MOVE:
                                         //TODO: drag event!
-                                        break;
+                                        return true;
                                     case MotionEvent.ACTION_UP:
+                                    case MotionEvent.ACTION_CANCEL:
                                         v.setBackgroundColor(bg_normal);
-                                        break;
+                                        return true;
+                                    default:
+                                        return true;
                                 }
-                                return true;
                             }
                         });
                     } catch (IllegalArgumentException e) {
