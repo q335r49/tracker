@@ -12,59 +12,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
-    private CalendarWin CW;
-    private static final String LOG_FILE = "log.txt";  //TODO: Make it a passed parameter?
-    Context context;
-    ScaleView mView;
-
-    public CalendarFrag() { } // Required empty public constructor
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
-    public static CalendarFrag newInstance(String param1, String param2) {
-        CalendarFrag fragment = new CalendarFrag();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    Context context; //TODO: do we need this??
+    private ScaleView mView;
     private OnFragmentInteractionListener mListener;
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener)
-            mListener = (OnFragmentInteractionListener) context;
-        else
-            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
 
     private Queue<String> EntryBuffer = new LinkedList<>();
     public void processNewEntry(String E) {
-        if (CW == null)
+        if (mView == null)
             EntryBuffer.add(E);
         else {
             for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
-                CW.loadEntry(s);
-            CW.loadEntry(E);
-            mView.invalidate();
+                mView.processNewEntry(s);
+            mView.processNewEntry(E);
         }
     }
 
@@ -81,45 +48,30 @@ public class CalendarFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (view.findViewById(R.id.drawing));
-        loadCalendarView();
         return view;
     }
-    public static List<String> read_file(Context context, String filename) {
-        try {
-            FileInputStream fis = context.openFileInput(filename);
-            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            ArrayList<String> sb = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.add(line);
-            }
-            return sb;
-        } catch (FileNotFoundException e) {
-            Log.e("tracker:","Log file not found!");
-            return null;
-        } catch (UnsupportedEncodingException e) {
-            Log.e("tracker:","Log file bad encoding!");
-            return null;
-        } catch (IOException e) {
-            Log.e("tracker:","Log file IO exception!");
-            return null;
-        }
-    }
-    public void loadCalendarView() {
-        Calendar cal = new GregorianCalendar();
-            cal.setTimeInMillis(System.currentTimeMillis()-86400000L*7);
-            cal.set(Calendar.DAY_OF_WEEK,1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
-        CW.log_to_shapes(read_file(getActivity().getApplicationContext(), LOG_FILE));
-        mView.setCV(CW);
-    }
 
-    // Rename method, loadCalendarView argument and hook method into UI event
+    public CalendarFrag() { } // Required empty public constructor
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+    private String mParam1;
+    private String mParam2;
+    public static CalendarFrag newInstance(String param1, String param2) {
+        CalendarFrag fragment = new CalendarFrag();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener)
+            mListener = (OnFragmentInteractionListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+    }
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);

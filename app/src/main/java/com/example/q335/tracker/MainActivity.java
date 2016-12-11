@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.loadCalendarView();
+                                            GF.processNewEntry(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.e("tracker:",e.toString());
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.loadCalendarView();
+                                            GF.processNewEntry(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.e("tracker:",e.toString());
