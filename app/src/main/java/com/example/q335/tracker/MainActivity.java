@@ -30,7 +30,7 @@ import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
     public void processNewLogEntry(String E) {
-        GF.processNewEntry(E);
+        GF.procMess(E);
     }
     public void onFragmentInteraction(Uri uri) { }
 
@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.processNewEntry(ScaleView.MESS_RELOAD_LOG);
+                                            GF.procMess(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.e("tracker:",e.toString());
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.processNewEntry(ScaleView.MESS_RELOAD_LOG);
+                                            GF.procMess(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.e("tracker:",e.toString());

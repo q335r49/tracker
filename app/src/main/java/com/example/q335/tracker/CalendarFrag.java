@@ -20,18 +20,16 @@ import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
-    Context context; //TODO: do we need this??
     private ScaleView mView;
-    private OnFragmentInteractionListener mListener;
 
     private Queue<String> EntryBuffer = new LinkedList<>();
-    public void processNewEntry(String E) {
+    public void procMess(String E) {
         if (mView == null)
             EntryBuffer.add(E);
         else {
             for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
-                mView.processNewEntry(s);
-            mView.processNewEntry(E);
+                mView.procMess(s);
+            mView.procMess(E);
         }
     }
 
@@ -42,7 +40,6 @@ public class CalendarFrag extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        context = getActivity().getApplicationContext();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,6 +48,7 @@ public class CalendarFrag extends Fragment {
         return view;
     }
 
+    private OnFragmentInteractionListener mListener;
     public CalendarFrag() { } // Required empty public constructor
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";

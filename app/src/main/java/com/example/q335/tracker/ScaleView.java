@@ -27,6 +27,14 @@ public class ScaleView extends View {
     Context appContext;
 
     public static String MESS_RELOAD_LOG = "IM#RELOAD LOG";
+    public void procMess(String s) {
+        if (s == MESS_RELOAD_LOG) {
+            loadCalendarView(appContext);
+        } else {
+            CV.loadEntry(s);
+            invalidate();
+        }
+    }
 
     public ScaleView(Context context) {
         super(context);
@@ -74,14 +82,6 @@ public class ScaleView extends View {
         cal.set(Calendar.MILLISECOND, 0);
         CV = new CalendarWin(cal.getTimeInMillis()/1000,-1,-1,10,4);
         CV.log_to_shapes(read_file(context.getApplicationContext(), LOG_FILE));
-    }
-    public void processNewEntry(String s) {
-        if (s == MESS_RELOAD_LOG) {
-            loadCalendarView(appContext);
-        } else {
-            CV.loadEntry(s);
-            invalidate();
-        }
     }
 
     @Override
