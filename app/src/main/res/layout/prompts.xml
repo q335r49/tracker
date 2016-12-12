@@ -6,16 +6,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp" >
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LL1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/paletteBox"
+        android:layout_alignLeft="@+id/paletteBox"
+        android:layout_alignEnd="@+id/paletteBox"
+        android:layout_alignRight="@+id/paletteBox"
         android:orientation="horizontal">
+        <View android:id="@+id/CurColor"
+            android:background="#DDDDDD"
+            android:layout_width="66dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight ="10dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
         <TextView
             android:id="@+id/CommentLabel"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Comment: ">
+            android:text="Label: ">
         </TextView>
         <EditText
             android:id="@+id/commentInput"
@@ -25,129 +37,165 @@
             <requestFocus/>
         </EditText>
     </LinearLayout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/LL3"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/LL1">
-        <TextView android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="Color: ">
-        </TextView>
-        <EditText
-            android:id="@+id/colorInput"
-            android:layout_width="0dp"
-            android:layout_weight=".50"
-            android:layout_height="wrap_content"
-            android:inputType="text" />
-    </LinearLayout>
-
-
-    <com.google.android.flexbox.FlexboxLayout
+    <View android:id="@+id/separator"
         android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/LL1"
+        android:background="@android:color/darker_gray"/>
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@id/paletteBox"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop = "5dp"
         app:flexWrap="wrap"
         app:alignItems="stretch"
         app:alignContent="stretch"
-        android:layout_below="@+id/LL3"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-        <View
-            android:background="#DDDDDD"
+        android:layout_below="@+id/separator"
+        android:layout_centerInParent="true">
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-        <View
-            android:background="#DDDDDD"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight ="5dp"
-            android:layout_marginBottom ="5dp"
-            />
-
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
+        <View android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="3dp"
+            android:layout_marginLeft = "3dp"
+            android:layout_marginBottom ="5dp" />
 
     </com.google.android.flexbox.FlexboxLayout>
-
-
 </RelativeLayout>

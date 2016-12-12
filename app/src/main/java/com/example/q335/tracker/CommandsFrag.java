@@ -22,6 +22,7 @@ import android.widget.GridView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -151,6 +152,22 @@ public class CommandsFrag extends Fragment {
                                             final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
                                             commentEntry.setText(commands.get(pos)[COMMENT_IX]);
                                             colorEntry.setText(commands.get(pos)[COLOR_IX]);
+
+                                            final View curColorV = promptView.findViewById(R.id.CurColor);
+                                            final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+                                            final int childCount = paletteView.getChildCount();
+                                            for (int i = 0; i < childCount ; i++) {
+                                                View v = paletteView.getChildAt(i);
+                                                final int bg = ((ColorDrawable) v.getBackground()).getColor();
+                                                v.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        curColorV.setBackgroundColor(bg);
+                                                    }
+                                                })
+                                            }
+
+
                                             alertDialogBuilder
                                                     .setCancelable(true)
                                                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
