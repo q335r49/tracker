@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -46,10 +47,45 @@ public class CommandsFrag extends Fragment {
     private static final String LOG_FILE = "log.txt";
     private final static int COMMENT_IX = 0;
     private final static int COLOR_IX = 1;
+    private final static int PALETTE_LEN = 24;
     Context context;
     //TODO: Textcolor in commandviews should be white
-    //TODO: Set foreground color
+    //TODO: Set foreground color: note that START and END of commands are no longer used
     //TODO: Handle bad color case
+
+    class PaletteRing {
+        private int length;
+        private int size;
+        private int[] ring;
+        private int pos;
+        public PaletteRing(int length) {
+            this.length = length;
+            ring = new int[length];
+            Arrays.fill(ring,-1);
+            pos = 0;
+            size = 0;
+        }
+        public void add(int c) {
+            for (int i = 0; i < length; i++) {
+                if (ring[(pos + i) % length] ==  c) {
+                    if (i != 0) {
+                        for (int j = pos + 1; j <= pos + i; j++) {
+                            ring[j % length] = ring[(j - 1) % length];
+                            size = size > 0 ? size - 1 : 0;
+                        }
+                    }
+                    break;
+                }
+            }
+            ring[pos] = c;
+            pos = (pos + 1) % length;
+            size++;
+        }
+        public int get(int i) {
+            return ring[(pos - size + i + length) % length];
+        }
+    }
+    private PaletteRing palette = new PaletteRing(PALETTE_LEN);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +114,42 @@ public class CommandsFrag extends Fragment {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
         }
+        palette.add(Color.parseColor("#B21F35"));
+        palette.add(Color.parseColor("#D82735"));
+        palette.add(Color.parseColor("#FF7435"));
+        palette.add(Color.parseColor("#FFA135"));
+        palette.add(Color.parseColor("#FFCB35"));
+        palette.add(Color.parseColor("#FFF735"));
+        palette.add(Color.parseColor("#00753A"));
+        palette.add(Color.parseColor("#009E47"));
+        palette.add(Color.parseColor("#16DD36"));
+        palette.add(Color.parseColor("#0052A5"));
+        palette.add(Color.parseColor("#0079E7"));
+        palette.add(Color.parseColor("#06A9FC"));
+        palette.add(Color.parseColor("#681E7E"));
+        palette.add(Color.parseColor("#7D3CB5"));
+        palette.add(Color.parseColor("#BD7AF6"));
+
+        palette.add(Color.parseColor("#F44336"));
+        palette.add(Color.parseColor("#E91E63"));
+        palette.add(Color.parseColor("#9C27B0"));
+        palette.add(Color.parseColor("#673AB7"));
+        palette.add(Color.parseColor("#3F51B5"));
+        palette.add(Color.parseColor("#2196F3"));
+        palette.add(Color.parseColor("#FF9800"));
+        palette.add(Color.parseColor("#FFEB3B"));
+        palette.add(Color.parseColor("#CDDC39"));
+
+        /*
+        for (String[] sa : commands) {
+            int color;
+            try {
+                color = Color.parseColor(sa[COLOR_IX]);
+                palette.add(color);
+            } catch (Exception e) {
+                Log.e("tracker:","Bad color " + sa[COLOR_IX]);
+            }
+        }*/
         makeView();
     }
 
@@ -149,30 +221,31 @@ public class CommandsFrag extends Fragment {
                                             alertDialogBuilder.setView(promptView);
 
                                             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                            final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
                                             commentEntry.setText(commands.get(pos)[COMMENT_IX]);
-                                            colorEntry.setText(commands.get(pos)[COLOR_IX]);
-
                                             final View curColorV = promptView.findViewById(R.id.CurColor);
+                                            try {
+                                                curColorV.setBackgroundColor(Color.parseColor(commands.get(pos)[COLOR_IX]));
+                                            } catch (Exception e) {
+                                                curColorV.setBackgroundColor(Color.parseColor("darkgrey"));
+                                            }
                                             final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
                                             final int childCount = paletteView.getChildCount();
                                             for (int i = 0; i < childCount ; i++) {
                                                 View v = paletteView.getChildAt(i);
+                                                v.setBackgroundColor(palette.get(i));
                                                 final int bg = ((ColorDrawable) v.getBackground()).getColor();
                                                 v.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View v) {
                                                         curColorV.setBackgroundColor(bg);
                                                     }
-                                                })
+                                                });
                                             }
-
-
                                             alertDialogBuilder
                                                     .setCancelable(true)
                                                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            commands.set(pos, new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), "0", ""});
+                                                            commands.set(pos, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & ((ColorDrawable) curColorV.getBackground()).getColor())), "0", ""});
                                                             makeView();
                                                         }
                                                     })
@@ -275,14 +348,28 @@ public class CommandsFrag extends Fragment {
                             LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                             View promptView = layoutInflater.inflate(R.layout.prompts, null);
                             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                            final EditText colorEntry = (EditText) promptView.findViewById(R.id.colorInput);
+
+                            final View curColorV = promptView.findViewById(R.id.CurColor);
+                            final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+                            final int childCount = paletteView.getChildCount();
+                            for (int i = 0; i < childCount ; i++) {
+                                View pv = paletteView.getChildAt(i);
+                                pv.setBackgroundColor(palette.get(i));
+                                final int bg = ((ColorDrawable) pv.getBackground()).getColor();
+                                pv.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        curColorV.setBackgroundColor(bg);
+                                    }
+                                });
+                            }
                             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setView(promptView);
                             alertDialogBuilder
                             .setCancelable(true)
                             .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    commands.add(new String[]{commentEntry.getText().toString(), colorEntry.getText().toString(), "0", ""});
+                                    commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & ((ColorDrawable) curColorV.getBackground()).getColor())), "0", ""});
                                     makeView();
                                 }
                             })

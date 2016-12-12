@@ -102,7 +102,6 @@ class CalendarWin {
     private Paint textStyle;
     private String statusText;
         void setStatusText(String s) { statusText = s; }
-
     float[] conv_ts_screen(long ts) {
         long days = ts > orig ? (ts - orig)/86400 : (ts - orig) / 86400 - 1;
         float dow = (float) ((days + 4611686018427387900L)%7);
@@ -177,6 +176,7 @@ class CalendarWin {
                     shapes.add(curTD);
                     curTD.start = ts + Long.parseLong(args[START_POS]);
                     curTD.setColor(args[COLOR_POS]);
+                    //TODO: add color to palette
                     curTD.comment = args[COMMENT_POS];
                 } else {
                     Log.e("tracker:","Empty start and end: "+line);
@@ -188,8 +188,10 @@ class CalendarWin {
                 markTD.start = ts + Long.parseLong(args[START_POS]);
                 markTD.end = ts + Long.parseLong(args[END_POS]);
                 markTD.setColor(args[COLOR_POS]);
+                //TODO: add color to palette
                 markTD.comment = args[COMMENT_POS];
                 shapes.add(markTD);
+                //TODO: Review logic now that there is no more mark
             }
         } catch (IllegalArgumentException e) {
             Log.e("tracker:","Bad color or number format: "+line);
