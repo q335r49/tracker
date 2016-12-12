@@ -23,12 +23,6 @@
             android:layout_marginRight ="10dp"
             android:layout_marginLeft = "3dp"
             android:layout_marginBottom ="5dp" />
-        <TextView
-            android:id="@+id/CommentLabel"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="Label: ">
-        </TextView>
         <EditText
             android:id="@+id/commentInput"
             android:layout_width="match_parent"
