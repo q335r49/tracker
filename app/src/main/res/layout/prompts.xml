@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,24 +8,23 @@
     android:padding="10dp" >
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LL1"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/CommentLabel"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Comment:">
+            android:text="Comment: ">
         </TextView>
         <EditText
             android:id="@+id/commentInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text">
-            <requestFocus />
+            <requestFocus/>
         </EditText>
     </LinearLayout>
-
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/LL3"
         android:layout_width="fill_parent"
@@ -33,7 +33,7 @@
         android:layout_below="@id/LL1">
         <TextView android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Color:">
+            android:text="Color: ">
         </TextView>
         <EditText
             android:id="@+id/colorInput"
@@ -43,66 +43,111 @@
             android:inputType="text" />
     </LinearLayout>
 
-    <TableLayout
+
+    <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/LL3">
+        android:layout_height="wrap_content"
+        app:flexWrap="wrap"
+        app:alignItems="stretch"
+        app:alignContent="stretch"
+        android:layout_below="@+id/LL3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="5dp">
-            <View
-                android:id="@+id/swatch1"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
-            <View
-                android:id="@+id/swatch2"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
-            <View
-                android:id="@+id/swatch3"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
-            <View
-                android:id="@+id/swatch4"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
-            <View
-                android:id="@+id/swatch5"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
-            <View
-                android:id="@+id/swatch6"
-                android:background="#DDDDDD"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight ="5dp"
-                />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
+        <View
+            android:background="#DDDDDD"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight ="5dp"
+            android:layout_marginBottom ="5dp"
+            />
 
-        </TableRow>
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    </com.google.android.flexbox.FlexboxLayout>
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </TableLayout>
+
 </RelativeLayout>

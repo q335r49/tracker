@@ -127,6 +127,7 @@ public class CommandsFrag extends Fragment {
                         private float offset_0y;
                         private final Handler handler = new Handler();
                         private Runnable mLongPressed;
+                        boolean has_run = false;
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
                             switch (event.getActionMasked()) {
@@ -138,6 +139,7 @@ public class CommandsFrag extends Fragment {
                                     final View finalView = v;
                                     mLongPressed = new Runnable() {
                                         public void run() {
+                                            has_run = true;
                                             finalView.setBackgroundColor(bg_Norm);
                                             Context context = getContext();
                                             LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -174,6 +176,8 @@ public class CommandsFrag extends Fragment {
                                     handler.postDelayed(mLongPressed,1800);
                                     return true;
                                 case MotionEvent.ACTION_MOVE:
+                                    if (has_run)
+                                        return false;
                                     if(offset_mode || !viewBounds.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
                                         handler.removeCallbacks(mLongPressed);
                                         if (!offset_mode) {
@@ -200,6 +204,8 @@ public class CommandsFrag extends Fragment {
                                     }
                                     return true;
                                 case MotionEvent.ACTION_UP:
+                                    if (has_run)
+                                        return false;
                                     handler.removeCallbacks(mLongPressed);
                                     v.setBackgroundColor(bg_Norm);
                                     ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
@@ -280,21 +286,6 @@ public class CommandsFrag extends Fragment {
         LVadapter.notifyDataSetChanged();
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
-    private void newLogEntry(String color, String start, String end, String comment) {
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + color + ">" + start + ">" + end + ">" + comment;
-        File internalFile = new File(context.getFilesDir(), LOG_FILE);
-        try {
-            FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(entry.getBytes());
-            out.write(System.getProperty("line.separator").getBytes());
-            out.close();
-        } catch (Exception e) {
-            Log.e("tracker:",e.toString());
-            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-        }
-        mListener.processNewLogEntry(entry);
-    }
-
 //    //Rename method, loadCalendarView argument and hook method into UI event
 //    public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
